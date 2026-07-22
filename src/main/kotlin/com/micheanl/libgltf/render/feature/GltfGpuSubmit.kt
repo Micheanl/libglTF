@@ -30,6 +30,8 @@ class GltfGpuSubmit(
         private set
     var light: Int = 0
         private set
+    var overlay: Int = 0
+        private set
     var lod: Int = 0
         private set
     var skinIndex: Int = -1
@@ -56,6 +58,7 @@ class GltfGpuSubmit(
         resource: GltfRenderAsset,
         textures: GltfTextureSet,
         light: Int,
+        overlay: Int,
         transform: Matrix4fc
     ) {
         val asset = resource.asset
@@ -75,6 +78,7 @@ class GltfGpuSubmit(
 
         this.resource = resource
         this.light = light
+        this.overlay = overlay
         lod = instance.lodLevel.coerceAtMost(primitive.lodIndices.lastIndex)
 
         modelMatrix.set(transform)

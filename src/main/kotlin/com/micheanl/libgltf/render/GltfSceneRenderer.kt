@@ -35,7 +35,6 @@ object GltfSceneRenderer {
         val textures = resource.textures()
         val gpuEnabled =
             instance.renderMode != GltfRenderMode.CPU &&
-                overlay == OverlayTexture.NO_OVERLAY &&
                 GltfGpuBackend.capabilities().instancing &&
                 !IrisCompat.shaderPackActive()
         val asset = instance.handle.asset
@@ -56,7 +55,7 @@ object GltfSceneRenderer {
                     val gpuResources = resource.gpu()
                     if (!gpuResources.failed(meshIndex, primitiveIndex)) {
                         val submit = gpuSubmits[primitiveIndex]
-                        submit.configure(resource, textures, light, poseStack.last().pose())
+                        submit.configure(resource, textures, light, overlay, poseStack.last().pose())
                         if (renderer.transparent()) {
                             submitNodeCollector.submitCustom(SubmitRenderPhases.TRANSLUCENT_MODELS, submit)
                         } else {

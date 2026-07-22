@@ -16,7 +16,6 @@ import com.mojang.blaze3d.vertex.CompactVectorArray
 import com.mojang.logging.LogUtils
 import net.minecraft.client.renderer.MappableRingBuffer
 import net.minecraft.client.renderer.rendertype.PreparedRenderType
-import net.minecraft.client.renderer.texture.OverlayTexture
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.Optional
@@ -287,7 +286,7 @@ class GltfPreparedGpuBatch : AutoCloseable {
         data.putFloat(offset + 120, submit.blue)
         data.putFloat(offset + 124, submit.alpha)
         data.putInt(offset + 128, submit.light)
-        data.putInt(offset + 132, OverlayTexture.NO_OVERLAY)
+        data.putInt(offset + 132, submit.overlay)
         data.putInt(offset + 136, paletteOffset)
     }
 
@@ -301,14 +300,10 @@ class GltfPreparedGpuBatch : AutoCloseable {
         ensurePaletteCapacity(byteCount)
         val view = requireNotNull(paletteBuffer).currentBuffer().slice(0L, byteCount.toLong()).map(false, true)
         view.use { mapped ->
-            val data = mapped.data().order(ByteOrder.nativeOrder())
-            var offset = 0
+            val data = mapped.data().order(ByteOrder.nativeOrder()).asFloatBuffer()
             for (index in fromIndex until toIndex) {
                 val submit = submits[index]
-                for (value in submit.instance.animationState.jointPalettes[submit.skinIndex]) {
-                    data.putFloat(offset, value)
-                    offset += Float.SIZE_BYTES
-                }
+                data.put(submit.instance.animationState.jointPalettes[submit.skinIndex])
             }
         }
     }
