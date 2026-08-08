@@ -1,6 +1,7 @@
 package com.micheanl.libgltf.render.feature
 
 import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenBenchmark
+import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenSettings
 import com.micheanl.libgltf.render.vulkan.GltfVulkanGpuDriven
 import com.micheanl.libgltf.render.gl.GltfGlGpuDriven
 import com.micheanl.libgltf.render.gpu.GltfGpuDriver
@@ -18,11 +19,11 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
     private var preparedBatchCount = 0
     private var preparedGroupCount = 0
     private var frameInstances = 0
-    private var gpuDriven: GltfGpuDriver? = null
-    private var gpuDrivenAttempted = false
 
     override fun beginPrepare(context: FeatureFrameContext) {
         if (!gpuDrivenAttempted) {
+            gpuDriven?.close()
+            gpuDriven = null
             gpuDrivenAttempted = true
             try {
                 gpuDriven = GltfVulkanGpuDriven.create(RenderSystem.getDevice()) ?: GltfGlGpuDriven.create()
@@ -113,6 +114,12 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
 
     companion object {
         const val INITIAL_GROUP_CAPACITY = 16
+        @Volatile
+        var gpuDriven: GltfGpuDriver? = null
+
+        @Volatile
+        var gpuDrivenAttempted = false
+
         @JvmField
         @Volatile
         var activeMesh: Boolean = false
@@ -125,5 +132,17 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
         @Volatile
         var lastFrameInstances: Int = 0
         val LOGGER = LogUtils.getLogger()
+
+        fun setMeshShader(enabled: Boolean) {
+            GltfGpuDrivenSettings.meshShaderOverride = enabled
+            gpuDrivenAttempted = false
+            activeMesh = false
+        }
+
+        fun resetMeshShader() {
+            GltfGpuDrivenSettings.meshShaderOverride = null
+            gpuDrivenAttempted = false
+            activeMesh = false
+        }
     }
 }

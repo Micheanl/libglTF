@@ -33,7 +33,7 @@ class GltfVulkanGpuDriven private constructor(
             val profile = GltfGpuBackend.vendorProfile()
             val mesh = if (
                 profile.preferMeshShader &&
-                GltfGpuDrivenSettings.meshShader &&
+                GltfGpuDrivenSettings.meshShaderEnabled() &&
                 backend.vkDevice().capabilities.VK_EXT_mesh_shader
             ) {
                 GltfVulkanMeshPipelineCache(backend).also {
@@ -43,7 +43,7 @@ class GltfVulkanGpuDriven private constructor(
                 LOGGER.info(
                     "libgltf Vulkan mesh shader disabled vendor={} enabled={} extension={}",
                     profile.vendor,
-                    GltfGpuDrivenSettings.meshShader,
+                    GltfGpuDrivenSettings.meshShaderEnabled(),
                     backend.vkDevice().capabilities.VK_EXT_mesh_shader
                 )
                 null

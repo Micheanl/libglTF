@@ -12,6 +12,7 @@ import com.micheanl.libgltf.render.GltfRenderRegistry
 import com.micheanl.libgltf.render.GltfSceneRenderer
 import com.micheanl.libgltf.render.feature.GltfGpuFeatureRenderer
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
+import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenSettings
 import com.mojang.brigadier.arguments.FloatArgumentType
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
@@ -136,6 +137,12 @@ object GltfDebugCommands {
                                     }
                             )
                     )
+                    .then(
+                        ClientCommands.literal("mesh")
+                            .then(ClientCommands.literal("on").executes { mesh(it.source, true) })
+                            .then(ClientCommands.literal("off").executes { mesh(it.source, false) })
+                            .then(ClientCommands.literal("auto").executes { meshAuto(it.source) })
+                    )
             )
         }
     }
@@ -199,7 +206,13 @@ object GltfDebugCommands {
         val oit = Minecraft.getInstance().gameRenderer.useImprovedTransparency()
         val lines = ArrayList<String>()
         lines += "libgltf backend=${capabilities.backend} vendor=${profile.vendor} path=${capabilities.path}"
-        lines += "libgltf mesh=${if (GltfGpuFeatureRenderer.activeMesh) "on" else "off"} " +
+        val meshOverride = GltfGpuDrivenSettings.meshShaderOverride
+        val meshMode = when (meshOverride) {
+            true -> "on"
+            false -> "off"
+            null -> "auto"
+        }
+        lines += "libgltf mesh=${if (GltfGpuFeatureRenderer.activeMesh) "on" else "off"}($meshMode) " +
             "oit=${if (oit) "on" else "off"}"
         lines += "libgltf gpu=${GltfSceneRenderer.lastGpuSubmits} " +
             "cpu=${GltfSceneRenderer.lastCpuSubmits} " +
@@ -386,5 +399,17 @@ object GltfDebugCommands {
         val names = current.handle.asset.sceneNames
         val index = current.sceneIndex
         return if (names.isEmpty()) "default" else "${names[index]} ($index)"
+    }
+
+    private fun mesh(source: FabricClientCommandSource, value: Boolean): Int {
+        Minecraft.getInstance().execute { GltfGpuFeatureRenderer.setMeshShader(value) }
+        source.sendFeedback(Component.literal("Mesh shader set to $value"))
+        return 0
+    }
+
+    private fun meshAuto(source: FabricClientCommandSource): Int {
+        Minecraft.getInstance().execute { GltfGpuFeatureRenderer.resetMeshShader() }
+        source.sendFeedback(Component.literal("Mesh shader set to auto"))
+        return 0
     }
 }

@@ -21,12 +21,12 @@ class GltfGlGpuDriven private constructor(
             val caps = GL.getCapabilities()
             val profile = GltfGpuBackend.vendorProfile()
             val extensionAvailable = caps.GL_EXT_mesh_shader || caps.GL_NV_mesh_shader
-            if (!extensionAvailable || !profile.preferMeshShader || !GltfGpuDrivenSettings.meshShader) {
+            if (!extensionAvailable || !profile.preferMeshShader || !GltfGpuDrivenSettings.meshShaderEnabled()) {
                 LOGGER.info(
                     "libgltf GL mesh shader disabled (extension={} vendor={} enabled={})",
                     extensionAvailable,
                     profile.vendor,
-                    GltfGpuDrivenSettings.meshShader
+                    GltfGpuDrivenSettings.meshShaderEnabled()
                 )
                 return null
             }

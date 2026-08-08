@@ -8,6 +8,11 @@ object GltfGpuDrivenSettings {
     val benchmark: Boolean = booleanProperty("libgltf.vulkan.benchmark", false)
     val force: Boolean = booleanProperty("libgltf.vulkan.gpuDriven.force", false)
 
+    @Volatile
+    var meshShaderOverride: Boolean? = null
+
+    fun meshShaderEnabled(): Boolean = meshShaderOverride ?: meshShader
+
     fun profitable(instanceCount: Int, meshletCount: Int): Boolean = force ||
         instanceCount >= MIN_INSTANCE_COUNT || instanceCount * meshletCount >= MIN_COMMAND_COUNT
 
