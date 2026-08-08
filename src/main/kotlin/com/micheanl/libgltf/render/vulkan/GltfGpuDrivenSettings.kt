@@ -3,8 +3,10 @@ package com.micheanl.libgltf.render.vulkan
 object GltfGpuDrivenSettings {
     val enabled: Boolean = booleanProperty("libgltf.vulkan.gpuDriven", true)
     val meshShader: Boolean = booleanProperty("libgltf.vulkan.meshShader", true)
-    val instanceCulling: Boolean = booleanProperty("libgltf.vulkan.instanceCulling", true)
-    val meshletCulling: Boolean = booleanProperty("libgltf.vulkan.meshletCulling", true)
+    @Volatile
+    var instanceCulling: Boolean = booleanProperty("libgltf.vulkan.instanceCulling", true)
+    @Volatile
+    var meshletCulling: Boolean = booleanProperty("libgltf.vulkan.meshletCulling", true)
     val benchmark: Boolean = booleanProperty("libgltf.vulkan.benchmark", false)
     val force: Boolean = booleanProperty("libgltf.vulkan.gpuDriven.force", false)
 

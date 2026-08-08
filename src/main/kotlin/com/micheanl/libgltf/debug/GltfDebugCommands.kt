@@ -143,6 +143,11 @@ object GltfDebugCommands {
                             .then(ClientCommands.literal("off").executes { mesh(it.source, false) })
                             .then(ClientCommands.literal("auto").executes { meshAuto(it.source) })
                             .then(
+                                ClientCommands.literal("cull")
+                                    .then(ClientCommands.literal("on").executes { cull(it.source, true) })
+                                    .then(ClientCommands.literal("off").executes { cull(it.source, false) })
+                            )
+                            .then(
                                 ClientCommands.literal("minimal")
                                     .then(ClientCommands.literal("on").executes { meshMinimal(it.source, true) })
                                     .then(ClientCommands.literal("off").executes { meshMinimal(it.source, false) })
@@ -232,6 +237,7 @@ object GltfDebugCommands {
         lines += "libgltf mesh=${if (GltfGpuFeatureRenderer.activeMesh) "on" else "off"}($meshMode) " +
             "minimal=${if (GltfGpuDrivenSettings.debugMeshMinimal) "on" else "off"} " +
             "limit=${GltfGpuDrivenSettings.meshGroupLimit} " +
+            "cull=${if (GltfGpuDrivenSettings.instanceCulling && GltfGpuDrivenSettings.meshletCulling) "on" else "off"} " +
             "oit=${if (oit) "on" else "off"}"
         lines += "libgltf gpu=${GltfSceneRenderer.lastGpuSubmits} " +
             "cpu=${GltfSceneRenderer.lastCpuSubmits} " +
@@ -435,6 +441,13 @@ object GltfDebugCommands {
     private fun meshAuto(source: FabricClientCommandSource): Int {
         Minecraft.getInstance().execute { GltfGpuFeatureRenderer.resetMeshShader() }
         source.sendFeedback(Component.literal("Mesh shader set to auto"))
+        return 0
+    }
+
+    private fun cull(source: FabricClientCommandSource, value: Boolean): Int {
+        GltfGpuDrivenSettings.instanceCulling = value
+        GltfGpuDrivenSettings.meshletCulling = value
+        source.sendFeedback(Component.literal("Mesh culling set to $value"))
         return 0
     }
 
