@@ -27,12 +27,10 @@ import java.util.Collections
 import java.util.IdentityHashMap
 
 class GltfVulkanNvMeshPipelineCache(
-    private val device: VulkanDevice,
-    private val debugMinimal: Boolean
+    private val device: VulkanDevice
 ) : GltfVulkanMeshCache {
     private val pipelines = Collections.synchronizedMap(IdentityHashMap<RenderPipeline, GltfVulkanNvMeshPipeline>())
     private val failed = Collections.newSetFromMap(IdentityHashMap<RenderPipeline, Boolean>())
-    private val counters = GltfVulkanMeshCounters()
     private val maxTaskGroups: Int
     private val maxPushDescriptors: Int
     private val meshWorkgroupSize: Int
@@ -48,14 +46,6 @@ class GltfVulkanNvMeshPipelineCache(
             maxTaskGroups = minOf(MAX_TASK_GROUPS, GltfGpuBackend.vendorProfile().maxTaskGroupCount)
             maxPushDescriptors = push.maxPushDescriptors()
             meshWorkgroupSize = minOf(NV_WORKGROUP_SIZE, mesh.maxMeshWorkGroupSize(0))
-            LOGGER.info(
-                "libgltf Vulkan NV mesh properties maxMeshWorkGroupSize={} maxMeshOutputVertices={} maxMeshOutputPrimitives={} maxTaskGroups={} maxPushDescriptors={}",
-                meshWorkgroupSize,
-                mesh.maxMeshOutputVertices(),
-                mesh.maxMeshOutputPrimitives(),
-                maxTaskGroups,
-                maxPushDescriptors
-            )
             supported = mesh.maxMeshOutputVertices() >= 256 &&
                 mesh.maxMeshOutputPrimitives() >= 256 &&
                 mesh.maxMeshWorkGroupInvocations() >= NV_WORKGROUP_SIZE &&
@@ -89,8 +79,7 @@ class GltfVulkanNvMeshPipelineCache(
                 original,
                 renderPipeline,
                 maxPushDescriptors,
-                meshWorkgroupSize,
-                debugMinimal
+                meshWorkgroupSize
             ).also { pipelines[renderPipeline] = it }
         } catch (error: RuntimeException) {
             LOGGER.error("libgltf Vulkan NV mesh pipeline creation failed for {}", renderPipeline.getLocation(), error)
@@ -108,8 +97,7 @@ class GltfVulkanNvMeshPipelineCache(
             instanceCulling,
             meshletCulling,
             maxTaskGroups,
-            GltfGpuDrivenSettings.meshGroupLimit,
-            counters
+            GltfGpuDrivenSettings.meshGroupLimit
         )
         return true
     }
@@ -121,8 +109,7 @@ class GltfVulkanNvMeshPipelineCache(
                 original,
                 renderPipeline,
                 maxPushDescriptors,
-                meshWorkgroupSize,
-                debugMinimal
+                meshWorkgroupSize
             ).also { pipelines[renderPipeline] = it }
         } catch (error: RuntimeException) {
             LOGGER.error("libgltf Vulkan NV mesh pipeline creation failed for {}", renderPipeline.getLocation(), error)
@@ -134,7 +121,6 @@ class GltfVulkanNvMeshPipelineCache(
         pipelines.values.forEach(GltfVulkanNvMeshPipeline::close)
         pipelines.clear()
         failed.clear()
-        counters.close()
     }
 
     companion object {
@@ -157,7 +143,6 @@ private class GltfVulkanNvMeshPipeline(
     private val descriptorPipeline: VulkanRenderPipeline,
     private val occlusionCulling: Boolean
 ) : AutoCloseable {
-    private var diagnosticsLogged = false
     private val storageCache = HashMap<List<GpuBuffer>, Long>()
     private val storageOrder = ArrayList<List<GpuBuffer>>()
     private var depthGeneration = -1L
@@ -175,8 +160,7 @@ private class GltfVulkanNvMeshPipeline(
         instanceCulling: Boolean,
         meshletCulling: Boolean,
         maxTaskGroups: Int,
-        meshGroupLimit: Int,
-        counters: GltfVulkanMeshCounters
+        meshGroupLimit: Int
     ) {
         VK10.vkCmdBindPipeline(
             commandBuffer,
@@ -188,8 +172,7 @@ private class GltfVulkanNvMeshPipeline(
                 instances,
                 meshlets.metadataBuffer,
                 meshlets.vertexBuffer,
-                meshlets.triangleBuffer,
-                counters.buffer()
+                meshlets.triangleBuffer
             )
             val storageSet = storageSet(buffers, stack)
             if (occlusionCulling) {
@@ -227,16 +210,6 @@ private class GltfVulkanNvMeshPipeline(
             )
             val candidateCount = instanceCount.toLong() * meshlets.meshletCount
             val chunkGroups = if (meshGroupLimit > 0) minOf(maxTaskGroups, meshGroupLimit) else maxTaskGroups
-            if (!diagnosticsLogged) {
-                diagnosticsLogged = true
-                LOGGER.info(
-                    "libgltf Vulkan NV mesh draw instanceCount={} meshletCount={} candidates={} chunkGroups={}",
-                    instanceCount,
-                    meshlets.meshletCount,
-                    candidateCount,
-                    chunkGroups
-                )
-            }
             var baseCandidate = 0L
             val meshBatch = GltfGpuDrivenSettings.meshBatchSize.coerceIn(1, 4)
             while (baseCandidate < candidateCount) {
@@ -338,17 +311,10 @@ private class GltfVulkanNvMeshPipeline(
             original: VulkanRenderPipeline,
             renderPipeline: RenderPipeline,
             maxPushDescriptors: Int,
-            meshWorkgroupSize: Int,
-            debugMinimal: Boolean
+            meshWorkgroupSize: Int
         ): GltfVulkanNvMeshPipeline {
             val uniforms = original.uniforms()
             if (uniforms.size > maxPushDescriptors) {
-                LOGGER.warn(
-                    "libgltf Vulkan NV mesh descriptor set uniforms={} maxPushDescriptors={} names={}",
-                    uniforms.size,
-                    maxPushDescriptors,
-                    uniforms.joinToString { it.name() }
-                )
                 require(maxPushDescriptors == 0) { "Vulkan NV mesh descriptor set exceeds push descriptor limit" }
             }
             val bindings = buildMap {
@@ -363,7 +329,6 @@ private class GltfVulkanNvMeshPipeline(
                 put("MESHLETS_BINDING", 1)
                 put("MESHLET_VERTICES_BINDING", 2)
                 put("MESHLET_TRIANGLES_BINDING", 3)
-                put("COUNTERS_BINDING", 4)
                 uniforms.indexOfFirst { it.name() == "DepthBoundsSampler" }
                     .takeIf { it >= 0 }
                     ?.let { put("DEPTH_BOUNDS_BINDING", it) }
@@ -377,10 +342,7 @@ private class GltfVulkanNvMeshPipeline(
             require(bindings.values.none { it < 0 })
             val occlusionCulling = GltfGpuDrivenSettings.occlusionCulling
             val macros = bindings.mapValues { it.value.toString() }
-            val debugMacros = macros +
-                (if (GltfGpuDrivenSettings.debugMeshCounters) mapOf("MESH_DEBUG_COUNTERS" to "") else emptyMap()) +
-                (if (debugMinimal) mapOf("MESH_DEBUG_MINIMAL" to "") else emptyMap())
-            val meshMacros = debugMacros + ("MESH_WORKGROUP_SIZE" to meshWorkgroupSize.toString()) +
+            val meshMacros = macros + ("MESH_WORKGROUP_SIZE" to meshWorkgroupSize.toString()) +
                 (if (renderPipeline.getShaderDefines().flags().contains("OIT_ALPHA_ONLY")) mapOf("OIT_ALPHA_ONLY" to "") else emptyMap()) +
                 (if (renderPipeline.isCull()) mapOf("MESH_CONE_CULLING" to "") else emptyMap()) +
                 (if (occlusionCulling) mapOf("MESH_OCCLUSION_CULLING" to "", "DEPTH_BINDING" to STORAGE_BUFFER_COUNT.toString()) else emptyMap())
@@ -394,8 +356,7 @@ private class GltfVulkanNvMeshPipeline(
                 val fragmentModule = compileFragment(
                     device,
                     renderPipeline,
-                    bindings,
-                    debugMinimal
+                    bindings
                 )
                 try {
                     return create(device, original, renderPipeline, meshModule, fragmentModule, occlusionCulling)
@@ -619,15 +580,12 @@ private class GltfVulkanNvMeshPipeline(
         private fun compileFragment(
             device: VulkanDevice,
             renderPipeline: RenderPipeline,
-            bindings: Map<String, Int>,
-            debugMinimal: Boolean
+            bindings: Map<String, Int>
         ): Long {
             val source = requireNotNull(GltfVulkanNvMeshPipeline::class.java.getResourceAsStream(FRAGMENT_SHADER))
                 .bufferedReader()
                 .use { it.readText() }
             val macros = HashMap(bindings.mapValues { it.value.toString() })
-            if (debugMinimal) macros["MESH_DEBUG_MINIMAL"] = ""
-            if (GltfGpuDrivenSettings.debugMeshFlat) macros["MESH_DEBUG_FLAT"] = ""
             val defines = renderPipeline.getShaderDefines()
             for ((name, value) in defines.values()) macros[name] = value
             for (flag in defines.flags()) macros[flag] = ""
@@ -689,7 +647,7 @@ private class GltfVulkanNvMeshPipeline(
 
         private const val MESH_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh_nv_vk.mesh"
         private const val FRAGMENT_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh.fsh"
-        private const val STORAGE_BUFFER_COUNT = 5
+        private const val STORAGE_BUFFER_COUNT = 4
         private const val STORAGE_CACHE_CAPACITY = 16
         private const val PUSH_CONSTANT_SIZE = 56
         private val LOGGER = LogUtils.getLogger()

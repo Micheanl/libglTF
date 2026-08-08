@@ -39,15 +39,17 @@ class GltfMeshletLod private constructor(
             attributes: ByteBuffer,
             vertexCount: Int,
             indexType: IndexType,
+            maxVertices: Int,
+            maxTriangles: Int,
             bounds: FloatArray
         ): GltfMeshletLod {
             val indexCount = indices.remaining()
             val maxMeshlets = MeshOptimizer.meshopt_buildMeshletsBound(
-                indexCount.toLong(), MAX_VERTICES.toLong(), MAX_TRIANGLES.toLong()
+                indexCount.toLong(), maxVertices.toLong(), maxTriangles.toLong()
             ).toInt()
             val meshlets = MeshoptMeshlet.calloc(maxMeshlets)
-            val meshletVertices = MemoryUtil.memAllocInt(maxMeshlets * MAX_VERTICES)
-            val meshletTriangles = MemoryUtil.memAlloc(maxMeshlets * MAX_TRIANGLES * 3)
+            val meshletVertices = MemoryUtil.memAllocInt(maxMeshlets * maxVertices)
+            val meshletTriangles = MemoryUtil.memAlloc(maxMeshlets * maxTriangles * 3)
             var packedIndices: ByteBuffer? = null
             var metadata: ByteBuffer? = null
             var vertexData: ByteBuffer? = null
@@ -58,8 +60,8 @@ class GltfMeshletLod private constructor(
                 indices.position(0)
                 val meshletCount = MeshOptimizer.meshopt_buildMeshlets(
                     meshlets, meshletVertices, meshletTriangles, indices, positions,
-                    vertexCount.toLong(), POSITION_STRIDE.toLong(), MAX_VERTICES.toLong(),
-                    MAX_TRIANGLES.toLong(), CONE_WEIGHT
+                    vertexCount.toLong(), POSITION_STRIDE.toLong(), maxVertices.toLong(),
+                    maxTriangles.toLong(), CONE_WEIGHT
                 ).toInt()
                 var meshletIndexCount = 0
                 var usedVertices = 0
@@ -419,8 +421,6 @@ class GltfMeshletLod private constructor(
 
         private fun align4(value: Int): Int = (value + 3) and -4
 
-        private const val MAX_VERTICES = 64
-        private const val MAX_TRIANGLES = 64
         private const val CONE_WEIGHT = 0.25f
         private const val POSITION_STRIDE = 12
         private const val COMPACT_VERTEX_WORDS = 4

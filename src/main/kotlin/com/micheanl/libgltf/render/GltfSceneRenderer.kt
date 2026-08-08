@@ -9,7 +9,6 @@ import com.micheanl.libgltf.render.cpu.GltfGeometryRenderer
 import com.micheanl.libgltf.render.feature.GltfGpuSubmit
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
 import com.micheanl.libgltf.render.iris.IrisCompat
-import com.micheanl.libgltf.render.debug.GltfBoneDebugRenderer
 import com.mojang.blaze3d.vertex.PoseStack
 import java.util.function.Consumer
 import net.fabricmc.fabric.api.client.rendering.v1.SubmitRenderPhases
@@ -25,24 +24,9 @@ import org.joml.Vector3f
 import org.joml.Vector3fc
 
 object GltfSceneRenderer {
-    @Volatile
-    var lastGpuSubmits: Int = 0
-
-    @Volatile
-    var lastCpuSubmits: Int = 0
-
-    @Volatile
-    var lastCulledPrimitives: Int = 0
-
     private val cullMatrix = Matrix4f()
     private val cullPoint = Vector3f()
     private val instanceMatrix = Matrix4f()
-
-    fun resetFrameCounters() {
-        lastGpuSubmits = 0
-        lastCpuSubmits = 0
-        lastCulledPrimitives = 0
-    }
 
     fun submit(
         instance: GltfInstance,
@@ -90,7 +74,6 @@ object GltfSceneRenderer {
                         camera
                     )
                 ) {
-                    lastCulledPrimitives++
                     continue
                 }
                 if (renderer.transparent() && !instance.lodSelector.transparent(distanceSquared)) continue
@@ -137,9 +120,6 @@ object GltfSceneRenderer {
                 }
                 poseStack.popPose()
             }
-        }
-        if (instance.showBones && asset.skins.isNotEmpty()) {
-            submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.lines(), GltfBoneDebugRenderer(instance))
         }
         poseStack.popPose()
     }
@@ -191,7 +171,6 @@ object GltfSceneRenderer {
         renderer: GltfGeometryRenderer,
         submit: GltfGpuSubmit
     ) {
-        lastGpuSubmits++
         if (renderer.transparent()) {
             submitNodeCollector.submitCustom(SubmitRenderPhases.TRANSLUCENT_MODELS, submit)
         } else {
@@ -224,7 +203,6 @@ object GltfSceneRenderer {
                 val renderer = renderers[primitiveIndex]
                 renderer.light = light
                 renderer.overlay = overlay
-                lastCpuSubmits++
                 poseStack.pushPose()
                 if (node.skinIndex < 0) poseStack.mulPose(instance.animation.pose.globalMatrices[nodeIndex])
                 val sourceMaterialIndex = primitive.materialIndex.coerceIn(0, asset.materials.lastIndex)

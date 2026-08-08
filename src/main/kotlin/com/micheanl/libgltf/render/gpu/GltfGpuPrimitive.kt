@@ -3,6 +3,7 @@ package com.micheanl.libgltf.render.gpu
 import com.micheanl.libgltf.model.GltfPrimitive
 import com.micheanl.libgltf.model.PrimitiveMode
 import com.micheanl.libgltf.model.VertexLayout
+import com.micheanl.libgltf.render.GltfGpuBackendType
 import com.micheanl.libgltf.render.vulkan.GltfVulkanUsage
 import com.mojang.renderpearl.api.pipeline.IndexType
 import com.mojang.renderpearl.api.buffers.GpuBuffer
@@ -105,6 +106,7 @@ class GltfGpuPrimitive private constructor(
                 }
                 val boundsSphere = boundingSphere(primitive.bounds)
                 val meshlets = if (buildMeshlets && primitive.mode == PrimitiveMode.TRIANGLES) {
+                    val gl = GltfGpuBackend.capabilities().backend == GltfGpuBackendType.OPENGL
                     Array(optimized.size) { level ->
                         GltfMeshletLod.create(
                             device,
@@ -114,6 +116,8 @@ class GltfGpuPrimitive private constructor(
                             remappedVertices,
                             primitive.vertexCount,
                             indexType,
+                            if (gl) 256 else 64,
+                            if (gl) 256 else 64,
                             primitive.bounds
                         )
                     }

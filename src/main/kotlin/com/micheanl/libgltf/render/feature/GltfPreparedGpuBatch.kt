@@ -7,7 +7,6 @@ import com.micheanl.libgltf.render.gpu.GltfGpuBackend
 import com.micheanl.libgltf.render.gpu.GltfGpuFormats
 import com.micheanl.libgltf.render.gpu.GltfGpuPrimitive
 import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenBatch
-import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenBenchmark
 import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenSettings
 import com.micheanl.libgltf.render.vulkan.GltfVulkanGpuDriven
 import com.micheanl.libgltf.render.vulkan.GltfVulkanUsage
@@ -86,15 +85,6 @@ class GltfPreparedGpuBatch : AutoCloseable {
     fun execute(stage: OitStage?, renderPass: RenderPass) {
         if (!active) return
         val frameEnd = stage == null || stage == OitStage.ACCUMULATE
-        val queryStart = if (
-            frameEnd &&
-            GltfGpuDrivenSettings.benchmark &&
-            GltfGpuBackend.capabilities().backend == GltfGpuBackendType.VULKAN
-        ) {
-            GltfGpuDrivenBenchmark.begin(renderPass)
-        } else {
-            -1
-        }
         val instances = requireNotNull(instanceBuffer)
         val instanceGpuBuffer = instances.currentBuffer()
         val palettes = if (skinned) requireNotNull(paletteBuffer) else null
@@ -150,42 +140,6 @@ class GltfPreparedGpuBatch : AutoCloseable {
             val indexBuffer = sortedIndices?.currentBuffer() ?: primitive.indexBuffers[lod]
             renderPass.setIndexBuffer(indexBuffer, primitive.indexType)
             renderPass.drawIndexed(primitive.indexCounts[lod], instanceCount, 0, 0, 0)
-        }
-        if (queryStart >= 0) {
-            val triangleCount = primitive.indexCounts[lod] / 3
-            if (meshDrawn) {
-                val meshlets = requireNotNull(primitive.meshlets?.getOrNull(lod))
-                GltfGpuDrivenBenchmark.end(
-                    renderPass,
-                    queryStart,
-                    GltfGpuDrivenBenchmark.RecordMetadata(
-                        mode = "task_mesh",
-                        submitCount = instanceCount,
-                        meshletCount = meshlets.meshletCount,
-                        triangleCount = triangleCount,
-                        lod = lod,
-                        skinned = false,
-                        transparent = false,
-                        taskGroupCount = instanceCount * meshlets.meshletCount
-                    )
-                )
-            } else if (indirect) {
-                gpuDriven.capture(queryStart, instanceCount, triangleCount, lod)
-            } else {
-                GltfGpuDrivenBenchmark.end(
-                    renderPass,
-                    queryStart,
-                    GltfGpuDrivenBenchmark.RecordMetadata(
-                        mode = "direct",
-                        submitCount = instanceCount,
-                        meshletCount = 1,
-                        triangleCount = triangleCount,
-                        lod = lod,
-                        skinned = skinned,
-                        transparent = useSortedIndexBuffer
-                    )
-                )
-            }
         }
         if (frameEnd) {
             frameUsed = true

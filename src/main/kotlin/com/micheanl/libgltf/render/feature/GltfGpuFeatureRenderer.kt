@@ -1,6 +1,5 @@
 package com.micheanl.libgltf.render.feature
 
-import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenBenchmark
 import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenSettings
 import com.micheanl.libgltf.render.vulkan.GltfVulkanGpuDriven
 import com.micheanl.libgltf.render.gpu.GltfOcclusionDepth
@@ -19,7 +18,6 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
     private var groupCounts = IntArray(INITIAL_GROUP_CAPACITY)
     private var preparedBatchCount = 0
     private var preparedGroupCount = 0
-    private var frameInstances = 0
 
     override fun beginPrepare(context: FeatureFrameContext) {
         if (!gpuDrivenAttempted) {
@@ -36,11 +34,9 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
         }
         preparedBatchCount = 0
         preparedGroupCount = 0
-        frameInstances = 0
     }
 
     override fun prepareGroup(context: FeatureFrameContext, submits: List<GltfGpuSubmit>, strictlyOrdered: Boolean) {
-        frameInstances += submits.size
         ensureGroupCapacity(preparedGroupCount + 1)
         val start = preparedBatchCount
         if (strictlyOrdered) {
@@ -82,10 +78,7 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
     }
 
     override fun finishExecute(context: FeatureFrameContext) {
-        lastFrameBatches = preparedBatchCount
-        lastFrameInstances = frameInstances
         for (index in 0 until preparedBatchCount) batches[index].finishFrame()
-        GltfGpuDrivenBenchmark.resolve()
     }
 
     override fun close() {
@@ -94,7 +87,6 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
         gpuDriven?.close()
         gpuDriven = null
         GltfOcclusionDepth.close()
-        GltfGpuDrivenBenchmark.close()
     }
 
     private fun prepareBatch(submits: List<GltfGpuSubmit>, fromIndex: Int, toIndex: Int) {
@@ -125,25 +117,7 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
         @JvmField
         @Volatile
         var activeMesh: Boolean = false
-
-        @JvmField
-        @Volatile
-        var lastFrameBatches: Int = 0
-
-        @JvmField
-        @Volatile
-        var lastFrameInstances: Int = 0
         val LOGGER = LogUtils.getLogger()
-
-        fun setMeshShader(enabled: Boolean) {
-            GltfGpuDrivenSettings.meshShaderOverride = enabled
-            recreate()
-        }
-
-        fun resetMeshShader() {
-            GltfGpuDrivenSettings.meshShaderOverride = null
-            recreate()
-        }
 
         fun recreate() {
             gpuDrivenAttempted = false

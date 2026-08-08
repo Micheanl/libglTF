@@ -1,7 +1,6 @@
 package com.micheanl.libgltf.render
 
 import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenSettings
-import com.mojang.logging.LogUtils
 import net.fabricmc.loader.api.FabricLoader
 import java.nio.file.Files
 import java.nio.file.Path
@@ -16,8 +15,7 @@ object GltfConfig {
         }
         val properties = Properties()
         Files.newInputStream(file).use { properties.load(it) }
-        val applied = GltfGpuDrivenSettings.applyConfig(properties)
-        LOGGER.info("libgltf config loaded: {}", applied)
+        GltfGpuDrivenSettings.applyConfig(properties)
     }
 
     private fun writeDefault(file: Path) {
@@ -33,15 +31,9 @@ object GltfConfig {
             meshletCulling=true
             # groupLimit: max mesh workgroups per draw call (0 = unlimited)
             groupLimit=65535
-            # debug toggles
-            counters=false
-            benchmark=false
-            minimal=false
-            flat=false
         """.trimIndent()
         Files.createDirectories(file.parent)
         Files.writeString(file, content)
     }
 
-    private val LOGGER = LogUtils.getLogger()
 }

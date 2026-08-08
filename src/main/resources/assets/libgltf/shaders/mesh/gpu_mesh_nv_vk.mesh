@@ -13,9 +13,6 @@ struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint verte
 layout(set = 1, binding = MESHLETS_BINDING, std430) readonly buffer Meshlets { Meshlet meshlets[]; };
 layout(set = 1, binding = MESHLET_VERTICES_BINDING, std430) readonly buffer MeshletVertices { uint meshletVertices[]; };
 layout(set = 1, binding = MESHLET_TRIANGLES_BINDING, std430) readonly buffer MeshletTriangles { uint meshletTriangleWords[]; };
-#ifdef MESH_DEBUG_COUNTERS
-layout(set = 1, binding = COUNTERS_BINDING, std430) buffer DebugCounters { uint counters[]; };
-#endif
 #ifdef MESH_OCCLUSION_CULLING
 layout(set = 1, binding = DEPTH_BINDING) uniform sampler2D DepthSampler;
 bool occludedByDepth(vec4 sphere, mat4 clipTransform, mat4 viewTransform) {
@@ -86,31 +83,6 @@ vec4 sampleLightmap(ivec2 uv) {
 }
 void main() {
     uint invocation = gl_LocalInvocationIndex;
-#ifdef MESH_DEBUG_COUNTERS
-    if (invocation == 0) atomicAdd(counters[2], 1u);
-#endif
-#ifdef MESH_DEBUG_MINIMAL
-    if (invocation == 0) gl_PrimitiveCountNV = 1;
-    if (invocation < 3) {
-        float x = float(gl_WorkGroupID.x & 31) * 0.06 - 0.9;
-        vec2 local[3] = vec2[3](vec2(x - 0.03, -0.03), vec2(x, 0.03), vec2(x + 0.03, -0.03));
-        gl_MeshVerticesNV[invocation].gl_Position = vec4(local[invocation], 0.5, 1.0);
-        sphericalVertexDistance[invocation] = 1.0;
-        cylindricalVertexDistance[invocation] = 1.0;
-        vertexColor[invocation] = vec4(1.0);
-        lightMapColor[invocation] = vec4(1.0);
-        overlayColor[invocation] = vec4(0.0);
-        texCoord0[invocation] = vec2(0.0);
-    }
-    if (invocation == 0) {
-        gl_PrimitiveIndicesNV[0] = 0;
-        gl_PrimitiveIndicesNV[1] = 1;
-        gl_PrimitiveIndicesNV[2] = 2;
-    }
-#ifdef MESH_DEBUG_COUNTERS
-    if (invocation == 0) atomicAdd(counters[3], 1u);
-#endif
-#else
     uint candidateCount = parameters.instanceCount * parameters.meshletCount;
     uint batch = min(parameters.meshBatch, 4u);
     uint totalVertices = 0;
@@ -137,17 +109,10 @@ void main() {
         bool backfacing = false;
 #endif
         if (!(instanceVisible && meshletVisible) || backfacing) {
-#ifdef MESH_DEBUG_COUNTERS
-            if (invocation == 0) atomicAdd(counters[5], 1u);
-#endif
             continue;
         }
 #ifdef MESH_OCCLUSION_CULLING
         if (parameters.screenSizeAndFlags.z > 0.0 && occludedByDepth(meshlet.sphere, clipTransform, viewTransform)) {
-#ifdef MESH_DEBUG_COUNTERS
-            if (invocation == 0) atomicAdd(counters[4], 1u);
-            if (invocation == 0) atomicAdd(counters[5], 1u);
-#endif
             continue;
         }
 #endif
@@ -195,10 +160,6 @@ void main() {
         }
         totalVertices += meshlet.vertexCount;
         totalTriangles += meshlet.triangleCount;
-#ifdef MESH_DEBUG_COUNTERS
-        if (invocation == 0) atomicAdd(counters[3], meshlet.triangleCount);
-#endif
     }
     if (invocation == 0) gl_PrimitiveCountNV = totalTriangles;
-#endif
 }

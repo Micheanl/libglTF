@@ -26,11 +26,6 @@ void main() {
     uint candidate = parameters.baseCandidate + gl_WorkGroupID.x;
     uint candidateCount = parameters.instanceCount * parameters.meshletCount;
     if (candidate >= candidateCount) return;
-#ifdef MESH_DEBUG_MINIMAL
-    payload[0] = 0;
-    payload[1] = 0;
-    EmitMeshTasksEXT(1, 1, 1);
-#else
     uint instanceIndex = candidate / parameters.meshletCount;
     uint meshletIndex = candidate - instanceIndex * parameters.meshletCount;
     mat4 transform = ProjMat * ModelViewMat * instanceMatrix(instanceIndex);
@@ -49,5 +44,4 @@ void main() {
     payload[0] = instanceIndex;
     payload[1] = meshletIndex;
     EmitMeshTasksEXT(1, 1, 1);
-#endif
 }

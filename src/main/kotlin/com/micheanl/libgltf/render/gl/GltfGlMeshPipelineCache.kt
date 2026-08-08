@@ -2,9 +2,9 @@ package com.micheanl.libgltf.render.gl
 
 import com.micheanl.libgltf.render.gpu.GltfMeshletLod
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
+import com.mojang.logging.LogUtils
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.pipeline.RenderPipeline
-import com.mojang.logging.LogUtils
 import net.minecraft.client.renderer.rendertype.PreparedRenderType
 import org.lwjgl.opengl.EXTMeshShader
 import org.lwjgl.opengl.GL
@@ -66,20 +66,6 @@ class GltfGlMeshPipelineCache : AutoCloseable {
             query(taskInvocationTarget) >= 32 &&
             meshWorkgroupSize >= 32 &&
             maxTaskGroups > 0
-        if (!supported) {
-            LOGGER.info(
-                "libgltf GL mesh limits nv={} ext={} maxMeshOutputVertices={} maxMeshOutputPrimitives={} maxTaskInvocations={} maxMeshInvocations={} meshWorkgroupSize={} maxDrawCount={} maxTaskGroups={}",
-                nvSupported,
-                extSupported,
-                query(outputVerticesTarget),
-                query(outputPrimitivesTarget),
-                query(taskInvocationTarget),
-                query(meshInvocationTarget),
-                meshWorkgroupSize,
-                maxDrawCount,
-                maxTaskGroups
-            )
-        }
     }
 
     fun draw(
@@ -133,8 +119,8 @@ class GltfGlMeshPipelineCache : AutoCloseable {
     }
 
     private companion object {
+        private val LOGGER = LogUtils.getLogger()
         const val TASK_WORKGROUP = 1
 
-        val LOGGER = LogUtils.getLogger()
     }
 }

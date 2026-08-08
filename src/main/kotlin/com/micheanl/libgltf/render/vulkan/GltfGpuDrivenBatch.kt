@@ -26,7 +26,6 @@ class GltfGpuDrivenBatch : AutoCloseable {
     private var indexBuffer: GpuBuffer? = null
     private var active = false
     private var meshletCulling = false
-    private var benchmark: GltfVulkanBenchmarkReadback? = null
 
     fun prepare(
         primitive: GltfGpuPrimitive,
@@ -139,19 +138,6 @@ class GltfGpuDrivenBatch : AutoCloseable {
         return true
     }
 
-    fun capture(queryStart: Int, instanceCount: Int, triangleCount: Int, lod: Int) {
-        if (!active || !GltfGpuDrivenSettings.benchmark) return
-        if (benchmark == null) benchmark = GltfVulkanBenchmarkReadback()
-        requireNotNull(benchmark).capture(
-            requireNotNull(statsRing).buffer(),
-            queryStart,
-            instanceCount,
-            meshletCount,
-            triangleCount,
-            lod
-        )
-    }
-
     fun rotate() {
         if (!active) return
         requireNotNull(commandRing).rotate()
@@ -159,8 +145,6 @@ class GltfGpuDrivenBatch : AutoCloseable {
     }
 
     override fun close() {
-        benchmark?.close()
-        benchmark = null
         commandRing?.close()
         commandRing = null
         statsRing?.close()
@@ -171,8 +155,6 @@ class GltfGpuDrivenBatch : AutoCloseable {
 
     private fun ensureCapacity(required: Int) {
         if (required <= commandCapacity) return
-        benchmark?.close()
-        benchmark = null
         commandRing?.close()
         statsRing?.close()
         commandCapacity = capacity(required)

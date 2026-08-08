@@ -12,21 +12,10 @@ object GltfGpuDrivenSettings {
 
     @Volatile
     var occlusionCulling: Boolean = booleanProperty("libgltf.vulkan.meshShader.occlusionCulling", false)
-    @Volatile
-    var benchmark: Boolean = booleanProperty("libgltf.vulkan.benchmark", false)
     val force: Boolean = booleanProperty("libgltf.vulkan.gpuDriven.force", false)
 
     @Volatile
     var meshShaderOverride: Boolean? = null
-
-    @Volatile
-    var debugMeshMinimal: Boolean = booleanProperty("libgltf.vulkan.meshShader.debugMinimal", false)
-
-    @Volatile
-    var debugMeshFlat: Boolean = booleanProperty("libgltf.vulkan.meshShader.debugFlat", false)
-
-    @Volatile
-    var debugMeshCounters: Boolean = booleanProperty("libgltf.vulkan.meshShader.debugCounters", false)
 
     @Volatile
     var meshGroupLimit: Int = intProperty("libgltf.vulkan.meshShader.groupLimit", 65535)
@@ -73,22 +62,6 @@ object GltfGpuDrivenSettings {
         properties.getProperty("groupLimit")?.toIntOrNull()?.let {
             meshGroupLimit = it.coerceAtLeast(0)
             applied += "groupLimit=$meshGroupLimit"
-        }
-        properties.getProperty("counters")?.toBooleanStrictOrNull()?.let {
-            debugMeshCounters = it
-            applied += "counters=$it"
-        }
-        properties.getProperty("benchmark")?.toBooleanStrictOrNull()?.let {
-            benchmark = it
-            applied += "benchmark=$it"
-        }
-        properties.getProperty("minimal")?.toBooleanStrictOrNull()?.let {
-            debugMeshMinimal = it
-            applied += "minimal=$it"
-        }
-        properties.getProperty("flat")?.toBooleanStrictOrNull()?.let {
-            debugMeshFlat = it
-            applied += "flat=$it"
         }
         return applied
     }

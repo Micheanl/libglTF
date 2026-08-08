@@ -16,7 +16,6 @@ object GltfWorldRenderer {
     fun submit(context: LevelRenderContext) {
         val instances = GltfFrameState.instances()
         if (instances.isEmpty()) return
-        GltfSceneRenderer.resetFrameCounters()
         val level = Minecraft.getInstance().level ?: return
         val camera = context.levelState().cameraRenderState.pos
         val poseStack = context.poseStack()

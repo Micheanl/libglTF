@@ -83,21 +83,6 @@ vec4 sampleLightmap(ivec2 uv) {
 }
 void main() {
     uint invocation = gl_LocalInvocationIndex;
-#ifdef MESH_DEBUG_MINIMAL
-    SetMeshOutputsEXT(3, 1);
-    if (invocation < 3) {
-        float x = float(gl_WorkGroupID.x & 31) * 0.06 - 0.9;
-        vec2 local[3] = vec2[3](vec2(x - 0.03, -0.03), vec2(x, 0.03), vec2(x + 0.03, -0.03));
-        gl_MeshVerticesEXT[invocation].gl_Position = vec4(local[invocation], 0.5, 1.0);
-        sphericalVertexDistance[invocation] = 1.0;
-        cylindricalVertexDistance[invocation] = 1.0;
-        vertexColor[invocation] = vec4(1.0);
-        lightMapColor[invocation] = vec4(1.0);
-        overlayColor[invocation] = vec4(0.0);
-        texCoord0[invocation] = vec2(0.0);
-    }
-    if (invocation == 0) gl_PrimitiveTriangleIndicesEXT[0] = uvec3(0, 1, 2);
-#else
     uint candidate = parameters.baseCandidate + gl_WorkGroupID.x;
     uint candidateCount = parameters.instanceCount * parameters.meshletCount;
     uint instanceIndex = candidate < candidateCount ? candidate / parameters.meshletCount : 0;
@@ -171,5 +156,4 @@ void main() {
         uint offset = meshlet.triangleOffset + triangle * 3;
         gl_PrimitiveTriangleIndicesEXT[triangle] = uvec3(triangleByte(offset), triangleByte(offset + 1), triangleByte(offset + 2));
     }
-#endif
 }

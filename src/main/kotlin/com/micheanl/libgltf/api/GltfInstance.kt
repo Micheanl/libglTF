@@ -25,7 +25,6 @@ class GltfInstance internal constructor(val handle: GltfHandle) {
 
     var renderMode: GltfRenderMode = GltfRenderMode.AUTO
     var automaticAnimation: Boolean = true
-    var showBones: Boolean = false
     var materialVariant: Int = -1
     var sceneIndex: Int = handle.asset.defaultScene
         private set
