@@ -135,12 +135,15 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
 
         fun setMeshShader(enabled: Boolean) {
             GltfGpuDrivenSettings.meshShaderOverride = enabled
-            gpuDrivenAttempted = false
-            activeMesh = false
+            recreate()
         }
 
         fun resetMeshShader() {
             GltfGpuDrivenSettings.meshShaderOverride = null
+            recreate()
+        }
+
+        fun recreate() {
             gpuDrivenAttempted = false
             activeMesh = false
         }

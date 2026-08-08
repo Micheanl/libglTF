@@ -461,7 +461,7 @@ object GltfDebugCommands {
     private fun meshMinimal(source: FabricClientCommandSource, value: Boolean): Int {
         Minecraft.getInstance().execute {
             GltfGpuDrivenSettings.debugMeshMinimal = value
-            GltfGpuFeatureRenderer.resetMeshShader()
+            GltfGpuFeatureRenderer.recreate()
         }
         source.sendFeedback(Component.literal("Mesh minimal debug set to $value"))
         return 0
