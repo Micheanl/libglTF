@@ -6,7 +6,7 @@ import net.minecraft.client.renderer.rendertype.RenderType
 /**
  * libgltf · GpuBatchKey
  *
- * <pre><code>
+ * ```
  * batchKey = GpuBatchKey(
  * resource.id,
  * meshIndex,
@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.rendertype.RenderType
  * skinIndex,
  * renderType
  * )
- * </code></pre>
+ * ```
  *
  * 提交分组键
  *

@@ -9,9 +9,9 @@ import com.micheanl.libgltf.render.texture.GltfTextureSet
 /**
  * libgltf · GltfRenderAsset
  *
- * <pre><code>
+ * ```
  * resources[id] = GltfRenderAsset(id, asset)
- * </code></pre>
+ * ```
  *
  * 渲染资源封装
  *

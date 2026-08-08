@@ -6,9 +6,9 @@ import kotlin.math.floor
 /**
  * libgltf · AnimationSegment
  *
- * <pre><code>
+ * ```
  * return AnimationSegment.full(index, asset.animations[index], framesPerSecond)
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

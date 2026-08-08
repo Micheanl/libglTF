@@ -8,9 +8,9 @@ import org.joml.Matrix4f
 /**
  * libgltf · GltfBlockEntityRenderState
  *
- * <pre><code>
+ * ```
  * override fun createRenderState(): GltfBlockEntityRenderState = GltfBlockEntityRenderState()
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

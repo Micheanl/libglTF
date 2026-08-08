@@ -33,7 +33,7 @@ private val JOINT_MATRICES_LAYOUT = BindGroupLayout.builder()
 /**
  * libgltf · GltfRenderTypes
  *
- * <pre><code>
+ * ```
  * val renderType = GltfRenderTypes.get(
  * resource.id,
  * materialIndex,
@@ -43,7 +43,7 @@ private val JOINT_MATRICES_LAYOUT = BindGroupLayout.builder()
  * material,
  * texture
  * )
- * </code></pre>
+ * ```
  *
  * 运行时 RenderType 构建
  *

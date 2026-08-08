@@ -18,9 +18,9 @@ import net.minecraft.client.renderer.rendertype.PreparedRenderType
 /**
  * libgltf · MeshletDispatcher
  *
- * <pre><code>
+ * ```
  * private val gpuDriven = MeshletDispatcher()
- * </code></pre>
+ * ```
  *
  * 每帧 meshlet 分发与间接绘制准备
  *

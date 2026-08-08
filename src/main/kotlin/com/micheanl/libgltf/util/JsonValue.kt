@@ -3,14 +3,14 @@ package com.micheanl.libgltf.util
 /**
  * libgltf · JsonValue
  *
- * <pre><code>
+ * ```
  * val root = JsonValue(
  * json.decodeFromStream(
  * JsonElement.serializer(),
  * ByteArrayInputStream(payload.json)
  * )
  * )
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

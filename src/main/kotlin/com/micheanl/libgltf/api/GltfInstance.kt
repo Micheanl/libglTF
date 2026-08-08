@@ -16,9 +16,9 @@ import org.joml.Matrix4fc
 /**
  * libgltf · GltfInstance
  *
- * <pre><code>
+ * ```
  * return GltfInstance(handle)
- * </code></pre>
+ * ```
  *
  * 场景中的一个 glTF 实例：变换、材质、动画状态与 LOD
  *

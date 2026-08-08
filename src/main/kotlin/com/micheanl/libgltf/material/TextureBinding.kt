@@ -7,7 +7,7 @@ import kotlin.math.sin
 /**
  * libgltf · TextureBinding
  *
- * <pre><code>
+ * ```
  * return TextureBinding(
  * JsonFields.int(value, "index"),
  * JsonFields.int(transform, "texCoord", JsonFields.int(value, "texCoord", 0)),
@@ -17,7 +17,7 @@ import kotlin.math.sin
  * scale.getOrElse(1) { 1.0f },
  * JsonFields.float(transform, "rotation")
  * )
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

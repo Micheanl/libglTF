@@ -7,9 +7,9 @@ import java.nio.ByteOrder
 /**
  * libgltf · GlbReader
  *
- * <pre><code>
+ * ```
  * val payload = if (GlbReader.isGlb(source)) {
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

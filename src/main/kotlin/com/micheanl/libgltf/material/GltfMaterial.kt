@@ -3,7 +3,7 @@ package com.micheanl.libgltf.material
 /**
  * libgltf · GltfMaterial
  *
- * <pre><code>
+ * ```
  * GltfMaterial(
  * JsonFields.string(value, "name", "material_$index"),
  * JsonFields.floats(pbr, "baseColorFactor", floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f)),
@@ -18,7 +18,7 @@ package com.micheanl.libgltf.material
  * parseBinding(JsonFields.value(value, "emissiveTexture")),
  * JsonFields.floats(value, "emissiveFactor", floatArrayOf(0.0f, 0.0f, 0.0f)),
  * JsonFields.float(emissiveExtension, "emissiveStrength", 1.0f),
- * </code></pre>
+ * ```
  *
  * glTF 材质与扩展
  *

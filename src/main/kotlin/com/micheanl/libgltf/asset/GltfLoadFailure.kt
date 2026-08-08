@@ -3,9 +3,9 @@ package com.micheanl.libgltf.asset
 /**
  * libgltf · GltfLoadFailure
  *
- * <pre><code>
+ * ```
  * GltfLoadFailure(throwable.message ?: throwable.javaClass.simpleName, throwable)
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

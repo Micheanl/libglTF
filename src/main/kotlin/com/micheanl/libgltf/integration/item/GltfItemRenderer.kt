@@ -13,9 +13,9 @@ import org.joml.Vector3fc
 /**
  * libgltf · GltfItemRenderer
  *
- * <pre><code>
+ * ```
  * fun item(instance: GltfInstance): GltfItemRenderer = GltfItemRenderer(instance)
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

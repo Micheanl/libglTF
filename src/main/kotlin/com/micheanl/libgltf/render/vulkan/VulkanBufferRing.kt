@@ -7,14 +7,14 @@ import com.mojang.renderpearl.api.device.GpuDevice
 /**
  * libgltf · VulkanBufferRing
  *
- * <pre><code>
+ * ```
  * commandRing = VulkanBufferRing(
  * device,
  * "libgltf indirect commands",
  * GpuBuffer.USAGE_INDIRECT_PARAMETERS or VulkanUsage.STORAGE,
  * commandCapacity
  * )
- * </code></pre>
+ * ```
  *
  * Vulkan 环形缓冲
  *

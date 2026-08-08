@@ -6,9 +6,9 @@ import com.micheanl.libgltf.model.GltfAsset
 /**
  * libgltf · GltfLoadSuccess
  *
- * <pre><code>
+ * ```
  * GltfLoadSuccess(parse(path, lodPolicy))
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

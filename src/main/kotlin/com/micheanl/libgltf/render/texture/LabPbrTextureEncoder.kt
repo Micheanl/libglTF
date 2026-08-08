@@ -14,9 +14,9 @@ import kotlin.math.sqrt
 /**
  * libgltf · LabPbrTextureEncoder
  *
- * <pre><code>
+ * ```
  * LabPbrTextureEncoder.normal(asset, material),
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

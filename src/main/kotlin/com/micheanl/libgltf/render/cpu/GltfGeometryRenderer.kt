@@ -30,9 +30,9 @@ private val EMPTY_DEFORMED_REVISIONS: LongArray = LongArray(0)
 /**
  * libgltf · GltfGeometryRenderer
  *
- * <pre><code>
+ * ```
  * GltfGeometryRenderer(this, nodeIndex, handle.asset.meshes[meshIndex].primitives[primitiveIndex])
- * </code></pre>
+ * ```
  *
  * CPU 渲染器
  *

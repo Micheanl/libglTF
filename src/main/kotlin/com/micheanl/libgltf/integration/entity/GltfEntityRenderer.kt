@@ -13,9 +13,9 @@ import net.minecraft.world.entity.Entity
 /**
  * libgltf · GltfEntityRenderer
  *
- * <pre><code>
- * ): GltfEntityRenderer&lt;T&gt; = GltfEntityRenderer(context, provider)
- * </code></pre>
+ * ```
+ * ): GltfEntityRenderer<T> = GltfEntityRenderer(context, provider)
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

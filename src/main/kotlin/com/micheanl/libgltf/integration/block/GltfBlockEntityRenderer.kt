@@ -14,9 +14,9 @@ import net.minecraft.world.phys.Vec3
 /**
  * libgltf · GltfBlockEntityRenderer
  *
- * <pre><code>
- * ): GltfBlockEntityRenderer&lt;T&gt; = GltfBlockEntityRenderer(provider)
- * </code></pre>
+ * ```
+ * ): GltfBlockEntityRenderer<T> = GltfBlockEntityRenderer(provider)
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

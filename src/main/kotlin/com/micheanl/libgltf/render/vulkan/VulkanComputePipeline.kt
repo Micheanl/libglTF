@@ -16,9 +16,9 @@ import java.nio.ByteBuffer
 /**
  * libgltf · VulkanComputePipeline
  *
- * <pre><code>
+ * ```
  * return VulkanGpuDriver(VulkanComputePipeline.create(backend), mesh)
- * </code></pre>
+ * ```
  *
  * 间接路径的计算剔除管线
  *

@@ -9,9 +9,9 @@ import net.minecraft.resources.Identifier
 /**
  * libgltf · LibGltf
  *
- * <pre><code>
+ * ```
  * LibGltf.id("runtime/$resourceId/texture_$index")
- * </code></pre>
+ * ```
  *
  * 模组主入口与资源 ID 定义
  *

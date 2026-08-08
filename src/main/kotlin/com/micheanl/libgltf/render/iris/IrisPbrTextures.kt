@@ -8,9 +8,9 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * libgltf · IrisPbrTextures
  *
- * <pre><code>
+ * ```
  * PBRTextureHolder holder = IrisPbrTextures.get(id);
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

@@ -7,7 +7,7 @@ import net.minecraft.resources.Identifier
 /**
  * libgltf · GltfTextureSet
  *
- * <pre><code>
+ * ```
  * GltfTextureSet(
  * identifiers,
  * Array(textures.size) { requireNotNull(textures[it]) },
@@ -15,7 +15,7 @@ import net.minecraft.resources.Identifier
  * materialTextures,
  * fallback
  * )
- * </code></pre>
+ * ```
  *
  * 资源纹理集合
  *

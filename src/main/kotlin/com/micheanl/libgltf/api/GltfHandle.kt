@@ -8,9 +8,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * libgltf · GltfHandle
  *
- * <pre><code>
+ * ```
  * return GltfHandle(asset, id)
- * </code></pre>
+ * ```
  *
  * 已加载 glTF 资源的句柄
  *

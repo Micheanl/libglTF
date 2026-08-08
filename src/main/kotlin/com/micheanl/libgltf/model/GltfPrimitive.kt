@@ -6,7 +6,7 @@ import java.nio.ByteBuffer
 /**
  * libgltf · GltfPrimitive
  *
- * <pre><code>
+ * ```
  * return GltfPrimitive(
  * vertices,
  * skin,
@@ -20,7 +20,7 @@ import java.nio.ByteBuffer
  * morphNormals,
  * targetCount
  * )
- * </code></pre>
+ * ```
  *
  * 网格基元与 LOD 索引
  *

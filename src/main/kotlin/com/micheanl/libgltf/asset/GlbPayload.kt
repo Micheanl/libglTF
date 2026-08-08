@@ -6,9 +6,9 @@ import java.nio.ByteBuffer
 /**
  * libgltf · GlbPayload
  *
- * <pre><code>
+ * ```
  * return GlbPayload(json, binary)
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

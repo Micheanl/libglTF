@@ -7,9 +7,9 @@ import net.minecraft.resources.Identifier
 /**
  * libgltf · GltfMaterialTexture
  *
- * <pre><code>
+ * ```
  * materialTexture = GltfMaterialTexture(identifier, albedo, normal, specular)
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

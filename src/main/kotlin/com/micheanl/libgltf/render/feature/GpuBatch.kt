@@ -27,9 +27,9 @@ import java.nio.ByteOrder
 /**
  * libgltf · GpuBatch
  *
- * <pre><code>
+ * ```
  * GpuBatch().also(batches::add)
- * </code></pre>
+ * ```
  *
  * 单个提交组的 GPU 绘制批
  *

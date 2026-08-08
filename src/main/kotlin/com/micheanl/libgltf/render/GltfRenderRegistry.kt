@@ -9,9 +9,9 @@ import java.util.concurrent.atomic.AtomicLong
 /**
  * libgltf · GltfRenderRegistry
  *
- * <pre><code>
+ * ```
  * override fun register(instance: GltfInstance): GltfInstanceId = GltfRenderRegistry.register(instance)
- * </code></pre>
+ * ```
  *
  * 渲染类型注册表
  *

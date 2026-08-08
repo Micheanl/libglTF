@@ -12,9 +12,9 @@ import org.joml.Vector3fc
 /**
  * libgltf · GltfBlockRenderer
  *
- * <pre><code>
+ * ```
  * fun block(instance: GltfInstance): GltfBlockRenderer = GltfBlockRenderer(instance)
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

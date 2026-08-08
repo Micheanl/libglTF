@@ -18,9 +18,9 @@ import kotlin.math.max
 /**
  * libgltf · GltfDynamicTexture
  *
- * <pre><code>
+ * ```
  * val dynamic = GltfDynamicTexture(identifiers[index].toString(), image, texture.sampler)
- * </code></pre>
+ * ```
  *
  * 动态更新的 GPU 纹理
  *

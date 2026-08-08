@@ -6,9 +6,9 @@ import com.micheanl.libgltf.material.TextureSampler
 /**
  * libgltf · GltfTexture
  *
- * <pre><code>
+ * ```
  * GltfTexture(JsonFields.int(texture, "source"), sampler)
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

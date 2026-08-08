@@ -7,9 +7,9 @@ import net.minecraft.client.renderer.texture.AbstractTexture
 /**
  * libgltf · IrisCompat
  *
- * <pre><code>
+ * ```
  * IrisCompat.registerPbr(albedo, normal, specular)
- * </code></pre>
+ * ```
  *
  * Iris 兼容性检测
  *

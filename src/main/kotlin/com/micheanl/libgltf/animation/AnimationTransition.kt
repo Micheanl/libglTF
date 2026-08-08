@@ -3,7 +3,7 @@ package com.micheanl.libgltf.animation
 /**
  * libgltf · AnimationTransition
  *
- * <pre><code>
+ * ```
  * AnimationTransition(
  * fromState,
  * toState,
@@ -13,7 +13,7 @@ package com.micheanl.libgltf.animation
  * exitTime,
  * priority
  * )
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

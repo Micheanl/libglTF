@@ -30,9 +30,9 @@ import java.util.IdentityHashMap
 /**
  * libgltf · VulkanNvMeshPipelineCache
  *
- * <pre><code>
+ * ```
  * VulkanNvMeshPipelineCache(backend).takeIf { it.supported }
- * </code></pre>
+ * ```
  *
  * Vulkan NV mesh 管线缓存
  *

@@ -27,9 +27,9 @@ import org.joml.Vector3fc
 /**
  * libgltf · GltfSceneRenderer
  *
- * <pre><code>
+ * ```
  * GltfSceneRenderer.submit(instance, poseStack, submitNodeCollector, light, overlay, distanceSquared)
- * </code></pre>
+ * ```
  *
  * 场景实例收集与提交入口
  *

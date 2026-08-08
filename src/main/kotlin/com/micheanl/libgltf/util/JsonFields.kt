@@ -3,9 +3,9 @@ package com.micheanl.libgltf.util
 /**
  * libgltf · JsonFields
  *
- * <pre><code>
+ * ```
  * val componentCount = componentCount(JsonFields.string(accessor, "type"))
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

@@ -13,9 +13,9 @@ import net.minecraft.client.Minecraft
 /**
  * libgltf · OcclusionDepth
  *
- * <pre><code>
+ * ```
  * OcclusionDepth.close()
- * </code></pre>
+ * ```
  *
  * 上一帧深度遮挡纹理与复制
  *

@@ -7,9 +7,9 @@ import kotlin.math.abs
 /**
  * libgltf · AnimationController
  *
- * <pre><code>
+ * ```
  * val animator: AnimationController = AnimationController(handle.asset, animation)
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

@@ -3,9 +3,9 @@ package com.micheanl.libgltf.asset
 /**
  * libgltf · MaterialUvTarget
  *
- * <pre><code>
+ * ```
  * return MaterialUvTarget(materialIndex, textureSlot, textureProperty)
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

@@ -7,9 +7,9 @@ import net.minecraft.client.renderer.texture.AbstractTexture
 /**
  * libgltf · IrisPbrHolder
  *
- * <pre><code>
+ * ```
  * holders[id] = IrisPbrHolder(normal, specular)
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

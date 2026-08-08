@@ -12,9 +12,9 @@ import com.mojang.renderpearl.backend.vulkan.VulkanDevice
 /**
  * libgltf · VulkanGpuDriver
  *
- * <pre><code>
+ * ```
  * gpuDriven = VulkanGpuDriver.create(RenderSystem.getDevice()) ?: GlGpuDriver.create()
- * </code></pre>
+ * ```
  *
  * Vulkan 后端的 GPU 驱动
  *

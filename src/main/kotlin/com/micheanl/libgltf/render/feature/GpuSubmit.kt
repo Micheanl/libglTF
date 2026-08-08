@@ -18,9 +18,9 @@ import kotlin.math.sin
 /**
  * libgltf · GpuSubmit
  *
- * <pre><code>
+ * ```
  * Array(instanceCount) { GpuSubmit(this, nodeIndex, meshIndex, primitiveIndex) }
- * </code></pre>
+ * ```
  *
  * 一次 GPU 提交：实例、材质与变换
  *

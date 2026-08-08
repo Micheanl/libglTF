@@ -3,7 +3,7 @@ package com.micheanl.libgltf.model
 /**
  * libgltf · GltfLight
  *
- * <pre><code>
+ * ```
  * GltfLight(
  * JsonFields.string(value, "name", "light_$index"),
  * lightType(JsonFields.string(value, "type")),
@@ -13,7 +13,7 @@ package com.micheanl.libgltf.model
  * JsonFields.float(spot, "innerConeAngle", 0.0f),
  * JsonFields.float(spot, "outerConeAngle", 0.7853982f)
  * )
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

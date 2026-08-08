@@ -6,9 +6,9 @@ import com.micheanl.libgltf.api.GltfInstance
 /**
  * libgltf · GltfFrameState
  *
- * <pre><code>
+ * ```
  * LevelExtractionEvents.END_EXTRACTION.register { GltfFrameState.capture() }
- * </code></pre>
+ * ```
  *
  * 当前帧实例状态
  *

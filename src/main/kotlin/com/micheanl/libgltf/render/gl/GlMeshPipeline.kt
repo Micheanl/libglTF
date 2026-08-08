@@ -24,9 +24,9 @@ import org.lwjgl.system.MemoryStack
 /**
  * libgltf · GlMeshPipeline
  *
- * <pre><code>
+ * ```
  * GlMeshPipeline.create(renderPipeline, useNv, meshWorkgroupSize).also { pipelines[renderPipeline] = it }
- * </code></pre>
+ * ```
  *
  * OpenGL mesh 管线与绘制
  *

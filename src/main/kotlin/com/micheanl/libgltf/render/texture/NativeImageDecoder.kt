@@ -9,9 +9,9 @@ import org.lwjgl.system.MemoryUtil
 /**
  * libgltf · NativeImageDecoder
  *
- * <pre><code>
+ * ```
  * val image = asset.images.getOrNull(texture.imageIndex)?.let { NativeImageDecoder.decode(it.bytes) } ?: whiteImage()
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

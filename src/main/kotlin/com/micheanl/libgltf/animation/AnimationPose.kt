@@ -8,9 +8,9 @@ import org.joml.Matrix4f
 /**
  * libgltf · AnimationPose
  *
- * <pre><code>
+ * ```
  * val pose: AnimationPose = AnimationPose(asset.nodes.size, asset.totalMorphWeights, asset.materials.size)
- * </code></pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

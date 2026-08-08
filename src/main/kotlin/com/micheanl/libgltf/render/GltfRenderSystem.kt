@@ -17,9 +17,9 @@ import java.util.concurrent.atomic.AtomicLong
 /**
  * libgltf · GltfRenderSystem
  *
- * <pre><code>
+ * ```
  * override fun upload(asset: GltfAsset): GltfHandle = GltfRenderSystem.upload(asset)
- * </code></pre>
+ * ```
  *
  * 渲染资源生命周期管理
  *

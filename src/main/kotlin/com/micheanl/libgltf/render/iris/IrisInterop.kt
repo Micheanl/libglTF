@@ -8,9 +8,9 @@ import net.minecraft.client.renderer.texture.AbstractTexture
 /**
  * libgltf · IrisInterop
  *
- * <pre><code>
- * fun shaderPackActive(): Boolean = loaded &amp;&amp; IrisInterop.shaderPackActive()
- * </code></pre>
+ * ```
+ * fun shaderPackActive(): Boolean = loaded && IrisInterop.shaderPackActive()
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

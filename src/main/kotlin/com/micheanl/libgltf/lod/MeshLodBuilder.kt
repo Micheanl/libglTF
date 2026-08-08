@@ -9,9 +9,9 @@ import java.nio.IntBuffer
 /**
  * libgltf · MeshLodBuilder
  *
- * <pre><code>
+ * ```
  * MeshLodBuilder.build(indices, positions, lodPolicy.triangleRatios)
- * </code></pre>
+ * ```
  *
  * LOD 网格简化
  *

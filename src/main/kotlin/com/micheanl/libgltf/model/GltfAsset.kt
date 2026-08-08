@@ -7,7 +7,7 @@ import com.micheanl.libgltf.material.GltfMaterial
 /**
  * libgltf · GltfAsset
  *
- * <pre><code>
+ * ```
  * return GltfAsset(
  * path.fileName.toString(),
  * resolvedNodes,
@@ -22,7 +22,7 @@ import com.micheanl.libgltf.material.GltfMaterial
  * materials,
  * materialVariantNames,
  * cameras,
- * </code></pre>
+ * ```
  *
  * 解析后的 glTF 资源模型
  *

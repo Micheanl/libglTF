@@ -18,14 +18,14 @@ import java.nio.IntBuffer
 /**
  * libgltf · GpuMesh
  *
- * <pre><code>
+ * ```
  * primitive = GpuMesh.create(
  * RenderSystem.getDevice(),
  * "libgltf $resourceId mesh $meshIndex primitive $primitiveIndex",
  * asset.meshes[meshIndex].primitives[primitiveIndex],
- * RenderConfig.enabled &amp;&amp; GpuBackend.meshletBuilding()
+ * RenderConfig.enabled && GpuBackend.meshletBuilding()
  * )
- * </code></pre>
+ * ```
  *
  * 网格的 GPU 资源与 LOD 缓冲
  *

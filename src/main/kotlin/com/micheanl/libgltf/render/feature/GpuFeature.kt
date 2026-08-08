@@ -7,9 +7,9 @@ import net.minecraft.client.renderer.feature.FeatureRendererType
 /**
  * libgltf · GpuFeature
  *
- * <pre><code>
+ * ```
  * GpuFeature.initialize()
- * </code></pre>
+ * ```
  *
  * GPU FeatureRenderer 注册
  *
