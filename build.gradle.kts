@@ -153,6 +153,12 @@ afterEvaluate {
                 }
             }
         }
+        if (signingKey.isPresent && signingPassword.isPresent) {
+            signing {
+                useInMemoryPgpKeys(signingKey.get(), signingPassword.get())
+                sign(publishing.publications["mavenJava"])
+            }
+        }
     }
 }
 
@@ -162,12 +168,5 @@ nexusPublishing {
             username.set(ossrhUsername)
             password.set(ossrhPassword)
         }
-    }
-}
-
-if (signingKey.isPresent && signingPassword.isPresent) {
-    signing {
-        useInMemoryPgpKeys(signingKey.get(), signingPassword.get())
-        sign(publishing.publications["mavenJava"])
     }
 }
