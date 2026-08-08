@@ -41,8 +41,7 @@ class GltfVulkanGpuDriven private constructor(
             )
             val mesh = if (
                 profile.preferMeshShader &&
-                GltfGpuDrivenSettings.meshShaderEnabled() &&
-                (profile.preferVulkanMeshShader || GltfGpuDrivenSettings.meshShaderOverride == true)
+                GltfGpuDrivenSettings.meshShaderEnabled()
             ) {
                 if (capabilities.meshShaderNvActive) {
                     GltfVulkanNvMeshPipelineCache(backend, GltfGpuDrivenSettings.debugMeshMinimal).also {

@@ -27,7 +27,7 @@ object GltfGpuVendors {
             GltfGpuVendor.NVIDIA -> GltfGpuVendorProfile(
                 vendor,
                 true,
-                false,
+                true,
                 true,
                 true,
                 65535,

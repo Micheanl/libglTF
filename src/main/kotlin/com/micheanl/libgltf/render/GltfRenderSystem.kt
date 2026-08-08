@@ -20,6 +20,7 @@ object GltfRenderSystem {
 
     fun initialize() {
         if (!initialized.compareAndSet(false, true)) return
+        GltfConfig.load()
         GltfGpuBackend.refresh()
         ClientLifecycleEvents.CLIENT_STARTED.register { _ -> GltfGpuBackend.refresh() }
         ClientLifecycleEvents.CLIENT_STOPPING.register { _ -> closeAll() }
