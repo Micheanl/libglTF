@@ -10,8 +10,12 @@ import com.micheanl.libgltf.render.iris.IrisCompat
 import com.mojang.blaze3d.vertex.PoseStack
 import java.util.function.Consumer
 import net.fabricmc.fabric.api.client.rendering.v1.SubmitRenderPhases
+import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector
+import net.minecraft.client.renderer.state.level.CameraRenderState
 import net.minecraft.client.renderer.texture.OverlayTexture
+import net.minecraft.world.phys.AABB
+import org.joml.Matrix4f
 import org.joml.Matrix4fc
 import org.joml.Vector3f
 import org.joml.Vector3fc
@@ -23,9 +27,16 @@ object GltfSceneRenderer {
     @Volatile
     var lastCpuSubmits: Int = 0
 
+    @Volatile
+    var lastCulledPrimitives: Int = 0
+
+    private val cullMatrix = Matrix4f()
+    private val cullPoint = Vector3f()
+
     fun resetFrameCounters() {
         lastGpuSubmits = 0
         lastCpuSubmits = 0
+        lastCulledPrimitives = 0
     }
 
     fun submit(
@@ -48,6 +59,8 @@ object GltfSceneRenderer {
                 GltfGpuBackend.capabilities().instancing &&
                 !IrisCompat.shaderPackActive()
         val asset = instance.handle.asset
+        val camera = Minecraft.getInstance().gameRenderer.gameRenderState().levelRenderState.cameraRenderState
+        val frustumCulling = camera.isFrustumCaptured
         poseStack.pushPose()
         poseStack.mulPose(transform)
         for (nodeIndex in asset.topologicalOrder) {
@@ -60,6 +73,20 @@ object GltfSceneRenderer {
             for (primitiveIndex in mesh.primitives.indices) {
                 val primitive = mesh.primitives[primitiveIndex]
                 val renderer = renderers[primitiveIndex]
+                if (
+                    frustumCulling &&
+                    !(node.skinIndex >= 0 && primitive.skin != null) &&
+                    primitive.morphTargetCount == 0 &&
+                    !nodeVisible(
+                        poseStack.last().pose(),
+                        instance.animation.pose.globalMatrices[nodeIndex],
+                        primitive.bounds,
+                        camera
+                    )
+                ) {
+                    lastCulledPrimitives++
+                    continue
+                }
                 if (renderer.transparent() && !instance.lodSelector.transparent(distanceSquared)) continue
                 if (gpuEnabled && gpuCompatible(instance, nodeIndex, primitive)) {
                     val gpuResources = resource.gpu()
@@ -84,6 +111,48 @@ object GltfSceneRenderer {
             }
         }
         poseStack.popPose()
+    }
+
+    private fun nodeVisible(
+        relativePose: Matrix4fc,
+        nodeMatrix: Matrix4fc,
+        bounds: FloatArray,
+        camera: CameraRenderState
+    ): Boolean {
+        cullMatrix.set(relativePose).mul(nodeMatrix)
+        var minX = Float.POSITIVE_INFINITY
+        var minY = Float.POSITIVE_INFINITY
+        var minZ = Float.POSITIVE_INFINITY
+        var maxX = Float.NEGATIVE_INFINITY
+        var maxY = Float.NEGATIVE_INFINITY
+        var maxZ = Float.NEGATIVE_INFINITY
+        for (x in 0..1) {
+            for (y in 0..1) {
+                for (z in 0..1) {
+                    cullPoint.set(bounds[x * 3], bounds[y * 3 + 1], bounds[z * 3 + 2])
+                    cullMatrix.transformPosition(cullPoint)
+                    minX = minOf(minX, cullPoint.x)
+                    minY = minOf(minY, cullPoint.y)
+                    minZ = minOf(minZ, cullPoint.z)
+                    maxX = maxOf(maxX, cullPoint.x)
+                    maxY = maxOf(maxY, cullPoint.y)
+                    maxZ = maxOf(maxZ, cullPoint.z)
+                }
+            }
+        }
+        val cameraX = camera.pos.x
+        val cameraY = camera.pos.y
+        val cameraZ = camera.pos.z
+        return camera.cullFrustum.isVisible(
+            AABB(
+                minX + cameraX,
+                minY + cameraY,
+                minZ + cameraZ,
+                maxX + cameraX,
+                maxY + cameraY,
+                maxZ + cameraZ
+            )
+        )
     }
 
     fun submitGlint(

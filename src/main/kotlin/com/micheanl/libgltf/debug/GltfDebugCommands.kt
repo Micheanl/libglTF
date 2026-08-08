@@ -174,6 +174,7 @@ object GltfDebugCommands {
             "oit=${if (oit) "on" else "off"}"
         lines += "libgltf gpu=${GltfSceneRenderer.lastGpuSubmits} " +
             "cpu=${GltfSceneRenderer.lastCpuSubmits} " +
+            "culled=${GltfSceneRenderer.lastCulledPrimitives} " +
             "batches=${GltfGpuFeatureRenderer.lastFrameBatches} " +
             "drawnInstances=${GltfGpuFeatureRenderer.lastFrameInstances}"
         if (loadedName.isEmpty()) {
