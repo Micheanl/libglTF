@@ -12,6 +12,9 @@ import net.minecraft.client.Minecraft
 object GltfOcclusionDepth : AutoCloseable {
     private var target: TextureTarget? = null
     private var retired: TextureTarget? = null
+    @Volatile
+    var generation: Long = 0
+        private set
 
     fun ensureCreated() {
         if (!active()) return
@@ -23,6 +26,7 @@ object GltfOcclusionDepth : AutoCloseable {
                 RenderSystem.getDevice().createCommandEncoder().clearDepthTexture(it, 1.0)
             }
             target = created
+            generation++
             if (current != null) {
                 retired?.destroyBuffers()
                 retired = current
