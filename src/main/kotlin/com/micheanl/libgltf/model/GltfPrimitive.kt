@@ -12,5 +12,6 @@ data class GltfPrimitive(
     val mode: PrimitiveMode,
     val bounds: FloatArray,
     val morphPositions: FloatArray,
+    val morphNormals: FloatArray,
     val morphTargetCount: Int
 )

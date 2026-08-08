@@ -348,12 +348,18 @@ object GltfLoader {
         val targets = JsonFields.value(value, "targets")
         val targetCount = targets?.size() ?: 0
         val morphPositions = FloatArray(targetCount * vertexCount * 3)
+        val morphNormals = FloatArray(targetCount * vertexCount * 3)
         if (targets != null) {
             for (target in 0 until targetCount) {
                 val accessor = JsonFields.int(targets[target], "POSITION")
                 if (accessor >= 0) {
                     val values = decoder.readFloats(accessor)
                     values.copyInto(morphPositions, target * vertexCount * 3, 0, values.size.coerceAtMost(vertexCount * 3))
+                }
+                val normalAccessor = JsonFields.int(targets[target], "NORMAL")
+                if (normalAccessor >= 0) {
+                    val values = decoder.readFloats(normalAccessor)
+                    values.copyInto(morphNormals, target * vertexCount * 3, 0, values.size.coerceAtMost(vertexCount * 3))
                 }
             }
         }
@@ -390,6 +396,7 @@ object GltfLoader {
             mode,
             bounds,
             morphPositions,
+            morphNormals,
             targetCount
         )
     }

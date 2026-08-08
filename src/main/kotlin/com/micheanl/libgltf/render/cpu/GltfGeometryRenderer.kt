@@ -280,6 +280,16 @@ class GltfGeometryRenderer(
                 px += primitive.morphPositions[offset] * weight
                 py += primitive.morphPositions[offset + 1] * weight
                 pz += primitive.morphPositions[offset + 2] * weight
+                nx += primitive.morphNormals[offset] * weight
+                ny += primitive.morphNormals[offset + 1] * weight
+                nz += primitive.morphNormals[offset + 2] * weight
+            }
+            if (palette == null) {
+                val inverseLength =
+                    1.0f / sqrt(nx * nx + ny * ny + nz * nz).coerceAtLeast(1.0e-12f)
+                nx *= inverseLength
+                ny *= inverseLength
+                nz *= inverseLength
             }
         }
         val skin = primitive.skin
