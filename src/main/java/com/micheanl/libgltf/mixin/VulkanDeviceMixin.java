@@ -1,13 +1,12 @@
 package com.micheanl.libgltf.mixin;
 
 import com.micheanl.libgltf.render.gpu.VertexAttributeLimitProvider;
-import com.mojang.blaze3d.shaders.ShaderSource;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vulkan.VulkanDevice;
-import com.mojang.blaze3d.vulkan.VulkanInstance;
-import com.mojang.blaze3d.vulkan.VulkanPhysicalDevice;
-import com.mojang.blaze3d.vulkan.checkpoints.CheckpointExtension;
-import java.util.Set;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
+import com.mojang.renderpearl.backend.vulkan.VulkanDevice;
+import com.mojang.renderpearl.backend.vulkan.VulkanInstance;
+import com.mojang.renderpearl.backend.vulkan.VulkanPhysicalDevice;
+import com.mojang.renderpearl.backend.vulkan.checkpoints.CheckpointExtension;
+import com.mojang.renderpearl.backend.vulkan.init.FeatureSet;
 import org.lwjgl.vulkan.VkDevice;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -20,12 +19,11 @@ public abstract class VulkanDeviceMixin implements VertexAttributeLimitProvider 
     @Unique
     private int libgltf$maxVertexAttributes = VertexFormat.MAX_VERTEX_ELEMENTS;
 
-    @Inject(method = "<init>", at = @At("RETURN"), require = 1)
+    @Inject(method = "<init>", at = @At("HEAD"), require = 1)
     private void libgltf$captureVertexAttributeLimit(
-            ShaderSource defaultShaderSource,
             VulkanInstance instance,
             VulkanPhysicalDevice physicalDevice,
-            Set<String> enabledDeviceExtensions,
+            FeatureSet enabledFeatureSet,
             VkDevice vkDevice,
             long vma,
             CheckpointExtension checkpointExtension,

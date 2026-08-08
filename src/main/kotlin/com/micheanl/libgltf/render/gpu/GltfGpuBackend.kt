@@ -1,13 +1,13 @@
 package com.micheanl.libgltf.render.gpu
 
-import com.micheanl.libgltf.mixin.GpuDeviceBackendAccessor
+import com.micheanl.libgltf.mixin.FrontendGpuDeviceAccessor
 import com.micheanl.libgltf.render.GltfGpuBackendType
 import com.micheanl.libgltf.render.GltfGpuCapabilities
 import com.micheanl.libgltf.render.GltfGpuPath
 import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenSettings
 import com.mojang.blaze3d.systems.RenderSystem
-import com.mojang.blaze3d.vertex.VertexFormat
-import com.mojang.blaze3d.vulkan.VulkanDevice
+import com.mojang.renderpearl.api.vertex.VertexFormat
+import com.mojang.renderpearl.backend.vulkan.VulkanDevice
 import org.lwjgl.opengl.GL
 
 object GltfGpuBackend {
@@ -47,7 +47,7 @@ object GltfGpuBackend {
             GltfGpuBackendType.UNKNOWN -> false
         }
         val features = info.features()
-        val limit = ((device as GpuDeviceBackendAccessor).libgltfBackend as? VertexAttributeLimitProvider)
+        val limit = ((device as FrontendGpuDeviceAccessor).libgltfBackend as? VertexAttributeLimitProvider)
             ?.maxVertexAttributes
             ?: VertexFormat.MAX_VERTEX_ELEMENTS
         val instancing = backend != GltfGpuBackendType.UNKNOWN &&
@@ -55,7 +55,7 @@ object GltfGpuBackend {
         val nativeMeshShader = meshShader &&
             backend == GltfGpuBackendType.VULKAN &&
             GltfGpuDrivenSettings.meshShader &&
-            ((device as GpuDeviceBackendAccessor).libgltfBackend as? VulkanDevice)?.vkDevice()?.capabilities?.VK_EXT_mesh_shader == true
+            ((device as FrontendGpuDeviceAccessor).libgltfBackend as? VulkanDevice)?.vkDevice()?.capabilities?.VK_EXT_mesh_shader == true
         vertexAttributeLimit = limit
         capabilities = GltfGpuCapabilities(
             backend,

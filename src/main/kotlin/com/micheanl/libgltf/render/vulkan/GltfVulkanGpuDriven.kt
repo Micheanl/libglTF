@@ -1,10 +1,10 @@
 package com.micheanl.libgltf.render.vulkan
 
-import com.micheanl.libgltf.mixin.GpuDeviceBackendAccessor
+import com.micheanl.libgltf.mixin.FrontendGpuDeviceAccessor
 import com.micheanl.libgltf.render.GltfGpuBackendType
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
-import com.mojang.blaze3d.systems.GpuDevice
-import com.mojang.blaze3d.vulkan.VulkanDevice
+import com.mojang.renderpearl.api.device.GpuDevice
+import com.mojang.renderpearl.backend.vulkan.VulkanDevice
 
 class GltfVulkanGpuDriven private constructor(
     val pipeline: GltfVulkanComputePipeline,
@@ -24,7 +24,7 @@ class GltfVulkanGpuDriven private constructor(
                 !capabilities.multiDrawIndirect ||
                 !capabilities.nonZeroFirstInstance
             ) return null
-            val backend = (device as GpuDeviceBackendAccessor).libgltfBackend as? VulkanDevice ?: return null
+            val backend = (device as FrontendGpuDeviceAccessor).libgltfBackend as? VulkanDevice ?: return null
             val mesh = if (GltfGpuDrivenSettings.meshShader && backend.vkDevice().capabilities.VK_EXT_mesh_shader) {
                 GltfVulkanMeshPipelineCache(backend).takeIf { it.supported }
             } else {

@@ -9,8 +9,9 @@ import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenBenchmark
 import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenSettings
 import com.micheanl.libgltf.render.vulkan.GltfVulkanGpuDriven
 import com.micheanl.libgltf.render.vulkan.GltfVulkanUsage
-import com.mojang.blaze3d.IndexType
-import com.mojang.blaze3d.buffers.GpuBuffer
+import com.mojang.renderpearl.api.commands.RenderPass
+import com.mojang.renderpearl.api.pipeline.IndexType
+import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.CompactVectorArray
 import com.mojang.logging.LogUtils
@@ -18,8 +19,6 @@ import net.minecraft.client.renderer.MappableRingBuffer
 import net.minecraft.client.renderer.rendertype.PreparedRenderType
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.util.Optional
-import java.util.OptionalDouble
 
 class GltfPreparedGpuBatch : AutoCloseable {
     private var instanceBuffer: MappableRingBuffer? = null
@@ -75,12 +74,9 @@ class GltfPreparedGpuBatch : AutoCloseable {
         }
     }
 
-    fun execute() {
+    fun execute(renderPass: RenderPass) {
         if (!active) return
         val benchmarkStart = if (GltfGpuDrivenSettings.benchmark && GltfGpuBackend.capabilities().backend == GltfGpuBackendType.VULKAN) System.nanoTime() else 0L
-        val renderTarget = preparedRenderType.outputTarget().renderTarget
-        val colorTexture = requireNotNull(RenderSystem.outputColorTextureOverride ?: renderTarget.colorTextureView)
-        val depthTexture = if (renderTarget.useDepth) RenderSystem.outputDepthTextureOverride ?: renderTarget.depthTextureView else null
         val instances = requireNotNull(instanceBuffer)
         val instanceGpuBuffer = instances.currentBuffer()
         val palettes = if (skinned) requireNotNull(paletteBuffer) else null
@@ -88,38 +84,43 @@ class GltfPreparedGpuBatch : AutoCloseable {
         val meshRequested = gpuDrivenDriver?.let(gpuDriven::meshReady) == true
         val indirect = !meshRequested && gpuDrivenDriver?.let { gpuDriven.dispatch(it, primitive, instanceGpuBuffer, instanceCount) } == true
         var meshDrawn = false
-        RenderSystem.getDevice().createCommandEncoder().createRenderPass(
-            { "libgltf gpu batch" }, colorTexture, Optional.empty(), depthTexture, OptionalDouble.empty()
-        ).use { renderPass ->
-            renderPass.setPipeline(preparedRenderType.pipeline())
-            val scissor = preparedRenderType.scissorState()
-            if (scissor.enabled()) renderPass.enableScissor(scissor.x(), scissor.y(), scissor.width(), scissor.height())
-            RenderSystem.bindDefaultUniforms(renderPass)
-            renderPass.setUniform("DynamicTransforms", preparedRenderType.dynamicTransforms())
-            renderPass.setVertexBuffer(0, primitive.vertexBuffer.slice())
-            renderPass.setVertexBuffer(1, instanceGpuBuffer.slice())
-            if (palettes != null) {
-                renderPass.setVertexBuffer(2, requireNotNull(primitive.skinBuffer).slice())
-                renderPass.setUniform("JointMatrices", palettes.currentBuffer().slice())
-            }
-            for (texture in preparedRenderType.textures()) renderPass.bindTexture(texture.name(), texture.textureView(), texture.sampler())
-            if (meshRequested) {
-                meshDrawn = gpuDriven.drawMesh(renderPass, requireNotNull(gpuDrivenDriver), primitive, instanceGpuBuffer, instanceCount)
-                if (!meshDrawn) {
-                    renderPass.setIndexBuffer(primitive.indexBuffers[lod], primitive.indexType)
-                    renderPass.drawIndexed(primitive.indexCounts[lod], instanceCount, 0, 0, 0)
-                }
-            } else if (indirect) {
-                renderPass.setIndexBuffer(gpuDriven.indexBuffer(), primitive.indexType)
-                if (!gpuDriven.draw(renderPass)) {
-                    renderPass.setIndexBuffer(primitive.indexBuffers[lod], primitive.indexType)
-                    renderPass.drawIndexed(primitive.indexCounts[lod], instanceCount, 0, 0, 0)
-                }
-            } else {
-                val indexBuffer = sortedIndices?.currentBuffer() ?: primitive.indexBuffers[lod]
-                renderPass.setIndexBuffer(indexBuffer, primitive.indexType)
+        renderPass.setPipeline(RenderSystem.getCompiledPipeline(preparedRenderType.pipeline()))
+        val scissor = preparedRenderType.scissorState()
+        if (scissor.enabled()) renderPass.enableScissor(scissor.x(), scissor.y(), scissor.width(), scissor.height())
+        RenderSystem.bindDefaultUniforms(renderPass)
+        renderPass.setUniform("DynamicTransforms", preparedRenderType.dynamicTransforms())
+        renderPass.setVertexBuffer(0, primitive.vertexBuffer.slice())
+        renderPass.setVertexBuffer(1, instanceGpuBuffer.slice())
+        if (palettes != null) {
+            renderPass.setVertexBuffer(2, requireNotNull(primitive.skinBuffer).slice())
+            renderPass.setUniform("JointMatrices", palettes.currentBuffer().slice())
+        }
+        for (texture in preparedRenderType.textures()) {
+            renderPass.setUniform(texture.name, texture.textureView, texture.sampler)
+        }
+        if (meshRequested) {
+            meshDrawn = gpuDriven.drawMesh(
+                renderPass,
+                requireNotNull(gpuDrivenDriver),
+                primitive,
+                instanceGpuBuffer,
+                instanceCount,
+                preparedRenderType.pipeline()
+            )
+            if (!meshDrawn) {
+                renderPass.setIndexBuffer(primitive.indexBuffers[lod], primitive.indexType)
                 renderPass.drawIndexed(primitive.indexCounts[lod], instanceCount, 0, 0, 0)
             }
+        } else if (indirect) {
+            renderPass.setIndexBuffer(gpuDriven.indexBuffer(), primitive.indexType)
+            if (!gpuDriven.draw(renderPass)) {
+                renderPass.setIndexBuffer(primitive.indexBuffers[lod], primitive.indexType)
+                renderPass.drawIndexed(primitive.indexCounts[lod], instanceCount, 0, 0, 0)
+            }
+        } else {
+            val indexBuffer = sortedIndices?.currentBuffer() ?: primitive.indexBuffers[lod]
+            renderPass.setIndexBuffer(indexBuffer, primitive.indexType)
+            renderPass.drawIndexed(primitive.indexCounts[lod], instanceCount, 0, 0, 0)
         }
         if (benchmarkStart != 0L) {
             val elapsed = System.nanoTime() - benchmarkStart

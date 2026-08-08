@@ -4,9 +4,9 @@ import com.micheanl.libgltf.model.GltfPrimitive
 import com.micheanl.libgltf.model.PrimitiveMode
 import com.micheanl.libgltf.model.VertexLayout
 import com.micheanl.libgltf.render.vulkan.GltfVulkanUsage
-import com.mojang.blaze3d.IndexType
-import com.mojang.blaze3d.buffers.GpuBuffer
-import com.mojang.blaze3d.systems.GpuDevice
+import com.mojang.renderpearl.api.pipeline.IndexType
+import com.mojang.renderpearl.api.buffers.GpuBuffer
+import com.mojang.renderpearl.api.device.GpuDevice
 import org.lwjgl.system.MemoryUtil
 import org.lwjgl.util.meshoptimizer.MeshOptimizer
 import java.nio.ByteBuffer

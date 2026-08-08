@@ -84,6 +84,8 @@ object GltfSceneRenderer {
         transform: Matrix4fc = instance.transform
     ) {
         if (!instance.visible || instance.handle.isClosed) return
+        val resource = GltfRenderSystem.resource(instance.handle.resourceId) ?: return
+        val textures = resource.textures()
         val asset = instance.handle.asset
         poseStack.pushPose()
         poseStack.mulPose(transform)
@@ -91,12 +93,25 @@ object GltfSceneRenderer {
             val node = asset.nodes[nodeIndex]
             if (node.meshIndex < 0) continue
             val renderers = instance.geometryRenderers[nodeIndex]
-            for (renderer in renderers) {
+            val mesh = asset.meshes[node.meshIndex]
+            for (primitiveIndex in mesh.primitives.indices) {
+                val primitive = mesh.primitives[primitiveIndex]
+                val renderer = renderers[primitiveIndex]
                 renderer.light = light
                 renderer.overlay = overlay
                 poseStack.pushPose()
                 if (node.skinIndex < 0) poseStack.mulPose(instance.animation.pose.globalMatrices[nodeIndex])
-                submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.entityGlint(), renderer)
+                val materialIndex = primitive.materialIndex.coerceIn(0, asset.materials.lastIndex)
+                val material = asset.materials[instance.resolveMaterial(materialIndex)]
+                val override = instance.materialOverrides[materialIndex]
+                val texture = when {
+                    override?.baseColorIdentifier != null -> override.baseColorIdentifier
+                    override?.baseColorTextureIndex != null && override.baseColorTextureIndex >= 0 ->
+                        textures.identifier(override.baseColorTextureIndex)
+                    material.baseColorTexture != null -> textures.identifier(material.baseColorTexture.textureIndex)
+                    else -> textures.materialIdentifier(materialIndex)
+                }
+                submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.entitySolidGlint(texture), renderer)
                 poseStack.popPose()
             }
         }

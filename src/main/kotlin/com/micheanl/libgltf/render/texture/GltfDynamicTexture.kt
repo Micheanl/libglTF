@@ -3,12 +3,12 @@ package com.micheanl.libgltf.render.texture
 import com.micheanl.libgltf.material.TextureFilter
 import com.micheanl.libgltf.material.TextureSampler
 import com.micheanl.libgltf.material.TextureWrap
-import com.mojang.blaze3d.GpuFormat
+import com.mojang.renderpearl.api.GpuFormat
 import com.mojang.blaze3d.platform.NativeImage
 import com.mojang.blaze3d.systems.RenderSystem
-import com.mojang.blaze3d.textures.AddressMode
-import com.mojang.blaze3d.textures.FilterMode
-import com.mojang.blaze3d.textures.GpuTexture
+import com.mojang.renderpearl.api.textures.AddressMode
+import com.mojang.renderpearl.api.textures.FilterMode
+import com.mojang.renderpearl.api.textures.GpuTexture
 import net.minecraft.client.renderer.texture.AbstractTexture
 import java.util.OptionalDouble
 import kotlin.math.max

@@ -6,13 +6,13 @@ import com.micheanl.libgltf.material.GltfMaterial
 import com.micheanl.libgltf.model.PrimitiveMode
 import com.micheanl.libgltf.render.gpu.GltfGpuFormats
 import com.micheanl.libgltf.render.iris.IrisCompat
-import com.mojang.blaze3d.GpuFormat
-import com.mojang.blaze3d.PrimitiveTopology
-import com.mojang.blaze3d.pipeline.BindGroupLayout
-import com.mojang.blaze3d.pipeline.BlendFunction
-import com.mojang.blaze3d.pipeline.ColorTargetState
-import com.mojang.blaze3d.pipeline.RenderPipeline
-import com.mojang.blaze3d.shaders.UniformType
+import com.mojang.renderpearl.api.GpuFormat
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology
+import com.mojang.renderpearl.api.pipeline.BindGroupLayout
+import com.mojang.renderpearl.api.pipeline.BlendFunction
+import com.mojang.renderpearl.api.pipeline.ColorTargetState
+import com.mojang.renderpearl.api.pipeline.RenderPipeline
+import com.mojang.renderpearl.api.pipeline.UniformType
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import net.minecraft.client.renderer.BindGroupLayouts
 import net.minecraft.client.renderer.RenderPipelines
@@ -87,7 +87,6 @@ object GltfRenderTypes {
             .withCull(!material.doubleSided)
         applyMaterial(builder, material, alphaCutoff)
         val pipeline = builder.build()
-        IrisCompat.copyEntity(pipeline, material.alphaMode)
         return createRenderType("libgltf_$suffix", pipeline, texture)
     }
 
@@ -119,7 +118,6 @@ object GltfRenderTypes {
         }
         applyMaterial(builder, material, alphaCutoff)
         val pipeline = builder.build()
-        IrisCompat.copyEntity(pipeline, material.alphaMode)
         return createRenderType("libgltf_$suffix", pipeline, texture)
     }
 

@@ -1,13 +1,16 @@
 package com.micheanl.libgltf.render.vulkan
 
 import com.micheanl.libgltf.render.gpu.GltfMeshletLod
-import com.mojang.blaze3d.buffers.GpuBuffer
-import com.mojang.blaze3d.pipeline.BlendFunction
-import com.mojang.blaze3d.vulkan.VulkanBindGroupLayout
-import com.mojang.blaze3d.vulkan.VulkanConst
-import com.mojang.blaze3d.vulkan.VulkanDevice
-import com.mojang.blaze3d.vulkan.VulkanGpuBuffer
-import com.mojang.blaze3d.vulkan.VulkanRenderPipeline
+import com.mojang.renderpearl.api.buffers.GpuBuffer
+import com.mojang.renderpearl.api.pipeline.BlendFunction
+import com.mojang.renderpearl.api.pipeline.RenderPipeline
+import com.mojang.renderpearl.api.pipeline.ShaderType
+import com.mojang.renderpearl.api.pipeline.UniformType
+import com.mojang.renderpearl.backend.vulkan.VulkanConst
+import com.mojang.renderpearl.backend.vulkan.VulkanDevice
+import com.mojang.renderpearl.backend.vulkan.VulkanGpuBuffer
+import com.mojang.renderpearl.backend.vulkan.VulkanRenderPipeline
+import it.unimi.dsi.fastutil.longs.LongArrayList
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
 import org.lwjgl.util.shaderc.Shaderc
@@ -16,8 +19,8 @@ import java.util.Collections
 import java.util.IdentityHashMap
 
 class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoCloseable {
-    private val pipelines = Collections.synchronizedMap(IdentityHashMap<VulkanRenderPipeline, GltfVulkanMeshPipeline>())
-    private val failed = Collections.newSetFromMap(IdentityHashMap<VulkanRenderPipeline, Boolean>())
+    private val pipelines = Collections.synchronizedMap(IdentityHashMap<RenderPipeline, GltfVulkanMeshPipeline>())
+    private val failed = Collections.newSetFromMap(IdentityHashMap<RenderPipeline, Boolean>())
     private val maxDrawCount: Int
     private val maxPushDescriptors: Int
     val supported: Boolean
@@ -47,12 +50,13 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
         }
     }
 
-    fun descriptorPipeline(original: VulkanRenderPipeline): VulkanRenderPipeline? {
-        if (!supported || failed.contains(original)) return null
-        return pipeline(original)?.descriptorPipeline()
+    fun descriptorPipeline(renderPipeline: RenderPipeline, original: VulkanRenderPipeline): VulkanRenderPipeline? {
+        if (!supported || failed.contains(renderPipeline)) return null
+        return pipeline(renderPipeline, original)?.descriptorPipeline()
     }
 
     fun draw(
+        renderPipeline: RenderPipeline,
         original: VulkanRenderPipeline,
         commandBuffer: VkCommandBuffer,
         hasDepth: Boolean,
@@ -64,11 +68,11 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
         instanceCulling: Boolean,
         meshletCulling: Boolean
     ): Boolean {
-        if (!supported || failed.contains(original)) return false
-        val pipeline = pipelines[original] ?: try {
-            GltfVulkanMeshPipeline.create(device, original, maxPushDescriptors).also { pipelines[original] = it }
+        if (!supported || failed.contains(renderPipeline)) return false
+        val pipeline = pipelines[renderPipeline] ?: try {
+            GltfVulkanMeshPipeline.create(device, original, renderPipeline, maxPushDescriptors).also { pipelines[renderPipeline] = it }
         } catch (_: RuntimeException) {
-            failed.add(original)
+            failed.add(renderPipeline)
             return false
         }
         pipeline.draw(
@@ -86,12 +90,13 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
         return true
     }
 
-    private fun pipeline(original: VulkanRenderPipeline): GltfVulkanMeshPipeline? = pipelines[original] ?: try {
-        GltfVulkanMeshPipeline.create(device, original, maxPushDescriptors).also { pipelines[original] = it }
-    } catch (_: RuntimeException) {
-        failed.add(original)
-        null
-    }
+    private fun pipeline(renderPipeline: RenderPipeline, original: VulkanRenderPipeline): GltfVulkanMeshPipeline? =
+        pipelines[renderPipeline] ?: try {
+            GltfVulkanMeshPipeline.create(device, original, renderPipeline, maxPushDescriptors).also { pipelines[renderPipeline] = it }
+        } catch (_: RuntimeException) {
+            failed.add(renderPipeline)
+            null
+        }
 
     override fun close() {
         pipelines.values.forEach(GltfVulkanMeshPipeline::close)
@@ -108,6 +113,7 @@ private class GltfVulkanMeshPipeline(
     private val withoutDepthPipeline: Long,
     private val taskModule: Long,
     private val meshModule: Long,
+    private val fragmentModule: Long,
     private val storageBinding: Int,
     private val descriptorPipeline: VulkanRenderPipeline
 ) : AutoCloseable {
@@ -180,6 +186,7 @@ private class GltfVulkanMeshPipeline(
         VK10.vkDestroyPipeline(device.vkDevice(), withDepthPipeline, null)
         VK10.vkDestroyPipelineLayout(device.vkDevice(), pipelineLayout, null)
         VK10.vkDestroyDescriptorSetLayout(device.vkDevice(), descriptorSetLayout, null)
+        VK10.vkDestroyShaderModule(device.vkDevice(), fragmentModule, null)
         VK10.vkDestroyShaderModule(device.vkDevice(), meshModule, null)
         VK10.vkDestroyShaderModule(device.vkDevice(), taskModule, null)
     }
@@ -188,17 +195,18 @@ private class GltfVulkanMeshPipeline(
         fun create(
             device: VulkanDevice,
             original: VulkanRenderPipeline,
+            renderPipeline: RenderPipeline,
             maxPushDescriptors: Int
         ): GltfVulkanMeshPipeline {
-            val entries = original.layout().entries()
-            val storageBinding = entries.size
+            val uniforms = original.uniforms()
+            val storageBinding = uniforms.size
             require(storageBinding + DESCRIPTOR_COUNT <= maxPushDescriptors)
             val bindings = mapOf(
-                "PROJECTION_BINDING" to entries.indexOfFirst { it.name() == "Projection" },
-                "DYNAMIC_TRANSFORMS_BINDING" to entries.indexOfFirst { it.name() == "DynamicTransforms" },
-                "LIGHTING_BINDING" to entries.indexOfFirst { it.name() == "Lighting" },
-                "SAMPLER1_BINDING" to entries.indexOfFirst { it.name() == "Sampler1" },
-                "SAMPLER2_BINDING" to entries.indexOfFirst { it.name() == "Sampler2" },
+                "PROJECTION_BINDING" to uniforms.indexOfFirst { it.name() == "Projection" },
+                "DYNAMIC_TRANSFORMS_BINDING" to uniforms.indexOfFirst { it.name() == "DynamicTransforms" },
+                "LIGHTING_BINDING" to uniforms.indexOfFirst { it.name() == "Lighting" },
+                "SAMPLER1_BINDING" to uniforms.indexOfFirst { it.name() == "Sampler1" },
+                "SAMPLER2_BINDING" to uniforms.indexOfFirst { it.name() == "Sampler2" },
                 "GEOMETRY_BINDING" to storageBinding,
                 "INSTANCES_BINDING" to storageBinding + 1,
                 "MESHLETS_BINDING" to storageBinding + 2,
@@ -210,7 +218,13 @@ private class GltfVulkanMeshPipeline(
             try {
                 val meshModule = compileModule(device, MESH_SHADER, Shaderc.shaderc_mesh_shader, bindings)
                 try {
-                    return create(device, original, taskModule, meshModule)
+                    val fragmentModule = compileFragment(device, renderPipeline, bindings)
+                    try {
+                        return create(device, original, renderPipeline, taskModule, meshModule, fragmentModule)
+                    } catch (error: RuntimeException) {
+                        VK10.vkDestroyShaderModule(device.vkDevice(), fragmentModule, null)
+                        throw error
+                    }
                 } catch (error: RuntimeException) {
                     VK10.vkDestroyShaderModule(device.vkDevice(), meshModule, null)
                     throw error
@@ -224,15 +238,17 @@ private class GltfVulkanMeshPipeline(
         private fun create(
             device: VulkanDevice,
             original: VulkanRenderPipeline,
+            renderPipeline: RenderPipeline,
             taskModule: Long,
-            meshModule: Long
+            meshModule: Long,
+            fragmentModule: Long
         ): GltfVulkanMeshPipeline = MemoryStack.stackPush().use { stack ->
-            val entries = original.layout().entries()
-            val storageBinding = entries.size
+            val uniforms = original.uniforms()
+            val storageBinding = uniforms.size
             val bindings = VkDescriptorSetLayoutBinding.calloc(storageBinding + DESCRIPTOR_COUNT, stack)
-            for (index in entries.indices) {
+            for (index in uniforms.indices) {
                 bindings[index].binding(index).descriptorCount(1)
-                    .descriptorType(descriptorType(entries[index].type()))
+                    .descriptorType(descriptorType(uniforms[index].type()))
                     .stageFlags(
                         VK10.VK_SHADER_STAGE_VERTEX_BIT or
                             VK10.VK_SHADER_STAGE_FRAGMENT_BIT or
@@ -262,16 +278,23 @@ private class GltfVulkanMeshPipeline(
                 checkVk(VK10.vkCreatePipelineLayout(device.vkDevice(), layoutInfo, null, pointer))
                 val pipelineLayout = pointer[0]
                 try {
-                    val pipelines = createGraphicsPipelines(device, original, taskModule, meshModule, pipelineLayout, stack)
+                    val pipelines = createGraphicsPipelines(
+                        device,
+                        renderPipeline,
+                        taskModule,
+                        meshModule,
+                        fragmentModule,
+                        pipelineLayout,
+                        stack
+                    )
                     val descriptorPipeline = VulkanRenderPipeline(
-                        original.info(),
-                        original.device(),
+                        device,
                         original.withDepthPipeline(),
                         original.withoutDepthPipeline(),
                         pipelineLayout,
-                        VulkanBindGroupLayout(descriptorSetLayout, entries),
-                        original.vertexModule(),
-                        original.fragmentModule()
+                        descriptorSetLayout,
+                        LongArrayList(),
+                        uniforms
                     )
                     GltfVulkanMeshPipeline(
                         device,
@@ -281,6 +304,7 @@ private class GltfVulkanMeshPipeline(
                         pipelines[1],
                         taskModule,
                         meshModule,
+                        fragmentModule,
                         storageBinding,
                         descriptorPipeline
                     )
@@ -296,25 +320,28 @@ private class GltfVulkanMeshPipeline(
 
         private fun createGraphicsPipelines(
             device: VulkanDevice,
-            original: VulkanRenderPipeline,
+            renderPipeline: RenderPipeline,
             taskModule: Long,
             meshModule: Long,
+            fragmentModule: Long,
             pipelineLayout: Long,
             stack: MemoryStack
         ): LongArray {
-            val info = original.info()
+            val polygonMode = renderPipeline.getPolygonMode()
+            val cull = renderPipeline.isCull()
+            val depthStencilState = renderPipeline.getDepthStencilState()
             val stages = VkPipelineShaderStageCreateInfo.calloc(3, stack)
             val main = stack.UTF8("main")
             stages[0].`sType$Default`().stage(EXTMeshShader.VK_SHADER_STAGE_TASK_BIT_EXT).module(taskModule).pName(main)
             stages[1].`sType$Default`().stage(EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT).module(meshModule).pName(main)
-            stages[2].`sType$Default`().stage(VK10.VK_SHADER_STAGE_FRAGMENT_BIT).module(original.fragmentModule()).pName(main)
+            stages[2].`sType$Default`().stage(VK10.VK_SHADER_STAGE_FRAGMENT_BIT).module(fragmentModule).pName(main)
             val rasterization = VkPipelineRasterizationStateCreateInfo.calloc(stack).`sType$Default`()
-                .polygonMode(VulkanConst.toVk(info.polygonMode))
-                .cullMode(if (info.isCull) VK10.VK_CULL_MODE_BACK_BIT else VK10.VK_CULL_MODE_NONE)
+                .polygonMode(VulkanConst.toVk(polygonMode))
+                .cullMode(if (cull) VK10.VK_CULL_MODE_BACK_BIT else VK10.VK_CULL_MODE_NONE)
                 .frontFace(VK10.VK_FRONT_FACE_CLOCKWISE)
                 .lineWidth(1.0f)
             val depth = VkPipelineDepthStencilStateCreateInfo.calloc(stack).`sType$Default`()
-            info.depthStencilState?.let {
+            depthStencilState?.let {
                 rasterization.depthBiasEnable(it.depthBiasConstant() != 0.0f && it.depthBiasScaleFactor() != 0.0f)
                     .depthBiasConstantFactor(it.depthBiasConstant())
                     .depthBiasSlopeFactor(it.depthBiasScaleFactor())
@@ -322,7 +349,7 @@ private class GltfVulkanMeshPipeline(
                     .depthWriteEnable(it.writeDepth())
                     .depthCompareOp(VulkanConst.toVk(it.depthTest()))
             }
-            val targets = info.colorTargetStates
+            val targets = renderPipeline.getColorTargetStates()
             val attachments = VkPipelineColorBlendAttachmentState.calloc(targets.size, stack)
             for (target in targets) {
                 attachments.colorWriteMask(if (target == null) 0 else VulkanConst.toVk(target))
@@ -353,7 +380,7 @@ private class GltfVulkanMeshPipeline(
             val pointer = stack.mallocLong(1)
             checkVk(VK10.vkCreateGraphicsPipelines(device.vkDevice(), 0L, createInfo, null, pointer))
             val withDepth = pointer[0]
-            if (info.depthStencilState != null) return longArrayOf(withDepth, 0L)
+            if (depthStencilState != null) return longArrayOf(withDepth, 0L)
             rendering.depthAttachmentFormat(VK10.VK_FORMAT_UNDEFINED)
             return try {
                 checkVk(VK10.vkCreateGraphicsPipelines(device.vkDevice(), 0L, createInfo, null, pointer))
@@ -384,6 +411,48 @@ private class GltfVulkanMeshPipeline(
             for ((name, value) in bindings) {
                 Shaderc.shaderc_compile_options_add_macro_definition(options, name, value.toString())
             }
+            return compileSpv(device, compiler, options, source, path, kind)
+        }
+
+        private fun compileFragment(
+            device: VulkanDevice,
+            renderPipeline: RenderPipeline,
+            bindings: Map<String, Int>
+        ): Long {
+            val shader = requireNotNull(renderPipeline.getShaders()[ShaderType.FRAGMENT])
+            val path = "/assets/${shader.namespace}/shaders/${shader.path}.fsh"
+            val source = requireNotNull(GltfVulkanMeshPipeline::class.java.getResourceAsStream(path))
+                .bufferedReader()
+                .use { it.readText() }
+            val compiler = Shaderc.shaderc_compiler_initialize()
+            val options = Shaderc.shaderc_compile_options_initialize()
+            check(compiler != MemoryUtil.NULL && options != MemoryUtil.NULL)
+            Shaderc.shaderc_compile_options_set_target_env(
+                options,
+                Shaderc.shaderc_target_env_vulkan,
+                Shaderc.shaderc_env_version_vulkan_1_3
+            )
+            for ((name, value) in bindings) {
+                Shaderc.shaderc_compile_options_add_macro_definition(options, name, value.toString())
+            }
+            val defines = renderPipeline.getShaderDefines()
+            for ((name, value) in defines.values()) {
+                Shaderc.shaderc_compile_options_add_macro_definition(options, name, value)
+            }
+            for (flag in defines.flags()) {
+                Shaderc.shaderc_compile_options_add_macro_definition(options, flag, "")
+            }
+            return compileSpv(device, compiler, options, source, path, Shaderc.shaderc_fragment_shader)
+        }
+
+        private fun compileSpv(
+            device: VulkanDevice,
+            compiler: Long,
+            options: Long,
+            source: String,
+            path: String,
+            kind: Int
+        ): Long {
             val result = Shaderc.shaderc_compile_into_spv(compiler, source, kind, path, "main", options)
             try {
                 check(result != MemoryUtil.NULL)
@@ -420,10 +489,10 @@ private class GltfVulkanMeshPipeline(
                 .srcColorBlendFactor(VulkanConst.toVk(blend.color().sourceFactor()))
         }
 
-        private fun descriptorType(type: VulkanBindGroupLayout.VulkanBindGroupEntryType): Int = when (type) {
-            VulkanBindGroupLayout.VulkanBindGroupEntryType.UNIFORM_BUFFER -> VK10.VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
-            VulkanBindGroupLayout.VulkanBindGroupEntryType.SAMPLED_IMAGE -> VK10.VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
-            VulkanBindGroupLayout.VulkanBindGroupEntryType.TEXEL_BUFFER -> VK10.VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER
+        private fun descriptorType(type: UniformType): Int = when (type) {
+            UniformType.UNIFORM_BUFFER -> VK10.VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
+            UniformType.COMBINED_IMAGE_SAMPLER -> VK10.VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+            UniformType.TEXEL_BUFFER -> VK10.VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER
         }
 
         private fun checkVk(result: Int) = check(result == VK10.VK_SUCCESS) { "Vulkan error $result" }

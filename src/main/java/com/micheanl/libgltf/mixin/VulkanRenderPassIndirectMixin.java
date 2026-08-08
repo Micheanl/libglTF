@@ -4,11 +4,12 @@ import com.micheanl.libgltf.render.gpu.GltfMeshletLod;
 import com.micheanl.libgltf.render.vulkan.GltfVulkanMeshPipelineCache;
 import com.micheanl.libgltf.render.vulkan.VulkanIndirectRenderPass;
 import com.micheanl.libgltf.render.vulkan.VulkanMeshRenderPass;
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.vulkan.VulkanGpuBuffer;
-import com.mojang.blaze3d.vulkan.VulkanRenderPass;
-import com.mojang.blaze3d.vulkan.VulkanRenderPipeline;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
+import com.mojang.renderpearl.backend.vulkan.VulkanGpuBuffer;
+import com.mojang.renderpearl.backend.vulkan.VulkanRenderPass;
+import com.mojang.renderpearl.backend.vulkan.VulkanRenderPipeline;
 import org.jspecify.annotations.Nullable;
 import org.lwjgl.vulkan.VK12;
 import org.lwjgl.vulkan.VkCommandBuffer;
@@ -36,7 +37,7 @@ public abstract class VulkanRenderPassIndirectMixin implements VulkanIndirectRen
 
     @Override
     public void drawIndexedIndirectCount(GpuBufferSlice commands, GpuBufferSlice count, int maxDrawCount) {
-        if (pipeline == null || !pipeline.isValid()) {
+        if (pipeline == null || pipeline.isClosed()) {
             throw new IllegalStateException("Pipeline is missing or not valid");
         }
         pushDescriptors();
@@ -54,6 +55,7 @@ public abstract class VulkanRenderPassIndirectMixin implements VulkanIndirectRen
     @Override
     public boolean drawMeshTasks(
             GltfVulkanMeshPipelineCache cache,
+            RenderPipeline renderPipeline,
             GpuBuffer geometry,
             GpuBuffer instances,
             GltfMeshletLod meshlets,
@@ -62,11 +64,11 @@ public abstract class VulkanRenderPassIndirectMixin implements VulkanIndirectRen
             boolean instanceCulling,
             boolean meshletCulling
     ) {
-        if (pipeline == null || !pipeline.isValid()) {
+        if (pipeline == null || pipeline.isClosed()) {
             return false;
         }
         VulkanRenderPipeline original = pipeline;
-        VulkanRenderPipeline descriptorPipeline = cache.descriptorPipeline(original);
+        VulkanRenderPipeline descriptorPipeline = cache.descriptorPipeline(renderPipeline, original);
         if (descriptorPipeline == null) {
             return false;
         }
@@ -77,6 +79,7 @@ public abstract class VulkanRenderPassIndirectMixin implements VulkanIndirectRen
             pipeline = original;
         }
         return cache.draw(
+                renderPipeline,
                 original,
                 commandBuffer(),
                 hasDepth,

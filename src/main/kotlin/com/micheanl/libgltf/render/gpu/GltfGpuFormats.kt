@@ -1,7 +1,7 @@
 package com.micheanl.libgltf.render.gpu
 
-import com.mojang.blaze3d.GpuFormat
-import com.mojang.blaze3d.vertex.VertexFormat
+import com.mojang.renderpearl.api.GpuFormat
+import com.mojang.renderpearl.api.vertex.VertexFormat
 
 object GltfGpuFormats {
     val GEOMETRY: VertexFormat = VertexFormat.builder(0)

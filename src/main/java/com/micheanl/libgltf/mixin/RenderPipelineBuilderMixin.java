@@ -2,8 +2,7 @@ package com.micheanl.libgltf.mixin;
 
 import com.micheanl.libgltf.LibGltf;
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import java.util.Optional;
 import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,7 +17,7 @@ public abstract class RenderPipelineBuilderMixin {
 
     @ModifyConstant(
             method = "build",
-            constant = @Constant(intValue = VertexFormat.MAX_VERTEX_ELEMENTS),
+            constant = @Constant(intValue = 16),
             require = 1
     )
     private int libgltf$vertexAttributeLimit(int original) {

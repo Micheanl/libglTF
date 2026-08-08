@@ -1,7 +1,7 @@
 package com.micheanl.libgltf.render.vulkan
 
-import com.mojang.blaze3d.buffers.GpuBuffer
-import com.mojang.blaze3d.buffers.GpuFence
+import com.mojang.renderpearl.api.buffers.GpuBuffer
+import com.mojang.renderpearl.api.commands.GpuFence
 import com.mojang.blaze3d.systems.RenderSystem
 import java.nio.ByteOrder
 

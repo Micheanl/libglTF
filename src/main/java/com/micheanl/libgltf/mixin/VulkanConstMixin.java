@@ -1,7 +1,7 @@
 package com.micheanl.libgltf.mixin;
 
 import com.micheanl.libgltf.render.vulkan.GltfVulkanUsage;
-import com.mojang.blaze3d.vulkan.VulkanConst;
+import com.mojang.renderpearl.backend.vulkan.VulkanConst;
 import org.lwjgl.vulkan.VK10;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

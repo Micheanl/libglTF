@@ -1,10 +1,11 @@
 package com.micheanl.libgltf.render.vulkan
 
-import com.micheanl.libgltf.mixin.RenderPassBackendAccessor
+import com.micheanl.libgltf.mixin.FrontendRenderPassAccessor
 import com.micheanl.libgltf.render.gpu.GltfGpuPrimitive
 import com.micheanl.libgltf.render.gpu.GltfMeshletLod
-import com.mojang.blaze3d.buffers.GpuBuffer
-import com.mojang.blaze3d.systems.RenderPass
+import com.mojang.renderpearl.api.pipeline.RenderPipeline
+import com.mojang.renderpearl.api.buffers.GpuBuffer
+import com.mojang.renderpearl.api.commands.RenderPass
 import com.mojang.blaze3d.systems.RenderSystem
 
 class GltfGpuDrivenBatch : AutoCloseable {
@@ -68,12 +69,14 @@ class GltfGpuDrivenBatch : AutoCloseable {
         driver: GltfVulkanGpuDriven,
         primitive: GltfGpuPrimitive,
         instances: GpuBuffer,
-        instanceCount: Int
+        instanceCount: Int,
+        renderPipeline: RenderPipeline
     ): Boolean {
         if (!active) return false
-        val backend = (renderPass as RenderPassBackendAccessor).libgltfBackend as? VulkanMeshRenderPass ?: return false
+        val backend = (renderPass as FrontendRenderPassAccessor).libgltfBackend as? VulkanMeshRenderPass ?: return false
         return backend.drawMeshTasks(
             driver.meshPipelines ?: return false,
+            renderPipeline,
             primitive.vertexBuffer,
             instances,
             requireNotNull(meshlets),
@@ -107,7 +110,7 @@ class GltfGpuDrivenBatch : AutoCloseable {
 
     fun draw(renderPass: RenderPass): Boolean {
         if (!active) return false
-        val backend = (renderPass as RenderPassBackendAccessor).libgltfBackend as? VulkanIndirectRenderPass ?: return false
+        val backend = (renderPass as FrontendRenderPassAccessor).libgltfBackend as? VulkanIndirectRenderPass ?: return false
         backend.drawIndexedIndirectCount(
             requireNotNull(commandRing).buffer().slice(),
             requireNotNull(statsRing).buffer().slice(0L, Int.SIZE_BYTES.toLong()),

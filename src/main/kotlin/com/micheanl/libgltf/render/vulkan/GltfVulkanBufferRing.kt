@@ -1,7 +1,7 @@
 package com.micheanl.libgltf.render.vulkan
 
-import com.mojang.blaze3d.buffers.GpuBuffer
-import com.mojang.blaze3d.systems.GpuDevice
+import com.mojang.renderpearl.api.buffers.GpuBuffer
+import com.mojang.renderpearl.api.device.GpuDevice
 
 class GltfVulkanBufferRing(
     device: GpuDevice,

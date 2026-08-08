@@ -1,10 +1,10 @@
 package com.micheanl.libgltf.render.vulkan
 
 import com.micheanl.libgltf.mixin.VulkanCommandEncoderAccessor
-import com.mojang.blaze3d.buffers.GpuBuffer
-import com.mojang.blaze3d.buffers.GpuBufferSlice
-import com.mojang.blaze3d.vulkan.VulkanDevice
-import com.mojang.blaze3d.vulkan.VulkanGpuBuffer
+import com.mojang.renderpearl.api.buffers.GpuBuffer
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice
+import com.mojang.renderpearl.backend.vulkan.VulkanDevice
+import com.mojang.renderpearl.backend.vulkan.VulkanGpuBuffer
 import org.joml.Matrix4f
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil

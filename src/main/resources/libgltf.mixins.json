@@ -4,17 +4,15 @@
   "compatibilityLevel": "JAVA_25",
   "client": [
     "GlDeviceMixin",
-    "GpuDeviceBackendAccessor",
-    "RenderPassBackendAccessor",
+    "FrontendGpuDeviceAccessor",
+    "FrontendRenderPassAccessor",
     "RenderPipelineBuilderMixin",
     "VulkanBackendMeshShaderMixin",
-    "VulkanBindGroupLayoutMeshShaderMixin",
     "VulkanCommandEncoderAccessor",
     "VulkanConstMixin",
     "VulkanDeviceMixin",
     "VulkanGpuSamplerMixin",
-    "VulkanRenderPassIndirectMixin",
-    "VulkanRenderPipelineMixin"
+    "VulkanRenderPassIndirectMixin"
   ],
   "injectors": {
     "defaultRequire": 1

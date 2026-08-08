@@ -1,11 +1,13 @@
 package com.micheanl.libgltf.render.vulkan
 
 import com.micheanl.libgltf.render.gpu.GltfMeshletLod
-import com.mojang.blaze3d.buffers.GpuBuffer
+import com.mojang.renderpearl.api.pipeline.RenderPipeline
+import com.mojang.renderpearl.api.buffers.GpuBuffer
 
 interface VulkanMeshRenderPass {
     fun drawMeshTasks(
         cache: GltfVulkanMeshPipelineCache,
+        renderPipeline: RenderPipeline,
         geometry: GpuBuffer,
         instances: GpuBuffer,
         meshlets: GltfMeshletLod,

@@ -1,10 +1,12 @@
 package com.micheanl.libgltf.render.feature
 
 import com.micheanl.libgltf.render.vulkan.GltfVulkanGpuDriven
+import com.mojang.renderpearl.api.commands.RenderPass
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.logging.LogUtils
 import net.minecraft.client.renderer.feature.FeatureFrameContext
 import net.minecraft.client.renderer.feature.FeatureRenderer
+import net.minecraft.client.renderer.oit.OitStage
 
 class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
     private val batches = ArrayList<GltfPreparedGpuBatch>()
@@ -43,13 +45,15 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
 
     override fun executeGroup(
         context: FeatureFrameContext,
+        stage: OitStage?,
+        renderPass: RenderPass,
         groupIndex: Int,
         submits: List<GltfGpuSubmit>,
         strictlyOrdered: Boolean
     ) {
         val start = groupStarts[groupIndex]
         val end = start + groupCounts[groupIndex]
-        for (index in start until end) batches[index].execute()
+        for (index in start until end) batches[index].execute(renderPass)
     }
 
     override fun close() {
