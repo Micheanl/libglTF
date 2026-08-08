@@ -182,9 +182,13 @@ object GltfRenderTypes {
 
     private fun applyMaterial(builder: RenderPipeline.Builder, material: GltfMaterial, alphaCutoff: Float) {
         when (material.alphaMode) {
-            AlphaMode.MASK -> builder.withShaderDefine("ALPHA_CUTOUT", alphaCutoff)
+            AlphaMode.MASK -> builder
+                .withShaderDefine("ALPHA_CUTOUT", alphaCutoff)
+                .withColorTargetState(ColorTargetState.DEFAULT)
             AlphaMode.BLEND -> builder.withColorTargetState(ColorTargetState(BlendFunction.TRANSLUCENT))
-            AlphaMode.OPAQUE -> builder.withShaderDefine("ALPHA_OPAQUE")
+            AlphaMode.OPAQUE -> builder
+                .withShaderDefine("ALPHA_OPAQUE")
+                .withColorTargetState(ColorTargetState.DEFAULT)
         }
     }
 
