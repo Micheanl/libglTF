@@ -6,5 +6,8 @@ data class AnimationChannel(
     val interpolation: Interpolation,
     val times: FloatArray,
     val values: FloatArray,
-    val componentCount: Int
+    val componentCount: Int,
+    val materialIndex: Int = -1,
+    val textureSlot: Int = 0,
+    val textureProperty: Int = 0
 )

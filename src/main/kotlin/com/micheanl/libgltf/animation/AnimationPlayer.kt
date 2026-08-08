@@ -1,11 +1,12 @@
 package com.micheanl.libgltf.animation
 
 import com.micheanl.libgltf.model.GltfAsset
+import com.micheanl.libgltf.material.MaterialUvAnimationState
 import org.joml.Quaternionf
 import kotlin.math.abs
 
 class AnimationPlayer(private val asset: GltfAsset) {
-    val pose: AnimationPose = AnimationPose(asset.nodes.size, asset.totalMorphWeights)
+    val pose: AnimationPose = AnimationPose(asset.nodes.size, asset.totalMorphWeights, asset.materials.size)
 
     var revision: Long = 0L
         private set
@@ -30,14 +31,17 @@ class AnimationPlayer(private val asset: GltfAsset) {
     private val restRotation = FloatArray(asset.nodes.size * 4)
     private val restScale = FloatArray(asset.nodes.size * 3)
     private val restMorph = FloatArray(asset.totalMorphWeights)
+    private val restMaterialUv = MaterialUvAnimationState(asset.materials.size)
     private val primaryTranslation = FloatArray(restTranslation.size)
     private val primaryRotation = FloatArray(restRotation.size)
     private val primaryScale = FloatArray(restScale.size)
     private val primaryMorph = FloatArray(restMorph.size)
+    private val primaryMaterialUv = MaterialUvAnimationState(asset.materials.size)
     private val secondaryTranslation = FloatArray(restTranslation.size)
     private val secondaryRotation = FloatArray(restRotation.size)
     private val secondaryScale = FloatArray(restScale.size)
     private val secondaryMorph = FloatArray(restMorph.size)
+    private val secondaryMaterialUv = MaterialUvAnimationState(asset.materials.size)
     private val animatedNodes = BooleanArray(asset.nodes.size)
     private val secondaryAnimatedNodes = BooleanArray(asset.nodes.size)
     private val sample = FloatArray(maxComponentCount())
@@ -143,7 +147,7 @@ class AnimationPlayer(private val asset: GltfAsset) {
             }
         }
         if (!changed) return pose
-        reset(primaryTranslation, primaryRotation, primaryScale, primaryMorph, animatedNodes)
+        reset(primaryTranslation, primaryRotation, primaryScale, primaryMorph, animatedNodes, primaryMaterialUv)
         if (clipIndex >= 0) {
             sample(
                 asset.animations[clipIndex],
@@ -153,11 +157,19 @@ class AnimationPlayer(private val asset: GltfAsset) {
                 primaryScale,
                 primaryMorph,
                 animatedNodes,
-                primaryKeys
+                primaryKeys,
+                primaryMaterialUv
             )
         }
         if (fadeClipIndex >= 0) {
-            reset(secondaryTranslation, secondaryRotation, secondaryScale, secondaryMorph, secondaryAnimatedNodes)
+            reset(
+                secondaryTranslation,
+                secondaryRotation,
+                secondaryScale,
+                secondaryMorph,
+                secondaryAnimatedNodes,
+                secondaryMaterialUv
+            )
             sample(
                 asset.animations[fadeClipIndex],
                 fadeTimeSeconds,
@@ -166,7 +178,8 @@ class AnimationPlayer(private val asset: GltfAsset) {
                 secondaryScale,
                 secondaryMorph,
                 secondaryAnimatedNodes,
-                secondaryKeys
+                secondaryKeys,
+                secondaryMaterialUv
             )
             buildPose((fadeElapsedSeconds / fadeDurationSeconds).coerceIn(0.0f, 1.0f))
         } else {
@@ -178,6 +191,7 @@ class AnimationPlayer(private val asset: GltfAsset) {
     }
 
     private fun initializeRestPose() {
+        restMaterialUv.reset()
         for (nodeIndex in asset.nodes.indices) {
             val node = asset.nodes[nodeIndex]
             node.translation.copyInto(restTranslation, nodeIndex * 3, 0, 3)
@@ -191,6 +205,14 @@ class AnimationPlayer(private val asset: GltfAsset) {
                 weights.copyInto(restMorph, offset, 0, weights.size.coerceAtMost(restMorph.size - offset))
             }
         }
+        for (materialIndex in asset.materials.indices) {
+            val binding = asset.materials[materialIndex].baseColorTexture ?: continue
+            restMaterialUv.offsetX[materialIndex] = binding.offsetX
+            restMaterialUv.offsetY[materialIndex] = binding.offsetY
+            restMaterialUv.rotation[materialIndex] = binding.rotation
+            restMaterialUv.scaleX[materialIndex] = binding.scaleX
+            restMaterialUv.scaleY[materialIndex] = binding.scaleY
+        }
     }
 
     private fun reset(
@@ -198,13 +220,15 @@ class AnimationPlayer(private val asset: GltfAsset) {
         rotation: FloatArray,
         scale: FloatArray,
         morph: FloatArray,
-        animated: BooleanArray
+        animated: BooleanArray,
+        materialUv: MaterialUvAnimationState
     ) {
         restTranslation.copyInto(translation)
         restRotation.copyInto(rotation)
         restScale.copyInto(scale)
         restMorph.copyInto(morph)
         animated.fill(false)
+        materialUv.copyFrom(restMaterialUv)
     }
 
     private fun sample(
@@ -215,11 +239,30 @@ class AnimationPlayer(private val asset: GltfAsset) {
         scale: FloatArray,
         morph: FloatArray,
         animated: BooleanArray,
-        keys: IntArray
+        keys: IntArray,
+        materialUv: MaterialUvAnimationState
     ) {
         for (channelIndex in clip.channels.indices) {
             val channel = clip.channels[channelIndex]
             keys[channelIndex] = sampleChannel(channel, time, sample, keys[channelIndex])
+            if (channel.path == AnimationPath.MATERIAL_UV) {
+                val materialIndex = channel.materialIndex
+                if (materialIndex in asset.materials.indices && channel.textureSlot == 0) {
+                    when (channel.textureProperty) {
+                        0 -> {
+                            materialUv.offsetX[materialIndex] = sample[0]
+                            materialUv.offsetY[materialIndex] = sample.getOrElse(1) { 0.0f }
+                        }
+                        1 -> materialUv.rotation[materialIndex] = sample[0]
+                        2 -> {
+                            materialUv.scaleX[materialIndex] = sample[0]
+                            materialUv.scaleY[materialIndex] = sample.getOrElse(1) { 1.0f }
+                        }
+                    }
+                    materialUv.animated[materialIndex] = true
+                }
+                continue
+            }
             val node = channel.nodeIndex
             animated[node] = true
             when (channel.path) {
@@ -408,6 +451,7 @@ class AnimationPlayer(private val asset: GltfAsset) {
         } else {
             primaryMorph.copyInto(pose.morphWeights)
         }
+        pose.materialUv.blendFrom(primaryMaterialUv, secondaryMaterialUv, factor)
     }
 
     private fun normalizeTime(index: Int, time: Float): Float {

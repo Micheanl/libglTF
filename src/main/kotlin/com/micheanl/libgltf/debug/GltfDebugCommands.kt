@@ -186,7 +186,9 @@ object GltfDebugCommands {
                 lines += "libgltf mode=${current.renderMode} " +
                     "pos=(${transform.m30()}, ${transform.m31()}, ${transform.m32()}) " +
                     "scale=${transform.m00()} lod=${current.lodLevel} " +
-                    "anim=${current.animation.clipIndex} instances=${GltfRenderRegistry.instances().size}"
+                    "anim=${current.animation.clipIndex} " +
+                    "uv=${if (current.animation.pose.materialUv.animated.any { it }) "on" else "off"} " +
+                    "instances=${GltfRenderRegistry.instances().size}"
             }
         }
         return lines

@@ -17,7 +17,9 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.SubmitNodeCollector
 import net.minecraft.client.renderer.rendertype.RenderType
 import net.minecraft.client.renderer.texture.OverlayTexture
+import kotlin.math.cos
 import kotlin.math.floor
+import kotlin.math.sin
 import kotlin.math.sqrt
 
 private const val DEFORMED_VERTEX_STRIDE: Int = 6
@@ -173,10 +175,19 @@ class GltfGeometryRenderer(
             var u = vertices.getFloat(uvOffset)
             var v = vertices.getFloat(uvOffset + 4)
             if (binding != null) {
-                val scaledU = u * binding.scaleX
-                val scaledV = v * binding.scaleY
-                u = scaledU * binding.cosine - scaledV * binding.sine + binding.offsetX
-                v = scaledU * binding.sine + scaledV * binding.cosine + binding.offsetY
+                val animatedUv = instance.animation.pose.materialUv
+                val animated = animatedUv.animated[materialIndex]
+                val offsetX = if (animated) animatedUv.offsetX[materialIndex] else binding.offsetX
+                val offsetY = if (animated) animatedUv.offsetY[materialIndex] else binding.offsetY
+                val scaleX = if (animated) animatedUv.scaleX[materialIndex] else binding.scaleX
+                val scaleY = if (animated) animatedUv.scaleY[materialIndex] else binding.scaleY
+                val rotation = if (animated) animatedUv.rotation[materialIndex] else binding.rotation
+                val cosine = cos(rotation)
+                val sine = sin(rotation)
+                val scaledU = u * scaleX
+                val scaledV = v * scaleY
+                u = scaledU * cosine - scaledV * sine + offsetX
+                v = scaledU * sine + scaledV * cosine + offsetY
                 if (mirroredS) u = mirrored(u)
                 if (mirroredT) v = mirrored(v)
             }

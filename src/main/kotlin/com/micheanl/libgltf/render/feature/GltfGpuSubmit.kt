@@ -11,6 +11,8 @@ import net.minecraft.client.renderer.rendertype.RenderType
 import org.joml.Matrix3f
 import org.joml.Matrix4f
 import org.joml.Matrix4fc
+import kotlin.math.cos
+import kotlin.math.sin
 
 class GltfGpuSubmit(
     val instance: GltfInstance,
@@ -88,12 +90,21 @@ class GltfGpuSubmit(
         normalMatrix.set(modelMatrix).invert().transpose()
         val binding = material.baseColorTexture
         if (binding != null && binding.texCoord == 0) {
-            uvTransform0[0] = binding.offsetX
-            uvTransform0[1] = binding.offsetY
-            uvTransform0[2] = binding.cosine * binding.scaleX
-            uvTransform0[3] = -binding.sine * binding.scaleY
-            uvTransform1[0] = binding.sine * binding.scaleX
-            uvTransform1[1] = binding.cosine * binding.scaleY
+            val animatedUv = instance.animation.pose.materialUv
+            val animated = animatedUv.animated[materialIndex]
+            val offsetX = if (animated) animatedUv.offsetX[materialIndex] else binding.offsetX
+            val offsetY = if (animated) animatedUv.offsetY[materialIndex] else binding.offsetY
+            val scaleX = if (animated) animatedUv.scaleX[materialIndex] else binding.scaleX
+            val scaleY = if (animated) animatedUv.scaleY[materialIndex] else binding.scaleY
+            val rotation = if (animated) animatedUv.rotation[materialIndex] else binding.rotation
+            val cosine = cos(rotation)
+            val sine = sin(rotation)
+            uvTransform0[0] = offsetX
+            uvTransform0[1] = offsetY
+            uvTransform0[2] = cosine * scaleX
+            uvTransform0[3] = -sine * scaleY
+            uvTransform1[0] = sine * scaleX
+            uvTransform1[1] = cosine * scaleY
         } else {
             uvTransform0[0] = 0.0f
             uvTransform0[1] = 0.0f

@@ -406,28 +406,78 @@ object GltfLoader {
             val samplers = JsonFields.value(animation, "samplers") ?: error("animation samplers missing")
             val channels = JsonFields.value(animation, "channels") ?: error("animation channels missing")
             var duration = 0.0f
-            val parsed = Array(channels.size()) { channelIndex ->
+            val parsed = ArrayList<AnimationChannel>(channels.size())
+            for (channelIndex in 0 until channels.size()) {
                 val channel = channels[channelIndex]
                 val sampler = samplers[JsonFields.int(channel, "sampler")]
                 val target = JsonFields.value(channel, "target") ?: error("animation target missing")
                 val input = decoder.readFloats(JsonFields.int(sampler, "input"))
                 val output = decoder.readFloats(JsonFields.int(sampler, "output"))
                 if (input.isNotEmpty()) duration = maxOf(duration, input[input.lastIndex])
-                val path = animationPath(JsonFields.string(target, "path"))
                 val interpolation = interpolation(JsonFields.string(sampler, "interpolation", "LINEAR"))
                 val multiplier = if (interpolation == Interpolation.CUBIC_SPLINE) 3 else 1
                 val components = if (input.isEmpty()) 0 else output.size / input.size / multiplier
-                AnimationChannel(
-                    JsonFields.int(target, "node"),
-                    path,
-                    interpolation,
-                    input,
-                    output,
-                    components
-                )
+                val materialTarget = materialUvTarget(target)
+                if (materialTarget != null) {
+                    parsed += AnimationChannel(
+                        -1,
+                        AnimationPath.MATERIAL_UV,
+                        interpolation,
+                        input,
+                        output,
+                        components,
+                        materialTarget.materialIndex,
+                        materialTarget.textureSlot,
+                        materialTarget.textureProperty
+                    )
+                } else if (!hasAnimationPointer(target)) {
+                    parsed += AnimationChannel(
+                        JsonFields.int(target, "node"),
+                        animationPath(JsonFields.string(target, "path")),
+                        interpolation,
+                        input,
+                        output,
+                        components
+                    )
+                }
             }
-            AnimationClip(JsonFields.string(animation, "name", "animation_$animationIndex"), duration, parsed)
+            AnimationClip(
+                JsonFields.string(animation, "name", "animation_$animationIndex"),
+                duration,
+                parsed.toTypedArray()
+            )
         }
+    }
+
+    private fun hasAnimationPointer(target: JsonValue): Boolean =
+        JsonFields.value(JsonFields.value(target, "extensions"), "KHR_animation_pointer") != null
+
+    private fun materialUvTarget(target: JsonValue): MaterialUvTarget? {
+        val extension = JsonFields.value(JsonFields.value(target, "extensions"), "KHR_animation_pointer")
+        val pointer = JsonFields.string(extension, "pointer")
+        if (pointer.isEmpty()) return null
+        val segments = pointer.split('/')
+        if (segments.size < 7 || segments[1] != "materials") return null
+        val materialIndex = segments[2].toIntOrNull() ?: return null
+        val textureSlot = when (segments.getOrNull(4)) {
+            "baseColorTexture" -> 0
+            else -> return null
+        }
+        val transform = segments.getOrNull(5)
+        val property = if (transform == "extensions" && segments.getOrNull(6) == "KHR_texture_transform") {
+            segments.getOrNull(7)
+        } else if (transform == "KHR_texture_transform") {
+            segments.getOrNull(6)
+        } else {
+            null
+        }
+        val textureProperty = when (property) {
+            "offset" -> 0
+            "rotation" -> 1
+            "scale" -> 2
+            else -> return null
+        }
+        return MaterialUvTarget(materialIndex, textureSlot, textureProperty)
     }
 
     private fun parentIndices(nodes: Array<GltfNode>): IntArray {
