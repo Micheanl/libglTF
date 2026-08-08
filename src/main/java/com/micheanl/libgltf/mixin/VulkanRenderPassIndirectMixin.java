@@ -11,6 +11,7 @@ import com.mojang.renderpearl.backend.vulkan.VulkanGpuBuffer;
 import com.mojang.renderpearl.backend.vulkan.VulkanRenderPass;
 import com.mojang.renderpearl.backend.vulkan.VulkanRenderPipeline;
 import org.jspecify.annotations.Nullable;
+import org.lwjgl.vulkan.VK10;
 import org.lwjgl.vulkan.VK12;
 import org.lwjgl.vulkan.VkCommandBuffer;
 import org.lwjgl.vulkan.VkDrawIndexedIndirectCommand;
@@ -78,7 +79,7 @@ public abstract class VulkanRenderPassIndirectMixin implements VulkanIndirectRen
         } finally {
             pipeline = original;
         }
-        return cache.draw(
+        boolean drawn = cache.draw(
                 renderPipeline,
                 original,
                 commandBuffer(),
@@ -91,5 +92,15 @@ public abstract class VulkanRenderPassIndirectMixin implements VulkanIndirectRen
                 instanceCulling,
                 meshletCulling
         );
+        if (drawn) {
+            VK10.vkCmdBindPipeline(
+                    commandBuffer(),
+                    VK10.VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    hasDepth || original.withoutDepthPipeline() == 0L
+                            ? original.withDepthPipeline()
+                            : original.withoutDepthPipeline()
+            );
+        }
+        return drawn;
     }
 }
