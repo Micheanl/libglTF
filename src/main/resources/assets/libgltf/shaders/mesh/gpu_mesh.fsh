@@ -3,8 +3,6 @@ layout(set = 0, binding = PROJECTION_BINDING, std140) uniform Projection { mat4 
 layout(set = 0, binding = DYNAMIC_TRANSFORMS_BINDING, std140) uniform DynamicTransforms { mat4 ModelViewMat; mat4 TextureMat; vec4 ColorModulator; vec3 ModelOffset; };
 layout(set = 0, binding = FOG_BINDING, std140) uniform Fog { vec4 FogColor; float FogEnvironmentalStart; float FogEnvironmentalEnd; float FogRenderDistanceStart; float FogRenderDistanceEnd; float FogSkyEnd; float FogCloudsEnd; };
 layout(set = 0, binding = SAMPLER0_BINDING) uniform sampler2D Sampler0;
-layout(set = 0, binding = SAMPLER1_BINDING) uniform sampler2D Sampler1;
-layout(set = 0, binding = SAMPLER2_BINDING) uniform sampler2D Sampler2;
 #ifdef OIT
 layout(set = 0, binding = DEPTH_BOUNDS_BINDING) uniform sampler2D DepthBoundsSampler;
 #ifdef COEFF0_BINDING
@@ -17,8 +15,8 @@ layout(set = 0, binding = COEFF1_BINDING) uniform sampler2D Coeff1;
 layout(location = 0) in float sphericalVertexDistance;
 layout(location = 1) in float cylindricalVertexDistance;
 layout(location = 2) in vec4 vertexColor;
-layout(location = 3) in vec2 lightMapCoord;
-layout(location = 4) in vec2 overlayCoord;
+layout(location = 3) in vec4 lightMapColor;
+layout(location = 4) in vec4 overlayColor;
 layout(location = 5) in vec2 texCoord0;
 #if !defined(OIT_ALPHA_ONLY) || defined(OIT_DEPTH_BOUNDS)
 layout(location = 0) out vec4 fragColor;
@@ -189,8 +187,6 @@ void main() {
     return;
 #endif
     vec4 color = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;
-    vec4 overlayColor = texelFetch(Sampler1, ivec2(overlayCoord), 0);
-    vec4 lightMapColor = texture(Sampler2, lightMapCoord);
 #ifdef ALPHA_CUTOUT
     if (color.a < ALPHA_CUTOUT) discard;
 #endif

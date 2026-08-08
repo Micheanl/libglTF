@@ -5,6 +5,8 @@ layout(triangles, max_vertices = 64, max_primitives = 124) out;
 layout(set = 0, binding = PROJECTION_BINDING, std140) uniform Projection { mat4 ProjMat; };
 layout(set = 0, binding = DYNAMIC_TRANSFORMS_BINDING, std140) uniform DynamicTransforms { mat4 ModelViewMat; mat4 TextureMat; vec4 ColorModulator; vec3 ModelOffset; };
 layout(set = 0, binding = LIGHTING_BINDING, std140) uniform Lighting { vec3 Light0_Direction; vec3 Light1_Direction; };
+layout(set = 0, binding = SAMPLER1_BINDING) uniform sampler2D Sampler1;
+layout(set = 0, binding = SAMPLER2_BINDING) uniform sampler2D Sampler2;
 layout(push_constant) uniform Parameters { vec4 primitiveSphere; uint instanceCount; uint meshletCount; uint instanceCulling; uint meshletCulling; uint baseCandidate; } parameters;
 layout(set = 1, binding = GEOMETRY_BINDING, std430) readonly buffer Geometry { uint geometryWords[]; };
 layout(set = 1, binding = INSTANCES_BINDING, std430) readonly buffer Instances { uint instanceWords[]; };
@@ -19,8 +21,8 @@ layout(set = 1, binding = COUNTERS_BINDING, std430) buffer DebugCounters { uint 
 layout(location = 0) out float sphericalVertexDistance[];
 layout(location = 1) out float cylindricalVertexDistance[];
 layout(location = 2) out vec4 vertexColor[];
-layout(location = 3) out vec2 lightMapCoord[];
-layout(location = 4) out vec2 overlayCoord[];
+layout(location = 3) out vec4 lightMapColor[];
+layout(location = 4) out vec4 overlayColor[];
 layout(location = 5) out vec2 texCoord0[];
 mat4 instanceMatrix(uint o) {
     return mat4(uintBitsToFloat(instanceWords[o]), uintBitsToFloat(instanceWords[o + 1]), uintBitsToFloat(instanceWords[o + 2]), uintBitsToFloat(instanceWords[o + 3]), uintBitsToFloat(instanceWords[o + 4]), uintBitsToFloat(instanceWords[o + 5]), uintBitsToFloat(instanceWords[o + 6]), uintBitsToFloat(instanceWords[o + 7]), uintBitsToFloat(instanceWords[o + 8]), uintBitsToFloat(instanceWords[o + 9]), uintBitsToFloat(instanceWords[o + 10]), uintBitsToFloat(instanceWords[o + 11]), uintBitsToFloat(instanceWords[o + 12]), uintBitsToFloat(instanceWords[o + 13]), uintBitsToFloat(instanceWords[o + 14]), uintBitsToFloat(instanceWords[o + 15]));
@@ -32,8 +34,9 @@ vec4 mixLight(vec3 normal, vec4 color) {
     float value = min(1.0, (light.x + light.y) * 0.6 + 0.4);
     return vec4(color.rgb * value, color.a);
 }
-vec2 lightmapCoord(ivec2 uv) {
-    return clamp((vec2(uv) / 256.0) + 0.5 / 16.0, vec2(0.5 / 16.0), vec2(15.5 / 16.0));
+vec4 sampleLightmap(ivec2 uv) {
+    vec2 coord = clamp((vec2(uv) / 256.0) + 0.5 / 16.0, vec2(0.5 / 16.0), vec2(15.5 / 16.0));
+    return texture(Sampler2, coord);
 }
 void main() {
     uint invocation = gl_LocalInvocationIndex;
@@ -49,8 +52,8 @@ void main() {
         sphericalVertexDistance[invocation] = 1.0;
         cylindricalVertexDistance[invocation] = 1.0;
         vertexColor[invocation] = vec4(1.0);
-        lightMapCoord[invocation] = vec2(0.5);
-        overlayCoord[invocation] = vec2(0.0);
+        lightMapColor[invocation] = vec4(1.0);
+        overlayColor[invocation] = vec4(0.0);
         texCoord0[invocation] = vec2(0.0);
     }
     if (invocation == 0) {
@@ -87,8 +90,8 @@ void main() {
         sphericalVertexDistance[vertex] = length(worldPosition.xyz);
         cylindricalVertexDistance[vertex] = max(length(worldPosition.xz), abs(worldPosition.y));
         vertexColor[vertex] = mixLight(worldNormal, color * instanceColor);
-        lightMapCoord[vertex] = lightmapCoord(ivec2(signed16(light), signed16(light >> 16)));
-        overlayCoord[vertex] = vec2(signed16(overlay), signed16(overlay >> 16));
+        lightMapColor[vertex] = sampleLightmap(ivec2(signed16(light), signed16(light >> 16)));
+        overlayColor[vertex] = texelFetch(Sampler1, ivec2(signed16(overlay), signed16(overlay >> 16)), 0);
         texCoord0[vertex] = uv0;
     }
     for (uint triangle = invocation; triangle < meshlet.triangleCount; triangle += gl_WorkGroupSize.x) {
