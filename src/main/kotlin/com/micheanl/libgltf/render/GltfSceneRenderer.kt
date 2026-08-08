@@ -5,6 +5,8 @@ import com.micheanl.libgltf.api.GltfRenderMode
 import com.micheanl.libgltf.material.TextureWrap
 import com.micheanl.libgltf.model.GltfPrimitive
 import com.micheanl.libgltf.model.PrimitiveMode
+import com.micheanl.libgltf.render.cpu.GltfGeometryRenderer
+import com.micheanl.libgltf.render.feature.GltfGpuSubmit
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
 import com.micheanl.libgltf.render.iris.IrisCompat
 import com.micheanl.libgltf.render.debug.GltfBoneDebugRenderer
@@ -34,6 +36,7 @@ object GltfSceneRenderer {
 
     private val cullMatrix = Matrix4f()
     private val cullPoint = Vector3f()
+    private val instanceMatrix = Matrix4f()
 
     fun resetFrameCounters() {
         lastGpuSubmits = 0
@@ -93,13 +96,25 @@ object GltfSceneRenderer {
                 if (gpuEnabled && gpuCompatible(instance, nodeIndex, primitive)) {
                     val gpuResources = resource.gpu()
                     if (!gpuResources.failed(meshIndex, primitiveIndex)) {
-                        val submit = gpuSubmits[primitiveIndex]
-                        submit.configure(resource, textures, light, overlay, poseStack.last().pose())
-                        lastGpuSubmits++
-                        if (renderer.transparent()) {
-                            submitNodeCollector.submitCustom(SubmitRenderPhases.TRANSLUCENT_MODELS, submit)
+                        val instanceCount = node.instanceMatrices.size / 16
+                        if (instanceCount > 0) {
+                            for (instanceIndex in 0 until instanceCount) {
+                                instanceMatrix.set(node.instanceMatrices, instanceIndex * 16)
+                                val submit = gpuSubmits[primitiveIndex][instanceIndex]
+                                submit.configure(
+                                    resource,
+                                    textures,
+                                    light,
+                                    overlay,
+                                    poseStack.last().pose(),
+                                    instanceMatrix
+                                )
+                                submitInstance(submitNodeCollector, renderer, submit)
+                            }
                         } else {
-                            submitNodeCollector.submitCustom(SubmitRenderPhases.SOLID, submit)
+                            val submit = gpuSubmits[primitiveIndex][0]
+                            submit.configure(resource, textures, light, overlay, poseStack.last().pose())
+                            submitInstance(submitNodeCollector, renderer, submit)
                         }
                         continue
                     }
@@ -108,7 +123,17 @@ object GltfSceneRenderer {
                 renderer.overlay = overlay
                 poseStack.pushPose()
                 if (node.skinIndex < 0) poseStack.mulPose(instance.animation.pose.globalMatrices[nodeIndex])
-                submitNodeCollector.submitCustomGeometry(poseStack, renderer.renderType(resource, textures), renderer)
+                val instanceCount = node.instanceMatrices.size / 16
+                if (instanceCount > 0) {
+                    for (instanceIndex in 0 until instanceCount) {
+                        poseStack.pushPose()
+                        poseStack.mulPose(instanceMatrix.set(node.instanceMatrices, instanceIndex * 16))
+                        submitNodeCollector.submitCustomGeometry(poseStack, renderer.renderType(resource, textures), renderer)
+                        poseStack.popPose()
+                    }
+                } else {
+                    submitNodeCollector.submitCustomGeometry(poseStack, renderer.renderType(resource, textures), renderer)
+                }
                 poseStack.popPose()
             }
         }
@@ -160,6 +185,19 @@ object GltfSceneRenderer {
         )
     }
 
+    private fun submitInstance(
+        submitNodeCollector: OrderedSubmitNodeCollector,
+        renderer: GltfGeometryRenderer,
+        submit: GltfGpuSubmit
+    ) {
+        lastGpuSubmits++
+        if (renderer.transparent()) {
+            submitNodeCollector.submitCustom(SubmitRenderPhases.TRANSLUCENT_MODELS, submit)
+        } else {
+            submitNodeCollector.submitCustom(SubmitRenderPhases.SOLID, submit)
+        }
+    }
+
     fun submitGlint(
         instance: GltfInstance,
         poseStack: PoseStack,
@@ -198,7 +236,17 @@ object GltfSceneRenderer {
                     material.baseColorTexture != null -> textures.identifier(material.baseColorTexture.textureIndex)
                     else -> textures.materialIdentifier(materialIndex)
                 }
-                submitNodeCollector.submitCustomGeometry(poseStack, GltfRenderTypes.glint(texture), renderer)
+                val instanceCount = node.instanceMatrices.size / 16
+                if (instanceCount > 0) {
+                    for (instanceIndex in 0 until instanceCount) {
+                        poseStack.pushPose()
+                        poseStack.mulPose(instanceMatrix.set(node.instanceMatrices, instanceIndex * 16))
+                        submitNodeCollector.submitCustomGeometry(poseStack, GltfRenderTypes.glint(texture), renderer)
+                        poseStack.popPose()
+                    }
+                } else {
+                    submitNodeCollector.submitCustomGeometry(poseStack, GltfRenderTypes.glint(texture), renderer)
+                }
                 poseStack.popPose()
             }
         }

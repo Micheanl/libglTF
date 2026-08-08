@@ -41,6 +41,7 @@ import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import org.joml.Matrix4f
 
 object GltfLoader {
     private val json = Json {
@@ -87,7 +88,7 @@ object GltfLoader {
         val materials = parseMaterials(root)
         val materialVariantNames = parseMaterialVariantNames(root)
         val meshes = parseMeshes(root, decoder, lodPolicy, materialVariantNames.size)
-        val nodes = parseNodes(root)
+        val nodes = parseNodes(root, decoder)
         val parents = parentIndices(nodes)
         val resolvedNodes = Array(nodes.size) { index -> nodes[index].copy(parentIndex = parents[index]) }
         val roots = sceneRoots(root, parents)
@@ -404,10 +405,36 @@ object GltfLoader {
         }
     }
 
-    private fun parseNodes(root: JsonValue): Array<GltfNode> {
+    private fun parseNodes(root: JsonValue, decoder: AccessorDecoder): Array<GltfNode> {
         val values = JsonFields.value(root, "nodes") ?: return emptyArray()
         return Array(values.size()) { index ->
             val node = values[index]
+            val instancing = JsonFields.value(JsonFields.value(node, "extensions"), "EXT_mesh_gpu_instancing")
+            val attributes = JsonFields.value(instancing, "attributes")
+            val translations = attributes?.let { attributeFloats(it, "TRANSLATION", decoder) } ?: FloatArray(0)
+            val rotations = attributes?.let { attributeFloats(it, "ROTATION", decoder) } ?: FloatArray(0)
+            val scales = attributes?.let { attributeFloats(it, "SCALE", decoder) } ?: FloatArray(0)
+            val instanceCount = maxOf(translations.size / 3, rotations.size / 4, scales.size / 3)
+            val instanceMatrices = FloatArray(instanceCount * 16)
+            for (instance in 0 until instanceCount) {
+                val translation = if (translations.isNotEmpty()) instance * 3 else 0
+                val rotation = if (rotations.isNotEmpty()) instance * 4 else 0
+                val scale = if (scales.isNotEmpty()) instance * 3 else 0
+                Matrix4f()
+                    .translationRotateScale(
+                        translations.getOrElse(translation) { 0.0f },
+                        translations.getOrElse(translation + 1) { 0.0f },
+                        translations.getOrElse(translation + 2) { 0.0f },
+                        rotations.getOrElse(rotation) { 0.0f },
+                        rotations.getOrElse(rotation + 1) { 0.0f },
+                        rotations.getOrElse(rotation + 2) { 0.0f },
+                        rotations.getOrElse(rotation + 3) { 1.0f },
+                        scales.getOrElse(scale) { 1.0f },
+                        scales.getOrElse(scale + 1) { 1.0f },
+                        scales.getOrElse(scale + 2) { 1.0f }
+                    )
+                    .get(instanceMatrices, instance * 16)
+            }
             GltfNode(
                 JsonFields.string(node, "name", "node_$index"),
                 -1,
@@ -415,6 +442,7 @@ object GltfLoader {
                 JsonFields.int(node, "mesh"),
                 JsonFields.int(node, "skin"),
                 JsonFields.int(node, "camera"),
+                instanceMatrices,
                 JsonFields.floats(node, "translation", floatArrayOf(0.0f, 0.0f, 0.0f)),
                 JsonFields.floats(node, "rotation", floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f)),
                 JsonFields.floats(node, "scale", floatArrayOf(1.0f, 1.0f, 1.0f)),

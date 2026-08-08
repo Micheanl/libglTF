@@ -20,7 +20,7 @@ class GltfInstance internal constructor(val handle: GltfHandle) {
     val materialOverrides: Array<MaterialOverride?> = arrayOfNulls(handle.asset.materials.size)
     private val materialMappings: IntArray = IntArray(handle.asset.materials.size) { it }
     internal val geometryRenderers: Array<Array<GltfGeometryRenderer>> = createRenderers()
-    internal val gpuSubmits: Array<Array<GltfGpuSubmit>> = createGpuSubmits()
+    internal val gpuSubmits: Array<Array<Array<GltfGpuSubmit>>> = createGpuSubmits()
 
     var renderMode: GltfRenderMode = GltfRenderMode.AUTO
     var automaticAnimation: Boolean = true
@@ -151,10 +151,16 @@ class GltfInstance internal constructor(val handle: GltfHandle) {
         }
     }
 
-    private fun createGpuSubmits(): Array<Array<GltfGpuSubmit>> = Array(handle.asset.nodes.size) { nodeIndex ->
+    private fun createGpuSubmits(): Array<Array<Array<GltfGpuSubmit>>> =
+        Array(handle.asset.nodes.size) { nodeIndex ->
         val meshIndex = handle.asset.nodes[nodeIndex].meshIndex
-        if (meshIndex < 0) emptyArray() else Array(handle.asset.meshes[meshIndex].primitives.size) { primitiveIndex ->
-            GltfGpuSubmit(this, nodeIndex, meshIndex, primitiveIndex)
+        if (meshIndex < 0) {
+            emptyArray()
+        } else {
+            val instanceCount = (handle.asset.nodes[nodeIndex].instanceMatrices.size / 16).coerceAtLeast(1)
+            Array(handle.asset.meshes[meshIndex].primitives.size) { primitiveIndex ->
+                Array(instanceCount) { GltfGpuSubmit(this, nodeIndex, meshIndex, primitiveIndex) }
+            }
         }
     }
 

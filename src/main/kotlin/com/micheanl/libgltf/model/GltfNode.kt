@@ -7,6 +7,7 @@ data class GltfNode(
     val meshIndex: Int,
     val skinIndex: Int,
     val cameraIndex: Int,
+    val instanceMatrices: FloatArray,
     val translation: FloatArray,
     val rotation: FloatArray,
     val scale: FloatArray,

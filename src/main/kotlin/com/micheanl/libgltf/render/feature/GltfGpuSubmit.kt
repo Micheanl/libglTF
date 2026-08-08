@@ -63,7 +63,8 @@ class GltfGpuSubmit(
         textures: GltfTextureSet,
         light: Int,
         overlay: Int,
-        transform: Matrix4fc
+        transform: Matrix4fc,
+        instanceMatrix: Matrix4fc? = null
     ) {
         val asset = resource.asset
         val primitive = asset.meshes[meshIndex].primitives[primitiveIndex]
@@ -89,6 +90,7 @@ class GltfGpuSubmit(
 
         modelMatrix.set(transform)
         if (skinIndex < 0) modelMatrix.mul(instance.animation.pose.globalMatrices[nodeIndex])
+        if (instanceMatrix != null) modelMatrix.mul(instanceMatrix)
         normalMatrix.set(modelMatrix).invert().transpose()
         val binding = material.baseColorTexture
         if (binding != null && binding.texCoord == 0) {
