@@ -14,7 +14,6 @@ struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint verte
 layout(set = 1, binding = MESHLETS_BINDING, std430) readonly buffer Meshlets { Meshlet meshlets[]; };
 layout(set = 1, binding = MESHLET_VERTICES_BINDING, std430) readonly buffer MeshletVertices { uint meshletVertices[]; };
 layout(set = 1, binding = MESHLET_TRIANGLES_BINDING, std430) readonly buffer MeshletTriangles { uint meshletTriangleWords[]; };
-taskPayloadSharedEXT uint payload[2];
 layout(location = 0) out float sphericalVertexDistance[];
 layout(location = 1) out float cylindricalVertexDistance[];
 layout(location = 2) out vec4 vertexColor[];
@@ -23,6 +22,16 @@ layout(location = 4) out vec4 overlayColor[];
 layout(location = 5) out vec2 texCoord0[];
 mat4 instanceMatrix(uint o) {
     return mat4(uintBitsToFloat(instanceWords[o]), uintBitsToFloat(instanceWords[o + 1]), uintBitsToFloat(instanceWords[o + 2]), uintBitsToFloat(instanceWords[o + 3]), uintBitsToFloat(instanceWords[o + 4]), uintBitsToFloat(instanceWords[o + 5]), uintBitsToFloat(instanceWords[o + 6]), uintBitsToFloat(instanceWords[o + 7]), uintBitsToFloat(instanceWords[o + 8]), uintBitsToFloat(instanceWords[o + 9]), uintBitsToFloat(instanceWords[o + 10]), uintBitsToFloat(instanceWords[o + 11]), uintBitsToFloat(instanceWords[o + 12]), uintBitsToFloat(instanceWords[o + 13]), uintBitsToFloat(instanceWords[o + 14]), uintBitsToFloat(instanceWords[o + 15]));
+}
+bool visibleSphere(vec4 sphere, mat4 transform) {
+    vec4 r0 = vec4(transform[0][0], transform[1][0], transform[2][0], transform[3][0]);
+    vec4 r1 = vec4(transform[0][1], transform[1][1], transform[2][1], transform[3][1]);
+    vec4 r2 = vec4(transform[0][2], transform[1][2], transform[2][2], transform[3][2]);
+    vec4 r3 = vec4(transform[0][3], transform[1][3], transform[2][3], transform[3][3]);
+    vec4 c = vec4(sphere.xyz, 1.0);
+    vec4 planes[6] = vec4[6](r3 + r0, r3 - r0, r3 + r1, r3 - r1, r3 + r2, r3 - r2);
+    for (uint i = 0; i < 6; i++) if (dot(planes[i], c) < -sphere.w * length(planes[i].xyz)) return false;
+    return true;
 }
 int signed16(uint value) { return int(value << 16) >> 16; }
 uint triangleByte(uint offset) { return meshletTriangleWords[offset >> 2] >> ((offset & 3) * 8) & 255; }
@@ -36,9 +45,9 @@ vec4 sampleLightmap(ivec2 uv) {
     return texture(Sampler2, coord);
 }
 void main() {
+    uint invocation = gl_LocalInvocationIndex;
 #ifdef MESH_DEBUG_MINIMAL
     SetMeshOutputsEXT(3, 1);
-    uint invocation = gl_LocalInvocationIndex;
     if (invocation < 3) {
         float x = float(gl_WorkGroupID.x & 31) * 0.06 - 0.9;
         vec2 local[3] = vec2[3](vec2(x - 0.03, -0.03), vec2(x + 0.03, -0.03), vec2(x, 0.03));
@@ -52,11 +61,19 @@ void main() {
     }
     if (invocation == 0) gl_PrimitiveTriangleIndicesEXT[0] = uvec3(0, 1, 2);
 #else
-    uint instanceIndex = min(payload[0], max(parameters.instanceCount, 1) - 1);
-    uint meshletIndex = min(payload[1], max(parameters.meshletCount, 1) - 1);
+    uint candidate = parameters.baseCandidate + gl_WorkGroupID.x;
+    uint candidateCount = parameters.instanceCount * parameters.meshletCount;
+    uint instanceIndex = candidate < candidateCount ? candidate / parameters.meshletCount : 0;
+    uint meshletIndex = candidate < candidateCount ? candidate - instanceIndex * parameters.meshletCount : 0;
+    mat4 transform = ProjMat * ModelViewMat * instanceMatrix(instanceIndex * 41);
+    bool instanceVisible = parameters.instanceCulling == 0 || visibleSphere(parameters.primitiveSphere, transform);
+    bool meshletVisible = parameters.meshletCulling == 0 || visibleSphere(meshlets[meshletIndex].sphere, transform);
+    if (candidate >= candidateCount || !(instanceVisible && meshletVisible)) {
+        SetMeshOutputsEXT(0, 0);
+        return;
+    }
     Meshlet meshlet = meshlets[meshletIndex];
     SetMeshOutputsEXT(meshlet.vertexCount, meshlet.triangleCount);
-    uint invocation = gl_LocalInvocationIndex;
     uint io = instanceIndex * 41;
     if (invocation < meshlet.vertexCount) {
         uint vertexIndex = meshletVertices[meshlet.vertexOffset + invocation];

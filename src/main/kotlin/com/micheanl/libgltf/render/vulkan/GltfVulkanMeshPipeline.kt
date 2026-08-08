@@ -25,7 +25,7 @@ class GltfVulkanMeshPipelineCache(
 ) : AutoCloseable {
     private val pipelines = Collections.synchronizedMap(IdentityHashMap<RenderPipeline, GltfVulkanMeshPipeline>())
     private val failed = Collections.newSetFromMap(IdentityHashMap<RenderPipeline, Boolean>())
-    private val maxTaskGroups: Int
+    private val maxMeshGroups: Int
     private val maxPushDescriptors: Int
     private val meshWorkgroupSize: Int
     val supported: Boolean
@@ -37,19 +37,18 @@ class GltfVulkanMeshPipelineCache(
             mesh.pNext(push.address())
             val root = VkPhysicalDeviceProperties2.calloc(stack).`sType$Default`().pNext(mesh)
             VK12.vkGetPhysicalDeviceProperties2(device.vkDevice().physicalDevice, root)
-            val maxTaskCount = minOf(mesh.maxTaskWorkGroupCount(0), GltfGpuBackend.vendorProfile().maxTaskGroupCount)
             val maxMeshTotalCount = mesh.maxMeshWorkGroupTotalCount()
-            maxTaskGroups = if (maxMeshTotalCount > 0) {
-                minOf(maxTaskCount, maxMeshTotalCount / TASK_WORKGROUP)
-            } else {
-                maxTaskCount
-            }
+            maxMeshGroups = minOf(
+                mesh.maxMeshWorkGroupCount(0),
+                maxMeshTotalCount,
+                GltfGpuBackend.vendorProfile().maxTaskGroupCount
+            )
             maxPushDescriptors = push.maxPushDescriptors()
             LOGGER.info(
-                "libgltf Vulkan mesh properties maxTaskWorkGroupCount={} maxMeshWorkGroupTotalCount={} maxTaskGroups={} maxPushDescriptors={}",
-                maxTaskCount,
+                "libgltf Vulkan mesh properties maxMeshWorkGroupCount={} maxMeshWorkGroupTotalCount={} maxMeshGroups={} maxPushDescriptors={}",
+                mesh.maxMeshWorkGroupCount(0),
                 maxMeshTotalCount,
-                maxTaskGroups,
+                maxMeshGroups,
                 maxPushDescriptors
             )
             val preferredWorkgroupSize = GltfGpuBackend.vendorProfile().maxMeshWorkGroupSize
@@ -60,17 +59,11 @@ class GltfVulkanMeshPipelineCache(
             }
             supported = mesh.maxMeshOutputVertices() >= 64 &&
                 mesh.maxMeshOutputPrimitives() >= 124 &&
-                mesh.maxTaskWorkGroupInvocations() >= 32 &&
                 mesh.maxMeshWorkGroupInvocations() >= 64 &&
-                mesh.maxTaskPayloadSize() >= 256 &&
-                mesh.maxTaskSharedMemorySize() >= Int.SIZE_BYTES &&
-                mesh.maxTaskPayloadAndSharedMemorySize() >= 256 + Int.SIZE_BYTES &&
-                mesh.maxMeshPayloadAndSharedMemorySize() >= 256 &&
-                mesh.maxTaskWorkGroupSize(0) >= 32 &&
                 mesh.maxMeshWorkGroupSize(0) >= 64 &&
                 mesh.maxMeshWorkGroupCount(0) >= 32 &&
-                mesh.maxMeshWorkGroupTotalCount() >= 32 &&
-                maxTaskGroups > 0
+                maxMeshTotalCount >= 32 &&
+                maxMeshGroups > 0
         }
     }
 
@@ -118,7 +111,7 @@ class GltfVulkanMeshPipelineCache(
             instanceCount,
             instanceCulling,
             meshletCulling,
-            maxTaskGroups
+            maxMeshGroups
         )
         return true
     }
@@ -146,8 +139,6 @@ class GltfVulkanMeshPipelineCache(
     }
 
     companion object {
-        const val TASK_WORKGROUP = 1
-
         private val LOGGER = LogUtils.getLogger()
     }
 }
@@ -159,7 +150,6 @@ private class GltfVulkanMeshPipeline(
     private val pipelineLayout: Long,
     private val withDepthPipeline: Long,
     private val withoutDepthPipeline: Long,
-    private val taskModule: Long,
     private val meshModule: Long,
     private val fragmentModule: Long,
     private val descriptorPipeline: VulkanRenderPipeline
@@ -178,7 +168,7 @@ private class GltfVulkanMeshPipeline(
         instanceCount: Int,
         instanceCulling: Boolean,
         meshletCulling: Boolean,
-        maxTaskGroups: Int
+        maxMeshGroups: Int
     ) {
         VK10.vkCmdBindPipeline(
             commandBuffer,
@@ -214,10 +204,7 @@ private class GltfVulkanMeshPipeline(
             }
             var baseCandidate = 0L
             while (baseCandidate < candidateCount) {
-                val groups = minOf(
-                    maxTaskGroups.toLong(),
-                    (candidateCount - baseCandidate + TASK_WORKGROUP - 1) / TASK_WORKGROUP
-                ).toInt()
+                val groups = minOf(maxMeshGroups.toLong(), candidateCount - baseCandidate).toInt()
                 val parameters = stack.malloc(PUSH_CONSTANT_SIZE)
                 for (index in sphere.indices) parameters.putFloat(index * Float.SIZE_BYTES, sphere[index])
                 parameters.putInt(16, instanceCount)
@@ -229,13 +216,12 @@ private class GltfVulkanMeshPipeline(
                 VK10.vkCmdPushConstants(
                     commandBuffer,
                     pipelineLayout,
-                    EXTMeshShader.VK_SHADER_STAGE_TASK_BIT_EXT or
-                        EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT,
+                    EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT,
                     0,
                     parameters
                 )
                 EXTMeshShader.vkCmdDrawMeshTasksEXT(commandBuffer, groups, 1, 1)
-                baseCandidate += groups.toLong() * TASK_WORKGROUP
+                baseCandidate += groups
             }
         }
     }
@@ -248,7 +234,6 @@ private class GltfVulkanMeshPipeline(
         VK10.vkDestroyDescriptorSetLayout(device.vkDevice(), storageSetLayout, null)
         VK10.vkDestroyShaderModule(device.vkDevice(), fragmentModule, null)
         VK10.vkDestroyShaderModule(device.vkDevice(), meshModule, null)
-        VK10.vkDestroyShaderModule(device.vkDevice(), taskModule, null)
     }
 
     companion object {
@@ -296,28 +281,22 @@ private class GltfVulkanMeshPipeline(
             require(bindings.values.none { it < 0 })
             val macros = bindings.mapValues { it.value.toString() }
             val debugMacros = if (debugMinimal) macros + ("MESH_DEBUG_MINIMAL" to "") else macros
-            val taskModule = compileModule(device, TASK_SHADER, Shaderc.shaderc_task_shader, debugMacros)
+            val meshModule = compileModule(
+                device,
+                MESH_SHADER,
+                Shaderc.shaderc_mesh_shader,
+                debugMacros + ("MESH_WORKGROUP_SIZE" to meshWorkgroupSize.toString())
+            )
             try {
-                val meshModule = compileModule(
-                    device,
-                    MESH_SHADER,
-                    Shaderc.shaderc_mesh_shader,
-                    debugMacros + ("MESH_WORKGROUP_SIZE" to meshWorkgroupSize.toString())
-                )
+                val fragmentModule = compileFragment(device, renderPipeline, bindings)
                 try {
-                    val fragmentModule = compileFragment(device, renderPipeline, bindings)
-                    try {
-                        return create(device, original, renderPipeline, taskModule, meshModule, fragmentModule)
-                    } catch (error: RuntimeException) {
-                        VK10.vkDestroyShaderModule(device.vkDevice(), fragmentModule, null)
-                        throw error
-                    }
+                    return create(device, original, renderPipeline, meshModule, fragmentModule)
                 } catch (error: RuntimeException) {
-                    VK10.vkDestroyShaderModule(device.vkDevice(), meshModule, null)
+                    VK10.vkDestroyShaderModule(device.vkDevice(), fragmentModule, null)
                     throw error
                 }
             } catch (error: RuntimeException) {
-                VK10.vkDestroyShaderModule(device.vkDevice(), taskModule, null)
+                VK10.vkDestroyShaderModule(device.vkDevice(), meshModule, null)
                 throw error
             }
         }
@@ -326,7 +305,6 @@ private class GltfVulkanMeshPipeline(
             device: VulkanDevice,
             original: VulkanRenderPipeline,
             renderPipeline: RenderPipeline,
-            taskModule: Long,
             meshModule: Long,
             fragmentModule: Long
         ): GltfVulkanMeshPipeline = MemoryStack.stackPush().use { stack ->
@@ -336,10 +314,7 @@ private class GltfVulkanMeshPipeline(
                 bindings[index].binding(index).descriptorCount(1)
                     .descriptorType(descriptorType(uniforms[index].type()))
                     .stageFlags(
-                        VK10.VK_SHADER_STAGE_VERTEX_BIT or
-                            VK10.VK_SHADER_STAGE_FRAGMENT_BIT or
-                            EXTMeshShader.VK_SHADER_STAGE_TASK_BIT_EXT or
-                            EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT
+                        VK10.VK_SHADER_STAGE_FRAGMENT_BIT or EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT
                     )
             }
             val descriptorInfo = VkDescriptorSetLayoutCreateInfo.calloc(stack).`sType$Default`()
@@ -353,7 +328,7 @@ private class GltfVulkanMeshPipeline(
                 for (index in 0 until STORAGE_BUFFER_COUNT) {
                     storageBindings[index].binding(index).descriptorCount(1)
                         .descriptorType(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-                        .stageFlags(EXTMeshShader.VK_SHADER_STAGE_TASK_BIT_EXT or EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT)
+                        .stageFlags(EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT)
                 }
                 val storageInfo = VkDescriptorSetLayoutCreateInfo.calloc(stack).`sType$Default`()
                     .flags(KHRPushDescriptor.VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR)
@@ -362,10 +337,7 @@ private class GltfVulkanMeshPipeline(
                 val storageSetLayout = pointer[0]
                 try {
                     val range = VkPushConstantRange.calloc(1, stack)
-                        .stageFlags(
-                            EXTMeshShader.VK_SHADER_STAGE_TASK_BIT_EXT or
-                                EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT
-                        )
+                        .stageFlags(EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT)
                         .offset(0)
                         .size(PUSH_CONSTANT_SIZE)
                     val layoutInfo = VkPipelineLayoutCreateInfo.calloc(stack).`sType$Default`()
@@ -377,7 +349,6 @@ private class GltfVulkanMeshPipeline(
                         val pipelines = createGraphicsPipelines(
                             device,
                             renderPipeline,
-                            taskModule,
                             meshModule,
                             fragmentModule,
                             pipelineLayout,
@@ -399,7 +370,6 @@ private class GltfVulkanMeshPipeline(
                             pipelineLayout,
                             pipelines[0],
                             pipelines[1],
-                            taskModule,
                             meshModule,
                             fragmentModule,
                             descriptorPipeline
@@ -421,7 +391,6 @@ private class GltfVulkanMeshPipeline(
         private fun createGraphicsPipelines(
             device: VulkanDevice,
             renderPipeline: RenderPipeline,
-            taskModule: Long,
             meshModule: Long,
             fragmentModule: Long,
             pipelineLayout: Long,
@@ -430,11 +399,10 @@ private class GltfVulkanMeshPipeline(
             val polygonMode = renderPipeline.getPolygonMode()
             val cull = renderPipeline.isCull()
             val depthStencilState = renderPipeline.getDepthStencilState()
-            val stages = VkPipelineShaderStageCreateInfo.calloc(3, stack)
+            val stages = VkPipelineShaderStageCreateInfo.calloc(2, stack)
             val main = stack.UTF8("main")
-            stages[0].`sType$Default`().stage(EXTMeshShader.VK_SHADER_STAGE_TASK_BIT_EXT).module(taskModule).pName(main)
-            stages[1].`sType$Default`().stage(EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT).module(meshModule).pName(main)
-            stages[2].`sType$Default`().stage(VK10.VK_SHADER_STAGE_FRAGMENT_BIT).module(fragmentModule).pName(main)
+            stages[0].`sType$Default`().stage(EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT).module(meshModule).pName(main)
+            stages[1].`sType$Default`().stage(VK10.VK_SHADER_STAGE_FRAGMENT_BIT).module(fragmentModule).pName(main)
             val rasterization = VkPipelineRasterizationStateCreateInfo.calloc(stack).`sType$Default`()
                 .polygonMode(VulkanConst.toVk(polygonMode))
                 .cullMode(if (cull) VK10.VK_CULL_MODE_BACK_BIT else VK10.VK_CULL_MODE_NONE)
@@ -582,11 +550,9 @@ private class GltfVulkanMeshPipeline(
 
         private fun checkVk(result: Int) = check(result == VK10.VK_SUCCESS) { "Vulkan error $result" }
 
-        private const val TASK_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh.task"
         private const val MESH_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh.mesh"
         private const val FRAGMENT_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh.fsh"
         private const val STORAGE_BUFFER_COUNT = 5
-        private const val TASK_WORKGROUP = 1
         private const val PUSH_CONSTANT_SIZE = 36
         private val LOGGER = LogUtils.getLogger()
     }
