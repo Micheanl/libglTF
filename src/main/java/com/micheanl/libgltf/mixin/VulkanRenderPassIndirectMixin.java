@@ -1,7 +1,7 @@
 package com.micheanl.libgltf.mixin;
 
 import com.micheanl.libgltf.render.gpu.GltfMeshletLod;
-import com.micheanl.libgltf.render.vulkan.GltfVulkanMeshPipelineCache;
+import com.micheanl.libgltf.render.vulkan.GltfVulkanMeshCache;
 import com.micheanl.libgltf.render.vulkan.VulkanIndirectRenderPass;
 import com.micheanl.libgltf.render.vulkan.VulkanMeshRenderPass;
 import com.mojang.renderpearl.api.buffers.GpuBuffer;
@@ -55,7 +55,7 @@ public abstract class VulkanRenderPassIndirectMixin implements VulkanIndirectRen
 
     @Override
     public boolean drawMeshTasks(
-            GltfVulkanMeshPipelineCache cache,
+            GltfVulkanMeshCache cache,
             RenderPipeline renderPipeline,
             GpuBuffer geometry,
             GpuBuffer instances,

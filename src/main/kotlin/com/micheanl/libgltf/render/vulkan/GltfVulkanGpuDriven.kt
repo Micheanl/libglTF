@@ -10,7 +10,7 @@ import com.mojang.logging.LogUtils
 
 class GltfVulkanGpuDriven private constructor(
     val pipeline: GltfVulkanComputePipeline,
-    val meshPipelines: GltfVulkanMeshPipelineCache?
+    val meshPipelines: GltfVulkanMeshCache?
 ) : GltfGpuDriver {
     override val meshSupported: Boolean
         get() = meshPipelines?.supported == true
@@ -31,19 +31,28 @@ class GltfVulkanGpuDriven private constructor(
             ) return null
             val backend = (device as FrontendGpuDeviceAccessor).libgltfBackend as? VulkanDevice ?: return null
             val profile = GltfGpuBackend.vendorProfile()
-            val mesh = if (
-                profile.preferMeshShader &&
-                GltfGpuDrivenSettings.meshShaderEnabled() &&
-                backend.vkDevice().capabilities.VK_EXT_mesh_shader
-            ) {
-                GltfVulkanMeshPipelineCache(backend, GltfGpuDrivenSettings.debugMeshMinimal).also {
-                    LOGGER.info(
-                        "libgltf Vulkan mesh shader enabled vendor={} supported={} debugMinimal={}",
-                        profile.vendor,
-                        it.supported,
-                        GltfGpuDrivenSettings.debugMeshMinimal
-                    )
-                }.takeIf { it.supported }
+            val mesh = if (profile.preferMeshShader && GltfGpuDrivenSettings.meshShaderEnabled()) {
+                if (capabilities.meshShaderNvActive) {
+                    GltfVulkanNvMeshPipelineCache(backend, GltfGpuDrivenSettings.debugMeshMinimal).also {
+                        LOGGER.info(
+                            "libgltf Vulkan NV mesh shader enabled vendor={} supported={} debugMinimal={}",
+                            profile.vendor,
+                            it.supported,
+                            GltfGpuDrivenSettings.debugMeshMinimal
+                        )
+                    }.takeIf { it.supported }
+                } else if (backend.vkDevice().capabilities.VK_EXT_mesh_shader) {
+                    GltfVulkanMeshPipelineCache(backend, GltfGpuDrivenSettings.debugMeshMinimal).also {
+                        LOGGER.info(
+                            "libgltf Vulkan EXT mesh shader enabled vendor={} supported={} debugMinimal={}",
+                            profile.vendor,
+                            it.supported,
+                            GltfGpuDrivenSettings.debugMeshMinimal
+                        )
+                    }.takeIf { it.supported }
+                } else {
+                    null
+                }
             } else {
                 LOGGER.info(
                     "libgltf Vulkan mesh shader disabled vendor={} enabled={} extension={}",

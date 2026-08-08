@@ -12,5 +12,6 @@ data class GltfGpuCapabilities(
     val persistentMapping: Boolean,
     val meshShaderExtensionPresent: Boolean,
     val nativeMeshShaderActive: Boolean,
+    val meshShaderNvActive: Boolean,
     val path: GltfGpuPath
 )

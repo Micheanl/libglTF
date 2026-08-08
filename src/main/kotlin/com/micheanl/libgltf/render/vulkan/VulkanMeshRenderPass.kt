@@ -6,7 +6,7 @@ import com.mojang.renderpearl.api.buffers.GpuBuffer
 
 interface VulkanMeshRenderPass {
     fun drawMeshTasks(
-        cache: GltfVulkanMeshPipelineCache,
+        cache: GltfVulkanMeshCache,
         renderPipeline: RenderPipeline,
         geometry: GpuBuffer,
         instances: GpuBuffer,

@@ -10,7 +10,9 @@ import com.mojang.renderpearl.backend.vulkan.init.VulkanPNextStruct;
 import java.util.HashSet;
 import java.util.Set;
 import org.lwjgl.vulkan.EXTMeshShader;
+import org.lwjgl.vulkan.NVMeshShader;
 import org.lwjgl.vulkan.VkPhysicalDeviceMeshShaderFeaturesEXT;
+import org.lwjgl.vulkan.VkPhysicalDeviceMeshShaderFeaturesNV;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -37,6 +39,26 @@ public abstract class VulkanBackendMeshShaderMixin {
             Set.of(EXTMeshShader.VK_EXT_MESH_SHADER_EXTENSION_NAME),
             Set.of(LIBGLTF_TASK_SHADER, LIBGLTF_MESH_SHADER)
     );
+    private static final VulkanPNextStruct LIBGLTF_NV_MESH_FEATURES = new VulkanPNextStruct(
+            VkPhysicalDeviceMeshShaderFeaturesNV.class,
+            NVMeshShader.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV,
+            VkPhysicalDeviceMeshShaderFeaturesNV.SIZEOF
+    );
+    private static final VulkanFeature LIBGLTF_NV_TASK_SHADER = new VulkanFeature(
+            LIBGLTF_NV_MESH_FEATURES,
+            "taskShader",
+            VkPhysicalDeviceMeshShaderFeaturesNV.TASKSHADER
+    );
+    private static final VulkanFeature LIBGLTF_NV_MESH_SHADER = new VulkanFeature(
+            LIBGLTF_NV_MESH_FEATURES,
+            "meshShader",
+            VkPhysicalDeviceMeshShaderFeaturesNV.MESHSHADER
+    );
+    private static final FeatureSet LIBGLTF_NV_MESH_SHADER_FEATURESET = new FeatureSet(
+            "libgltf nv mesh shader",
+            Set.of(NVMeshShader.VK_NV_MESH_SHADER_EXTENSION_NAME),
+            Set.of(LIBGLTF_NV_TASK_SHADER, LIBGLTF_NV_MESH_SHADER)
+    );
 
     @Redirect(
             method = "createDevice",
@@ -53,6 +75,7 @@ public abstract class VulkanBackendMeshShaderMixin {
         }
         Set<FeatureSet> featureSets = new HashSet<>(original);
         featureSets.add(LIBGLTF_MESH_SHADER_FEATURESET);
+        featureSets.add(LIBGLTF_NV_MESH_SHADER_FEATURESET);
         return featureSets;
     }
 }
