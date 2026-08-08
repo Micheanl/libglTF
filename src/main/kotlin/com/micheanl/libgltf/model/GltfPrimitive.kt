@@ -8,6 +8,7 @@ data class GltfPrimitive(
     val lodIndices: Array<IntArray>,
     val vertexCount: Int,
     val materialIndex: Int,
+    val materialMappings: IntArray,
     val mode: PrimitiveMode,
     val bounds: FloatArray,
     val morphPositions: FloatArray,

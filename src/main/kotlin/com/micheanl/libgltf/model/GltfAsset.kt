@@ -12,6 +12,7 @@ data class GltfAsset(
     val skins: Array<GltfSkin>,
     val animations: Array<AnimationClip>,
     val materials: Array<GltfMaterial>,
+    val materialVariantNames: Array<String>,
     val textures: Array<GltfTexture>,
     val images: Array<GltfImage>,
     val bounds: FloatArray,

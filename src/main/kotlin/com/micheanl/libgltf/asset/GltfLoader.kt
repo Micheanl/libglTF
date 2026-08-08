@@ -83,7 +83,8 @@ object GltfLoader {
         val images = parseImages(root, resolver)
         val textures = parseTextures(root)
         val materials = parseMaterials(root)
-        val meshes = parseMeshes(root, decoder, lodPolicy)
+        val materialVariantNames = parseMaterialVariantNames(root)
+        val meshes = parseMeshes(root, decoder, lodPolicy, materialVariantNames.size)
         val nodes = parseNodes(root)
         val parents = parentIndices(nodes)
         val resolvedNodes = Array(nodes.size) { index -> nodes[index].copy(parentIndex = parents[index]) }
@@ -129,6 +130,7 @@ object GltfLoader {
             skins,
             animations,
             materials,
+            materialVariantNames,
             textures,
             images,
             bounds,
@@ -262,20 +264,32 @@ object GltfLoader {
         )
     }
 
-    private fun parseMeshes(root: JsonValue, decoder: AccessorDecoder, lodPolicy: LodPolicy): Array<GltfMesh> {
+    private fun parseMeshes(
+        root: JsonValue,
+        decoder: AccessorDecoder,
+        lodPolicy: LodPolicy,
+        variantCount: Int
+    ): Array<GltfMesh> {
         val meshes = JsonFields.value(root, "meshes") ?: return emptyArray()
         return Array(meshes.size()) { meshIndex ->
             val mesh = meshes[meshIndex]
             val primitives = JsonFields.value(mesh, "primitives") ?: error("mesh has no primitives")
             GltfMesh(
                 JsonFields.string(mesh, "name", "mesh_$meshIndex"),
-                Array(primitives.size()) { primitiveIndex -> parsePrimitive(primitives[primitiveIndex], decoder, lodPolicy) },
+                Array(primitives.size()) { primitiveIndex ->
+                    parsePrimitive(primitives[primitiveIndex], decoder, lodPolicy, variantCount)
+                },
                 JsonFields.floats(mesh, "weights")
             )
         }
     }
 
-    private fun parsePrimitive(value: JsonValue, decoder: AccessorDecoder, lodPolicy: LodPolicy): GltfPrimitive {
+    private fun parsePrimitive(
+        value: JsonValue,
+        decoder: AccessorDecoder,
+        lodPolicy: LodPolicy,
+        variantCount: Int
+    ): GltfPrimitive {
         val attributes = JsonFields.value(value, "attributes") ?: error("primitive attributes missing")
         val positionAccessor = JsonFields.int(attributes, "POSITION")
         require(positionAccessor >= 0)
@@ -345,17 +359,45 @@ object GltfLoader {
         } else {
             computeBounds(positions)
         }
+        val variantMappings = JsonFields.value(
+            JsonFields.value(value, "extensions"),
+            "KHR_materials_variants"
+        )
+        val materialMappings = IntArray(variantCount) { -1 }
+        val mappings = JsonFields.value(variantMappings, "mappings")
+        if (mappings != null) {
+            for (mappingIndex in 0 until mappings.size()) {
+                val mapping = mappings[mappingIndex]
+                val material = JsonFields.int(mapping, "material")
+                if (material < 0) continue
+                for (variant in JsonFields.ints(mapping, "variants")) {
+                    if (variant in materialMappings.indices) materialMappings[variant] = material
+                }
+            }
+        }
         return GltfPrimitive(
             vertices,
             skin,
             lodIndices,
             vertexCount,
             JsonFields.int(value, "material", 0),
+            materialMappings,
             mode,
             bounds,
             morphPositions,
             targetCount
         )
+    }
+
+    private fun parseMaterialVariantNames(root: JsonValue): Array<String> {
+        val variants = JsonFields.value(
+            JsonFields.value(root, "extensions"),
+            "KHR_materials_variants"
+        )
+        val names = JsonFields.value(variants, "variants") ?: return emptyArray()
+        return Array(names.size()) { index ->
+            JsonFields.string(names[index], "name", "variant_$index")
+        }
     }
 
     private fun parseNodes(root: JsonValue): Array<GltfNode> {

@@ -69,7 +69,7 @@ class GltfGpuSubmit(
         val primitive = asset.meshes[meshIndex].primitives[primitiveIndex]
         val node = asset.nodes[nodeIndex]
         val sourceMaterialIndex = primitive.materialIndex.coerceIn(0, asset.materials.lastIndex)
-        val materialIndex = instance.resolveMaterial(sourceMaterialIndex)
+        val materialIndex = instance.resolvePrimitiveMaterial(sourceMaterialIndex, primitive.materialMappings)
         val material = asset.materials[materialIndex]
         val override = instance.materialOverrides[sourceMaterialIndex]
         val factor = override?.baseColorFactor ?: material.baseColorFactor

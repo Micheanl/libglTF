@@ -25,6 +25,7 @@ class GltfInstance internal constructor(val handle: GltfHandle) {
     var renderMode: GltfRenderMode = GltfRenderMode.AUTO
     var automaticAnimation: Boolean = true
     var showBones: Boolean = false
+    var materialVariant: Int = -1
 
     @Volatile
     var visible: Boolean = true
@@ -116,6 +117,15 @@ class GltfInstance internal constructor(val handle: GltfHandle) {
         return this
     }
 
+    fun selectVariant(index: Int): GltfInstance {
+        val clamped = index.coerceIn(-1, handle.asset.materialVariantNames.lastIndex)
+        if (materialVariant != clamped) {
+            materialVariant = clamped
+            materialRevision++
+        }
+        return this
+    }
+
     fun setMaterial(index: Int, override: MaterialOverride?): GltfInstance {
         require(index in materialOverrides.indices)
         materialOverrides[index] = override
@@ -124,6 +134,15 @@ class GltfInstance internal constructor(val handle: GltfHandle) {
     }
 
     internal fun resolveMaterial(index: Int): Int = materialMappings[index.coerceIn(0, materialMappings.lastIndex)]
+
+    internal fun resolvePrimitiveMaterial(sourceIndex: Int, variantMappings: IntArray): Int {
+        val variant = materialVariant
+        if (variant in variantMappings.indices) {
+            val mapped = variantMappings[variant]
+            if (mapped >= 0) return mapped
+        }
+        return resolveMaterial(sourceIndex)
+    }
 
     private fun createRenderers(): Array<Array<GltfGeometryRenderer>> = Array(handle.asset.nodes.size) { nodeIndex ->
         val meshIndex = handle.asset.nodes[nodeIndex].meshIndex

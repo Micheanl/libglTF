@@ -187,9 +187,10 @@ object GltfSceneRenderer {
                 lastCpuSubmits++
                 poseStack.pushPose()
                 if (node.skinIndex < 0) poseStack.mulPose(instance.animation.pose.globalMatrices[nodeIndex])
-                val materialIndex = primitive.materialIndex.coerceIn(0, asset.materials.lastIndex)
-                val material = asset.materials[instance.resolveMaterial(materialIndex)]
-                val override = instance.materialOverrides[materialIndex]
+                val sourceMaterialIndex = primitive.materialIndex.coerceIn(0, asset.materials.lastIndex)
+                val materialIndex = instance.resolvePrimitiveMaterial(sourceMaterialIndex, primitive.materialMappings)
+                val material = asset.materials[materialIndex]
+                val override = instance.materialOverrides[sourceMaterialIndex]
                 val texture = when {
                     override?.baseColorIdentifier != null -> override.baseColorIdentifier
                     override?.baseColorTextureIndex != null && override.baseColorTextureIndex >= 0 ->
@@ -223,7 +224,7 @@ object GltfSceneRenderer {
         val node = asset.nodes[nodeIndex]
         if (primitive.skin != null && node.skinIndex < 0) return false
         val sourceMaterialIndex = primitive.materialIndex.coerceIn(0, asset.materials.lastIndex)
-        val material = asset.materials[instance.resolveMaterial(sourceMaterialIndex)]
+        val material = asset.materials[instance.resolvePrimitiveMaterial(sourceMaterialIndex, primitive.materialMappings)]
         if (instance.materialOverrides[sourceMaterialIndex]?.baseColorIdentifier != null) return true
         val overrideTexture = instance.materialOverrides[sourceMaterialIndex]?.baseColorTextureIndex ?: -1
         val textureIndex = if (overrideTexture >= 0) overrideTexture else material.baseColorTexture?.textureIndex ?: -1

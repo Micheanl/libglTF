@@ -59,13 +59,15 @@ class GltfGeometryRenderer(
         null
     }
 
-    fun transparent(): Boolean = asset.materials[instance.resolveMaterial(sourceMaterialIndex)].alphaMode == AlphaMode.BLEND
+    fun transparent(): Boolean =
+        asset.materials[instance.resolvePrimitiveMaterial(sourceMaterialIndex, primitive.materialMappings)]
+            .alphaMode == AlphaMode.BLEND
 
     fun renderType(resource: GltfRenderAsset, textures: GltfTextureSet): RenderType {
         val revision = instance.materialRevision
         val cached = cachedRenderType
         if (cached != null && cachedResourceId == resource.id && cachedMaterialRevision == revision) return cached
-        val materialIndex = instance.resolveMaterial(sourceMaterialIndex)
+        val materialIndex = instance.resolvePrimitiveMaterial(sourceMaterialIndex, primitive.materialMappings)
         val material = asset.materials[materialIndex]
         val override = instance.materialOverrides[sourceMaterialIndex]
         val overrideIdentifier = override?.baseColorIdentifier
@@ -99,7 +101,7 @@ class GltfGeometryRenderer(
 
     override fun render(pose: PoseStack.Pose, buffer: VertexConsumer) {
         val node = asset.nodes[nodeIndex]
-        val materialIndex = instance.resolveMaterial(sourceMaterialIndex)
+        val materialIndex = instance.resolvePrimitiveMaterial(sourceMaterialIndex, primitive.materialMappings)
         val material = asset.materials[materialIndex]
         val override = instance.materialOverrides[sourceMaterialIndex]
         val factor = override?.baseColorFactor ?: material.baseColorFactor
