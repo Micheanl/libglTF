@@ -20,7 +20,9 @@ import com.micheanl.libgltf.material.TextureBinding
 import com.micheanl.libgltf.material.TextureFilter
 import com.micheanl.libgltf.material.TextureSampler
 import com.micheanl.libgltf.material.TextureWrap
+import com.micheanl.libgltf.model.CameraType
 import com.micheanl.libgltf.model.GltfAsset
+import com.micheanl.libgltf.model.GltfCamera
 import com.micheanl.libgltf.model.GltfImage
 import com.micheanl.libgltf.model.GltfMesh
 import com.micheanl.libgltf.model.GltfNode
@@ -91,6 +93,7 @@ object GltfLoader {
         val roots = sceneRoots(root, parents)
         val order = topologicalOrder(resolvedNodes, roots)
         val skins = parseSkins(root, decoder)
+        val cameras = parseCameras(root)
         val animations = parseAnimations(root, decoder)
         val morphOffsets = IntArray(resolvedNodes.size)
         var totalMorphWeights = 0
@@ -131,6 +134,7 @@ object GltfLoader {
             animations,
             materials,
             materialVariantNames,
+            cameras,
             textures,
             images,
             bounds,
@@ -410,6 +414,7 @@ object GltfLoader {
                 JsonFields.ints(node, "children"),
                 JsonFields.int(node, "mesh"),
                 JsonFields.int(node, "skin"),
+                JsonFields.int(node, "camera"),
                 JsonFields.floats(node, "translation", floatArrayOf(0.0f, 0.0f, 0.0f)),
                 JsonFields.floats(node, "rotation", floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f)),
                 JsonFields.floats(node, "scale", floatArrayOf(1.0f, 1.0f, 1.0f)),
@@ -438,6 +443,25 @@ object GltfLoader {
                 }
             }
             GltfSkin(JsonFields.string(skin, "name", "skin_$index"), joints, matrices)
+        }
+    }
+
+    private fun parseCameras(root: JsonValue): Array<GltfCamera> {
+        val values = JsonFields.value(root, "cameras") ?: return emptyArray()
+        return Array(values.size()) { index ->
+            val value = values[index]
+            val perspective = JsonFields.value(value, "perspective")
+            val orthographic = JsonFields.value(value, "orthographic")
+            GltfCamera(
+                JsonFields.string(value, "name", "camera_$index"),
+                cameraType(JsonFields.string(value, "type", "perspective")),
+                JsonFields.float(perspective, "yfov", 0.7853982f),
+                JsonFields.float(perspective, "znear", 0.01f),
+                JsonFields.float(perspective, "zfar", -1.0f),
+                JsonFields.float(perspective, "aspectRatio", -1.0f),
+                JsonFields.float(orthographic, "xmag", -1.0f),
+                JsonFields.float(orthographic, "ymag", -1.0f)
+            )
         }
     }
 
@@ -695,6 +719,11 @@ object GltfLoader {
         "MASK" -> AlphaMode.MASK
         "BLEND" -> AlphaMode.BLEND
         else -> AlphaMode.OPAQUE
+    }
+
+    private fun cameraType(value: String): CameraType = when (value) {
+        "orthographic" -> CameraType.ORTHOGRAPHIC
+        else -> CameraType.PERSPECTIVE
     }
 
     private fun animationPath(value: String): AnimationPath = when (value) {
