@@ -76,9 +76,10 @@ object GltfDebugCommands {
     }
 
     private fun load(source: FabricClientCommandSource, path: String): Int {
-        val file = Path.of(path)
+        val cleaned = path.trim().removeSurrounding("\"")
+        val file = Path.of(cleaned)
         if (!Files.isRegularFile(file)) {
-            source.sendError(Component.literal("File not found: $path"))
+            source.sendError(Component.literal("File not found: $cleaned"))
             return 1
         }
         unload(null)
