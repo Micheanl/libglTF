@@ -44,11 +44,26 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
         if (strictlyOrdered) {
             for (index in submits.indices) prepareBatch(submits, index, index + 1)
         } else {
-            prepareBatch(submits, 0, submits.size)
+            prepareBatches(submits)
         }
         groupStarts[preparedGroupCount] = start
         groupCounts[preparedGroupCount] = preparedBatchCount - start
         preparedGroupCount++
+    }
+
+    private fun prepareBatches(submits: List<GltfGpuSubmit>) {
+        if (submits.isEmpty()) return
+        var fromIndex = 0
+        var key = submits[0].batchKey()
+        for (index in 1 until submits.size) {
+            val nextKey = submits[index].batchKey()
+            if (nextKey != key) {
+                prepareBatch(submits, fromIndex, index)
+                fromIndex = index
+                key = nextKey
+            }
+        }
+        prepareBatch(submits, fromIndex, submits.size)
     }
 
     override fun executeGroup(
