@@ -190,7 +190,7 @@ private class GltfVulkanMeshPipeline(
             if (hasDepth || withoutDepthPipeline == 0L) withDepthPipeline else withoutDepthPipeline
         )
         MemoryStack.stackPush().use { stack ->
-            val buffers = arrayOf(geometry, instances, meshlets.metadataBuffer, meshlets.vertexBuffer, meshlets.triangleBuffer)
+            val buffers = arrayOf(instances, meshlets.metadataBuffer, meshlets.vertexBuffer, meshlets.triangleBuffer)
             val storageSet = storageSet(buffers, stack)
             if (occlusionCulling) {
                 val texture = requireNotNull(GltfOcclusionDepth.texture()) as VulkanGpuTexture
@@ -356,11 +356,10 @@ private class GltfVulkanMeshPipeline(
                 put("SAMPLER0_BINDING", uniforms.indexOfFirst { it.name() == "Sampler0" })
                 put("SAMPLER1_BINDING", uniforms.indexOfFirst { it.name() == "Sampler1" })
                 put("SAMPLER2_BINDING", uniforms.indexOfFirst { it.name() == "Sampler2" })
-                put("GEOMETRY_BINDING", 0)
-                put("INSTANCES_BINDING", 1)
-                put("MESHLETS_BINDING", 2)
-                put("MESHLET_VERTICES_BINDING", 3)
-                put("MESHLET_TRIANGLES_BINDING", 4)
+                put("INSTANCES_BINDING", 0)
+                put("MESHLETS_BINDING", 1)
+                put("MESHLET_VERTICES_BINDING", 2)
+                put("MESHLET_TRIANGLES_BINDING", 3)
                 uniforms.indexOfFirst { it.name() == "DepthBoundsSampler" }
                     .takeIf { it >= 0 }
                     ?.let { put("DEPTH_BOUNDS_BINDING", it) }
@@ -678,7 +677,7 @@ private class GltfVulkanMeshPipeline(
 
         private const val MESH_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh.mesh"
         private const val FRAGMENT_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh.fsh"
-        private const val STORAGE_BUFFER_COUNT = 5
+        private const val STORAGE_BUFFER_COUNT = 4
         private const val STORAGE_CACHE_CAPACITY = 16
         private const val PUSH_CONSTANT_SIZE = 52
         private val LOGGER = LogUtils.getLogger()

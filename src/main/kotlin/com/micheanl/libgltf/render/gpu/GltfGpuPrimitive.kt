@@ -111,6 +111,7 @@ class GltfGpuPrimitive private constructor(
                             "$label lod $level",
                             optimized[level],
                             remappedPositions,
+                            remappedVertices,
                             primitive.vertexCount,
                             indexType,
                             primitive.bounds

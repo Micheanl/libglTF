@@ -8,9 +8,8 @@ layout(set = 0, binding = LIGHTING_BINDING, std140) uniform Lighting { vec3 Ligh
 layout(set = 0, binding = SAMPLER1_BINDING) uniform sampler2D Sampler1;
 layout(set = 0, binding = SAMPLER2_BINDING) uniform sampler2D Sampler2;
 layout(push_constant) uniform Parameters { vec4 primitiveSphere; vec4 screenSizeAndFlags; uint instanceCount; uint meshletCount; uint instanceCulling; uint meshletCulling; uint baseCandidate; } parameters;
-layout(set = 1, binding = GEOMETRY_BINDING, std430) readonly buffer Geometry { uint geometryWords[]; };
 layout(set = 1, binding = INSTANCES_BINDING, std430) readonly buffer Instances { uint instanceWords[]; };
-struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint vertexCount; uint triangleCount; uint firstIndex; uint indexCount; uint padding0; uint padding1; vec4 cone; vec4 coneApex; };
+struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint vertexCount; uint triangleCount; uint firstIndex; uint indexCount; uint padding0; uint padding1; vec4 cone; vec4 coneApex; vec4 positionBias; };
 layout(set = 1, binding = MESHLETS_BINDING, std430) readonly buffer Meshlets { Meshlet meshlets[]; };
 layout(set = 1, binding = MESHLET_VERTICES_BINDING, std430) readonly buffer MeshletVertices { uint meshletVertices[]; };
 layout(set = 1, binding = MESHLET_TRIANGLES_BINDING, std430) readonly buffer MeshletTriangles { uint meshletTriangleWords[]; };
@@ -69,6 +68,13 @@ bool visibleSphere(vec4 sphere, mat4 transform) {
 }
 int signed16(uint value) { return int(value << 16) >> 16; }
 uint triangleByte(uint offset) { return meshletTriangleWords[offset >> 2] >> ((offset & 3) * 8) & 255; }
+vec2 signNotZero(vec2 value) { return vec2(value.x >= 0.0 ? 1.0 : -1.0, value.y >= 0.0 ? 1.0 : -1.0); }
+vec3 decodeOct(uint oct) {
+    vec2 encoded = vec2(float(int(oct << 24) >> 24), float(int(oct << 16) >> 24)) / 127.0;
+    vec3 decoded = vec3(encoded, 1.0 - abs(encoded.x) - abs(encoded.y));
+    if (decoded.z < 0.0) decoded.xy = (1.0 - abs(decoded.yx)) * signNotZero(decoded.xy);
+    return normalize(decoded);
+}
 vec4 mixLight(vec3 normal, vec4 color) {
     vec2 light = max(vec2(0.0), vec2(dot(Light0_Direction, normal), dot(Light1_Direction, normal)));
     float value = min(1.0, (light.x + light.y) * 0.6 + 0.4);
@@ -161,13 +167,16 @@ void main() {
     vec4 overlayColorValue = texelFetch(Sampler1, ivec2(signed16(overlay), signed16(overlay >> 16)), 0);
 #endif
     for (uint vertex = invocation; vertex < meshlet.vertexCount; vertex += gl_WorkGroupSize.x) {
-        uint vertexIndex = meshletVertices[meshlet.vertexOffset + vertex];
-        uint vo = vertexIndex * 15;
-        vec3 position = vec3(uintBitsToFloat(geometryWords[vo]), uintBitsToFloat(geometryWords[vo + 1]), uintBitsToFloat(geometryWords[vo + 2]));
-        vec3 normal = vec3(uintBitsToFloat(geometryWords[vo + 3]), uintBitsToFloat(geometryWords[vo + 4]), uintBitsToFloat(geometryWords[vo + 5]));
-        vec2 uv = vec2(uintBitsToFloat(geometryWords[vo + 10]), uintBitsToFloat(geometryWords[vo + 11]));
+        uint vo = (meshlet.vertexOffset + vertex) * 4;
+        uint q0 = meshletVertices[vo];
+        uint q1 = meshletVertices[vo + 1];
+        uint q2 = meshletVertices[vo + 2];
+        vec3 position = meshlet.positionBias.xyz +
+            vec3(float(q0 & 0xFFFFu), float(q0 >> 16), float(q1 & 0xFFFFu)) * meshlet.positionBias.w;
+        vec3 normal = decodeOct(q1 >> 16);
+        vec2 uv = unpackHalf2x16(q2);
         vec2 uv0 = uvOffset + uvTransform * uv;
-        vec4 color = unpackUnorm4x8(geometryWords[vo + 14]);
+        vec4 color = unpackUnorm4x8(meshletVertices[vo + 3]);
         vec4 worldPosition = worldTransform * vec4(position, 1.0);
         vec3 worldNormal = normalize(normalTransform * normal);
         gl_MeshVerticesNV[vertex].gl_Position = ProjMat * ModelViewMat * worldPosition;

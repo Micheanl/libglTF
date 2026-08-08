@@ -4,7 +4,7 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(set = 0, binding = PROJECTION_BINDING, std140) uniform Projection { mat4 ProjMat; };
 layout(set = 0, binding = DYNAMIC_TRANSFORMS_BINDING, std140) uniform DynamicTransforms { mat4 ModelViewMat; mat4 TextureMat; vec4 ColorModulator; vec3 ModelOffset; };
 layout(set = 1, binding = INSTANCES_BINDING, std430) readonly buffer Instances { uint instanceWords[]; };
-struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint vertexCount; uint triangleCount; uint firstIndex; uint indexCount; uint padding0; uint padding1; vec4 cone; vec4 coneApex; };
+struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint vertexCount; uint triangleCount; uint firstIndex; uint indexCount; uint padding0; uint padding1; vec4 cone; vec4 coneApex; vec4 positionBias; };
 layout(set = 1, binding = MESHLETS_BINDING, std430) readonly buffer Meshlets { Meshlet meshlets[]; };
 layout(push_constant) uniform Parameters { vec4 primitiveSphere; vec4 screenSizeAndFlags; uint instanceCount; uint meshletCount; uint instanceCulling; uint meshletCulling; uint baseCandidate; } parameters;
 taskPayloadSharedEXT uint payload[2];

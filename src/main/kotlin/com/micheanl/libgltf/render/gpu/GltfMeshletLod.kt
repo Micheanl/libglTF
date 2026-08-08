@@ -1,6 +1,7 @@
 package com.micheanl.libgltf.render.gpu
 
 import com.micheanl.libgltf.render.vulkan.GltfVulkanUsage
+import com.micheanl.libgltf.model.VertexLayout
 import com.mojang.renderpearl.api.pipeline.IndexType
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.device.GpuDevice
@@ -35,6 +36,7 @@ class GltfMeshletLod private constructor(
             label: String,
             indices: IntBuffer,
             positions: FloatBuffer,
+            attributes: ByteBuffer,
             vertexCount: Int,
             indexType: IndexType,
             bounds: FloatArray
@@ -70,8 +72,9 @@ class GltfMeshletLod private constructor(
                 }
                 packedIndices = MemoryUtil.memAlloc(meshletIndexCount * indexType.bytes).order(ByteOrder.nativeOrder())
                 metadata = MemoryUtil.memAlloc(meshletCount * METADATA_STRIDE).order(ByteOrder.nativeOrder())
-                vertexData = MemoryUtil.memAlloc(usedVertices * Int.SIZE_BYTES).order(ByteOrder.nativeOrder())
-                for (index in 0 until usedVertices) vertexData.putInt(meshletVertices[index])
+                vertexData = MemoryUtil.memAlloc(usedVertices * COMPACT_VERTEX_WORDS * Int.SIZE_BYTES)
+                    .order(ByteOrder.nativeOrder())
+                val compactVertexData = vertexData.asIntBuffer()
                 triangleData = MemoryUtil.memCalloc(align4(usedTriangleBytes)).order(ByteOrder.nativeOrder())
                 for (index in 0 until usedTriangleBytes) triangleData.put(index, meshletTriangles[index])
                 triangleData.position(triangleData.capacity())
@@ -113,6 +116,39 @@ class GltfMeshletLod private constructor(
                             meshletBounds.center(1),
                             meshletBounds.center(2)
                         )
+                        var minX = Float.POSITIVE_INFINITY
+                        var minY = Float.POSITIVE_INFINITY
+                        var minZ = Float.POSITIVE_INFINITY
+                        var maxX = Float.NEGATIVE_INFINITY
+                        var maxY = Float.NEGATIVE_INFINITY
+                        var maxZ = Float.NEGATIVE_INFINITY
+                        for (vertex in 0 until meshlet.vertex_count()) {
+                            val positionOffset = meshletVertices[vertexOffset + vertex] * 3
+                            val px = positions[positionOffset]
+                            val py = positions[positionOffset + 1]
+                            val pz = positions[positionOffset + 2]
+                            minX = minOf(minX, px)
+                            minY = minOf(minY, py)
+                            minZ = minOf(minZ, pz)
+                            maxX = maxOf(maxX, px)
+                            maxY = maxOf(maxY, py)
+                            maxZ = maxOf(maxZ, pz)
+                        }
+                        val extent = maxOf(maxX - minX, maxY - minY, maxZ - minZ)
+                        val positionScale = if (extent > 1.0e-6f) extent / 65535.0f else 1.0f
+                        for (vertex in 0 until meshlet.vertex_count()) {
+                            writeCompactVertex(
+                                compactVertexData,
+                                (vertexOffset + vertex) * COMPACT_VERTEX_WORDS,
+                                positions,
+                                attributes,
+                                meshletVertices[vertexOffset + vertex],
+                                minX,
+                                minY,
+                                minZ,
+                                positionScale
+                            )
+                        }
                         putMetadata(
                             metadata,
                             meshletBounds.center(0),
@@ -126,6 +162,10 @@ class GltfMeshletLod private constructor(
                             cone[4],
                             cone[5],
                             cone[6],
+                            minX,
+                            minY,
+                            minZ,
+                            positionScale,
                             vertexOffset,
                             triangleOffset,
                             meshlet.vertex_count(),
@@ -158,6 +198,10 @@ class GltfMeshletLod private constructor(
                     0.0f,
                     0.0f,
                     0.0f,
+                    0.0f,
+                    0.0f,
+                    0.0f,
+                    1.0f,
                     0,
                     0,
                     0,
@@ -167,7 +211,7 @@ class GltfMeshletLod private constructor(
                 )
                 packedIndices.flip()
                 metadata.flip()
-                vertexData.flip()
+                vertexData.position(usedVertices * COMPACT_VERTEX_WORDS * Int.SIZE_BYTES).flip()
                 triangleData.flip()
                 wholeMetadata.flip()
                 return GltfMeshletLod(
@@ -207,6 +251,10 @@ class GltfMeshletLod private constructor(
             coneApexX: Float,
             coneApexY: Float,
             coneApexZ: Float,
+            biasX: Float,
+            biasY: Float,
+            biasZ: Float,
+            biasScale: Float,
             vertexOffset: Int,
             triangleOffset: Int,
             vertexCount: Int,
@@ -219,6 +267,67 @@ class GltfMeshletLod private constructor(
             buffer.putInt(firstIndex).putInt(indexCount).putLong(0L)
             buffer.putFloat(coneAxisX).putFloat(coneAxisY).putFloat(coneAxisZ).putFloat(coneCutoff)
             buffer.putFloat(coneApexX).putFloat(coneApexY).putFloat(coneApexZ).putFloat(0.0f)
+            buffer.putFloat(biasX).putFloat(biasY).putFloat(biasZ).putFloat(biasScale)
+        }
+
+        private fun writeCompactVertex(
+            vertexData: IntBuffer,
+            wordOffset: Int,
+            positions: FloatBuffer,
+            attributes: ByteBuffer,
+            vertexIndex: Int,
+            minX: Float,
+            minY: Float,
+            minZ: Float,
+            scale: Float
+        ) {
+            val positionOffset = vertexIndex * 3
+            val qx = ((positions[positionOffset] - minX) / scale + 0.5f).toInt().coerceIn(0, 65535)
+            val qy = ((positions[positionOffset + 1] - minY) / scale + 0.5f).toInt().coerceIn(0, 65535)
+            val qz = ((positions[positionOffset + 2] - minZ) / scale + 0.5f).toInt().coerceIn(0, 65535)
+            val attributeOffset = vertexIndex * VertexLayout.STRIDE
+            val normal = oct16(
+                attributes.getFloat(attributeOffset + VertexLayout.NORMAL),
+                attributes.getFloat(attributeOffset + VertexLayout.NORMAL + 4),
+                attributes.getFloat(attributeOffset + VertexLayout.NORMAL + 8)
+            )
+            val uv = (java.lang.Float.floatToFloat16(attributes.getFloat(attributeOffset + VertexLayout.UV0)).toInt() and 0xFFFF) or
+                ((java.lang.Float.floatToFloat16(attributes.getFloat(attributeOffset + VertexLayout.UV0 + 4)).toInt() and 0xFFFF) shl 16)
+            val color = attributes.getInt(attributeOffset + VertexLayout.COLOR)
+            vertexData.put(wordOffset, qx or (qy shl 16))
+            vertexData.put(wordOffset + 1, qz or (normal shl 16))
+            vertexData.put(wordOffset + 2, uv)
+            vertexData.put(wordOffset + 3, color)
+        }
+
+        private fun oct16(nx: Float, ny: Float, nz: Float): Int {
+            var x = nx
+            var y = ny
+            var z = nz
+            val length = kotlin.math.sqrt(x * x + y * y + z * z)
+            if (length <= 1.0e-8f) {
+                x = 0.0f
+                y = 0.0f
+                z = 1.0f
+            } else {
+                x /= length
+                y /= length
+                z /= length
+            }
+            val l1 = kotlin.math.abs(x) + kotlin.math.abs(y) + kotlin.math.abs(z)
+            var ux = x / l1
+            var uy = y / l1
+            if (z < 0.0f) {
+                val sx = if (ux >= 0.0f) 1.0f else -1.0f
+                val sy = if (uy >= 0.0f) 1.0f else -1.0f
+                val tx = ux
+                val ty = uy
+                ux = (1.0f - kotlin.math.abs(ty)) * sx
+                uy = (1.0f - kotlin.math.abs(tx)) * sy
+            }
+            val qx = (ux * 127.0f).toInt().coerceIn(-128, 127)
+            val qy = (uy * 127.0f).toInt().coerceIn(-128, 127)
+            return (qx and 0xFF) or ((qy and 0xFF) shl 8)
         }
 
         private fun coneData(
@@ -312,6 +421,7 @@ class GltfMeshletLod private constructor(
         private const val MAX_TRIANGLES = 256
         private const val CONE_WEIGHT = 0.25f
         private const val POSITION_STRIDE = 12
-        private const val METADATA_STRIDE = 80
+        private const val COMPACT_VERTEX_WORDS = 4
+        private const val METADATA_STRIDE = 96
     }
 }

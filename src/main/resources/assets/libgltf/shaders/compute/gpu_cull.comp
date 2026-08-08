@@ -18,6 +18,7 @@ struct Meshlet {
     uint padding1;
     vec4 cone;
     vec4 coneApex;
+    vec4 positionBias;
 };
 
 layout(set = 0, binding = 1, std430) readonly buffer Meshlets {
