@@ -11,7 +11,7 @@ class GltfVulkanMeshCounters : AutoCloseable {
     private val counters = device.createBuffer(
         { "libgltf mesh debug counters" },
         GpuBuffer.USAGE_MAP_READ or GpuBuffer.USAGE_COPY_DST or GltfVulkanUsage.STORAGE,
-        java.nio.ByteBuffer.allocate(COUNTER_SIZE)
+        java.nio.ByteBuffer.allocateDirect(COUNTER_SIZE)
     )
     private val readback = device.createBuffer(
         { "libgltf mesh debug readback" },
