@@ -62,6 +62,7 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
     }
 
     override fun finishExecute(context: FeatureFrameContext) {
+        for (index in 0 until preparedBatchCount) batches[index].finishFrame()
         GltfGpuDrivenBenchmark.resolve()
     }
 

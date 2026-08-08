@@ -42,6 +42,8 @@ class GltfPreparedGpuBatch : AutoCloseable {
     private var skinned = false
     private var useSortedIndexBuffer = false
     private var active = false
+    private var frameUsed = false
+    private var frameIndirect = false
 
     fun prepare(submits: List<GltfGpuSubmit>, fromIndex: Int, toIndex: Int, driver: GltfGpuDriver?) {
         val first = submits[fromIndex]
@@ -185,12 +187,21 @@ class GltfPreparedGpuBatch : AutoCloseable {
             }
         }
         if (frameEnd) {
-            instances.rotate()
-            palettes?.rotate()
-            sortedIndices?.rotate()
-            if (indirect) gpuDriven.rotate()
+            frameUsed = true
+            frameIndirect = indirect
         }
     }
+
+    fun finishFrame() {
+        if (!frameUsed) return
+        frameUsed = false
+        frameIndirect = false
+        requireNotNull(instanceBuffer).rotate()
+        paletteBuffer?.rotate()
+        if (useSortedIndexBuffer) requireNotNull(sortedIndexBuffer).rotate()
+        if (frameIndirect) gpuDriven.rotate()
+    }
+
     override fun close() {
         instanceBuffer?.close()
         instanceBuffer = null
