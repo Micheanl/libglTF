@@ -27,7 +27,9 @@ data class GltfMaterial(
     val thicknessTexture: TextureBinding?,
     val attenuationDistance: Float,
     val attenuationColor: FloatArray,
-    val ior: Float
+    val ior: Float,
+    val anisotropy: AnisotropyMaterial?,
+    val iridescence: IridescenceMaterial?
 ) {
     val hasTransmission: Boolean
         get() = transmissionFactor > 0.0f || transmissionTexture != null

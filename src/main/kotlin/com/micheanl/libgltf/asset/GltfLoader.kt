@@ -12,8 +12,10 @@ import com.micheanl.libgltf.animation.Interpolation
 import com.micheanl.libgltf.lod.LodPolicy
 import com.micheanl.libgltf.lod.MeshLodBuilder
 import com.micheanl.libgltf.material.AlphaMode
+import com.micheanl.libgltf.material.AnisotropyMaterial
 import com.micheanl.libgltf.material.ClearcoatMaterial
 import com.micheanl.libgltf.material.GltfMaterial
+import com.micheanl.libgltf.material.IridescenceMaterial
 import com.micheanl.libgltf.material.SheenMaterial
 import com.micheanl.libgltf.material.SpecularMaterial
 import com.micheanl.libgltf.material.TextureBinding
@@ -237,6 +239,8 @@ object GltfLoader {
             val transmissionExtension = JsonFields.value(extensions, "KHR_materials_transmission")
             val volumeExtension = JsonFields.value(extensions, "KHR_materials_volume")
             val iorExtension = JsonFields.value(extensions, "KHR_materials_ior")
+            val anisotropyExtension = JsonFields.value(extensions, "KHR_materials_anisotropy")
+            val iridescenceExtension = JsonFields.value(extensions, "KHR_materials_iridescence")
             GltfMaterial(
                 JsonFields.string(value, "name", "material_$index"),
                 JsonFields.floats(pbr, "baseColorFactor", floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f)),
@@ -287,7 +291,24 @@ object GltfLoader {
                 parseBinding(JsonFields.value(volumeExtension, "thicknessTexture")),
                 JsonFields.float(volumeExtension, "attenuationDistance", Float.POSITIVE_INFINITY),
                 JsonFields.floats(volumeExtension, "attenuationColor", floatArrayOf(1.0f, 1.0f, 1.0f)),
-                JsonFields.float(iorExtension, "ior", 1.5f)
+                JsonFields.float(iorExtension, "ior", 1.5f),
+                anisotropyExtension?.let {
+                    AnisotropyMaterial(
+                        JsonFields.float(it, "anisotropyStrength"),
+                        JsonFields.float(it, "anisotropyRotation"),
+                        parseBinding(JsonFields.value(it, "anisotropyTexture"))
+                    )
+                },
+                iridescenceExtension?.let {
+                    IridescenceMaterial(
+                        JsonFields.float(it, "iridescenceFactor"),
+                        parseBinding(JsonFields.value(it, "iridescenceTexture")),
+                        JsonFields.float(it, "iridescenceIor", 1.3f),
+                        JsonFields.float(it, "iridescenceThicknessMinimum", 100.0f),
+                        JsonFields.float(it, "iridescenceThicknessMaximum", 400.0f),
+                        parseBinding(JsonFields.value(it, "iridescenceThicknessTexture"))
+                    )
+                }
             )
         }
     }
@@ -853,7 +874,9 @@ object GltfLoader {
         null,
         Float.POSITIVE_INFINITY,
         floatArrayOf(1.0f, 1.0f, 1.0f),
-        1.5f
+        1.5f,
+        null,
+        null
     )
 
     private fun alphaMode(value: String): AlphaMode = when (value) {
