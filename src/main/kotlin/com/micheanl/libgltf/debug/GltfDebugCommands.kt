@@ -93,6 +93,17 @@ object GltfDebugCommands {
                             )
                     )
                     .then(ClientCommands.literal("info").executes { info(it.source) })
+                    .then(
+                        ClientCommands.literal("anim")
+                            .executes { playAnim(it.source, 0) }
+                            .then(
+                                ClientCommands.argument("index", IntegerArgumentType.integer(0))
+                                    .executes { context ->
+                                        playAnim(context.source, context.getArgument("index", Int::class.java))
+                                    }
+                            )
+                            .then(ClientCommands.literal("stop").executes { stopAnim(it.source) })
+                    )
                     .then(ClientCommands.literal("mode").then(ClientCommands.literal("auto").executes { mode(it.source, GltfRenderMode.AUTO) }))
                     .then(ClientCommands.literal("mode").then(ClientCommands.literal("gpu").executes { mode(it.source, GltfRenderMode.GPU_PREFERRED) }))
                     .then(ClientCommands.literal("mode").then(ClientCommands.literal("cpu").executes { mode(it.source, GltfRenderMode.CPU) }))
@@ -120,6 +131,9 @@ object GltfDebugCommands {
                         val newHandle = GltfApiImpl.upload(result.asset)
                         val newInstance = GltfApiImpl.createInstance(newHandle)
                             .setPosition(player.x.toFloat(), player.y.toFloat() + 1.0f, player.z.toFloat())
+                        if (result.asset.animations.isNotEmpty()) {
+                            newInstance.animator.play(newInstance.animator.segment(0))
+                        }
                         instanceId = GltfApiImpl.register(newInstance)
                         handle = newHandle
                         instance = newInstance
@@ -171,7 +185,8 @@ object GltfDebugCommands {
                 val transform = current.transform
                 lines += "libgltf mode=${current.renderMode} " +
                     "pos=(${transform.m30()}, ${transform.m31()}, ${transform.m32()}) " +
-                    "scale=${transform.m00()} lod=${current.lodLevel} instances=${GltfRenderRegistry.instances().size}"
+                    "scale=${transform.m00()} lod=${current.lodLevel} " +
+                    "anim=${current.animation.clipIndex} instances=${GltfRenderRegistry.instances().size}"
             }
         }
         return lines
@@ -232,6 +247,34 @@ object GltfDebugCommands {
                 )
             )
         }
+        return 0
+    }
+
+    private fun playAnim(source: FabricClientCommandSource, index: Int): Int {
+        val current = instance
+        if (current == null) {
+            source.sendError(Component.literal("No model loaded"))
+            return 1
+        }
+        val animations = current.handle.asset.animations
+        if (animations.isEmpty()) {
+            source.sendError(Component.literal("Model has no animations"))
+            return 1
+        }
+        val clip = index.coerceIn(0, animations.lastIndex)
+        current.animator.play(current.animator.segment(clip))
+        source.sendFeedback(Component.literal("Playing animation $clip: ${animations[clip].name}"))
+        return 0
+    }
+
+    private fun stopAnim(source: FabricClientCommandSource): Int {
+        val current = instance
+        if (current == null) {
+            source.sendError(Component.literal("No model loaded"))
+            return 1
+        }
+        current.animator.stop()
+        source.sendFeedback(Component.literal("Animation stopped"))
         return 0
     }
 
