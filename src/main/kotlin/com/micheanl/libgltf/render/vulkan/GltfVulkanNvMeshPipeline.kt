@@ -226,7 +226,7 @@ private class GltfVulkanNvMeshPipeline(
                     0,
                     parameters
                 )
-                NVMeshShader.vkCmdDrawMeshTasksNV(commandBuffer, 0, groups)
+                NVMeshShader.vkCmdDrawMeshTasksNV(commandBuffer, groups, 0)
                 baseCandidate += groups
             }
         }
