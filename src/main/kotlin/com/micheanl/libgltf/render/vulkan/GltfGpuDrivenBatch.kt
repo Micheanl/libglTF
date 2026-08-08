@@ -55,7 +55,7 @@ class GltfGpuDrivenBatch : AutoCloseable {
             return false
         }
         maxDrawCount = instanceCount * meshletCount
-        if (!meshShader) ensureCapacity(maxDrawCount * COMMAND_STRIDE)
+        if (!(meshShader && meshletCulling)) ensureCapacity(maxDrawCount * COMMAND_STRIDE)
         metadata = if (meshletCulling) meshletLod.metadataBuffer else meshletLod.wholeMetadataBuffer
         indexBuffer = if (meshletCulling) meshletLod.indexBuffer else primitive.indexBuffers[lod]
         active = true
