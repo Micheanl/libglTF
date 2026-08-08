@@ -11,7 +11,7 @@ struct TaskPayload { uint instanceIndices[32]; uint meshletIndices[32]; };
 taskPayloadSharedEXT TaskPayload payload;
 shared uint visibleCount;
 mat4 instanceMatrix(uint instanceIndex) {
-    uint o = instanceIndex * 35;
+    uint o = instanceIndex * 41;
     return mat4(uintBitsToFloat(instanceWords[o]), uintBitsToFloat(instanceWords[o + 1]), uintBitsToFloat(instanceWords[o + 2]), uintBitsToFloat(instanceWords[o + 3]), uintBitsToFloat(instanceWords[o + 4]), uintBitsToFloat(instanceWords[o + 5]), uintBitsToFloat(instanceWords[o + 6]), uintBitsToFloat(instanceWords[o + 7]), uintBitsToFloat(instanceWords[o + 8]), uintBitsToFloat(instanceWords[o + 9]), uintBitsToFloat(instanceWords[o + 10]), uintBitsToFloat(instanceWords[o + 11]), uintBitsToFloat(instanceWords[o + 12]), uintBitsToFloat(instanceWords[o + 13]), uintBitsToFloat(instanceWords[o + 14]), uintBitsToFloat(instanceWords[o + 15]));
 }
 bool visibleSphere(vec4 sphere, mat4 transform) {
