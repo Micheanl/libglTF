@@ -9,6 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.renderpearl.api.textures.AddressMode
 import com.mojang.renderpearl.api.textures.FilterMode
 import com.mojang.renderpearl.api.textures.GpuTexture
+import com.mojang.logging.LogUtils
 import net.minecraft.client.renderer.texture.AbstractTexture
 import java.util.OptionalDouble
 import kotlin.math.max
@@ -55,7 +56,28 @@ class GltfDynamicTexture(
             )
         }
         val encoder = device.createCommandEncoder()
-        for (level in levels.indices) encoder.writeToTexture(gpuTexture, levels[level], level, 0, 0, 0)
+        for (level in levels.indices) {
+            val expectedWidth = gpuTexture.getWidth(level)
+            val expectedHeight = gpuTexture.getHeight(level)
+            val source = levels[level]
+            if (source.width == expectedWidth && source.height == expectedHeight) {
+                encoder.writeToTexture(gpuTexture, source, level, 0, 0, 0)
+            } else {
+                LOGGER.warn(
+                    "libgltf texture {} mip {} size {}x{} does not match GPU mip {}x{}, resizing",
+                    label,
+                    level,
+                    source.width,
+                    source.height,
+                    expectedWidth,
+                    expectedHeight
+                )
+                NativeImage(expectedWidth, expectedHeight, false).use { resized ->
+                    source.resizeSubRectTo(0, 0, source.width, source.height, resized)
+                    encoder.writeToTexture(gpuTexture, resized, level, 0, 0, 0)
+                }
+            }
+        }
     }
 
     override fun close() {
@@ -65,6 +87,8 @@ class GltfDynamicTexture(
     }
 
     private companion object {
+        val LOGGER = LogUtils.getLogger()
+
         fun createLevels(image: NativeImage, mipmaps: Boolean): Array<NativeImage> {
             if (!mipmaps) return arrayOf(image)
             var width = image.width
