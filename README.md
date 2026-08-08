@@ -23,29 +23,29 @@
 ---
 
 > [!NOTE]
-> **libgltf** is a rendering *library*, not a content mod. Other mods call its API to attach animated, PBR-textured glTF 2.0 models to **items, entities and block entities** — rendered natively inside Minecraft's modern Vulkan / OpenGL pipeline.
+> **libgltf** is a rendering *library*, not a content mod. Other mods call its API to attach animated, PBR-textured glTF 2.0 models to **items, entities and block entities**, rendered natively inside Minecraft's modern Vulkan / OpenGL pipeline.
 
 ## Highlights
 
 | Feature | Detail |
 |---|---|
 | **glTF 2.0 / GLB** | Meshes, node hierarchies, skins, PBR materials, `OPAQUE` / `MASK` / `BLEND` |
-| **GPU-driven (Vulkan)** | Compute-shader instance & meshlet frustum culling → `vkCmdDrawIndexedIndirectCount` |
-| **Mesh shaders** | Vulkan `VK_EXT_mesh_shader` and OpenGL `GL_EXT_mesh_shader` / `GL_NV_mesh_shader` task/mesh pipelines with automatic fallback chain |
-| **Instancing & skinning** | Bone palettes streamed via triple-buffered `MappableRingBuffer`, zero cross-frame races |
-| **Animation** | Clip playback, blending, parameterized state machine with conditions & transitions |
-| **LOD** | meshoptimizer-generated LOD chains, configurable selection policies |
-| **True transparency** | Mojang `VertexSorting`-based per-face sorting for `BLEND` materials |
+| **Mesh shaders** | Vulkan `VK_NV_mesh_shader` / `VK_EXT_mesh_shader` and OpenGL `GL_EXT_mesh_shader` / `GL_NV_mesh_shader` task/mesh pipelines |
+| **Compact meshlets** | 16-byte per-meshlet vertices (quantized position, oct16 normal, fp16 UV, 8-bit color) with sequential reads |
+| **Batched dispatch** | NV path processes 4 meshlets per workgroup, cutting group count 3-4x |
+| **Three-level culling** | Frustum sphere, tight-cone backface, previous-frame depth occlusion (device-space comparison) |
+| **GPU-driven fallback** | Compute-shader culling → `vkCmdDrawIndexedIndirectCount` on devices without mesh shaders |
+| **Descriptor caching** | Storage descriptor sets cached by buffer identity; zero updates per frame in steady state |
+| **Instancing & skinning** | Bone palettes streamed via triple-buffered ring buffers, zero cross-frame races |
+| **Animation** | Clip playback, blending, parameterized state machines with conditions and transitions |
+| **LOD** | meshoptimizer-generated LOD chains with configurable selection policies |
+| **True transparency** | Per-face sorting for `BLEND` materials |
 | **Iris compatible** | Dedicated OpenGL pipeline mapping when shader packs are enabled |
-| **KHR_materials_variants** | Per-primitive variant mappings with runtime switching |
-| **EXT_mesh_gpu_instancing** | Node-level instance transforms on CPU, GPU and glint paths |
-| **KHR_animation_pointer** | Material UV and base-color factor animation with cross-fades |
-| **EXT_meshopt_compression** | Vertex/index decompression with fallback |
-| **Scenes / cameras / lights** | Multi-scene switching plus camera and punctual-light data |
-| **Vendor profiles** | Per-vendor mesh workgroup, culling and task-count tuning (NVIDIA / AMD / Intel) |
+| **Extensions** | `KHR_materials_variants`, `KHR_animation_pointer`, `EXT_meshopt_compression`, scenes / cameras / lights |
+| **Auto device profile** | Picks the highest-performance path per vendor; overridable via `config/libgltf.properties` |
 
 > [!TIP]
-> No capable GPU? No problem. libgltf probes device capabilities at startup and transparently falls back **mesh shader → indirect → direct → CPU**, so the same code runs everywhere.
+> No capable GPU? libgltf probes device capabilities at startup and falls back **mesh shader → indirect → direct → CPU** automatically.
 
 ## Quick start
 
@@ -82,6 +82,21 @@ instance.automaticAnimation = false
 
 </details>
 
+## Configuration
+
+On first launch libgltf generates `config/libgltf.properties`:
+
+```properties
+meshShader=auto        # auto | on | off
+meshBatchSize=4        # 1-4, meshlets per NV workgroup
+occlusionCulling=false # previous-frame depth occlusion
+instanceCulling=true
+meshletCulling=true
+groupLimit=65535
+```
+
+The device profile automatically enables the best path; the config overrides it.
+
 ## Architecture
 
 ```mermaid
@@ -92,11 +107,12 @@ flowchart LR
     API --> MAT["material"]
     API --> LOD["lod"]
     API --> R{"render"}
-    R --> GPU["render.gpu<br/>indirect · mesh shader"]
+    R --> GPU["render.gpu<br/>GpuMesh · MeshletStorage"]
+    R --> VK["render.vulkan<br/>VulkanGpuDriver · MeshletDispatcher"]
+    R --> GL["render.gl<br/>GlGpuDriver"]
+    R --> F["render.feature<br/>GpuSubmitRenderer · GpuBatch"]
     R --> CPU["render.cpu<br/>fallback"]
-    R --> F["render.feature<br/>frame submission"]
     API --> INT["integration<br/>item · entity · block"]
-    GPU -.capability gate.-> CPU
 ```
 
 <details>
@@ -105,33 +121,15 @@ flowchart LR
 | Package | Responsibility |
 |---|---|
 | `api` | Public facade: loading, handles, instances, render mode |
-| `asset` | glTF / GLB parsing and buffer decoding |
-| `model` | Immutable asset model (nodes, meshes, skins) |
-| `material` | PBR materials and per-instance overrides |
-| `animation` | Players, controllers, state machines |
-| `lod` | LOD generation and selection |
-| `render.cpu` / `render.gpu` / `render.feature` | CPU fallback, GPU resources, frame submission |
+| `asset` / `model` | glTF / GLB parsing and immutable asset model |
+| `material` / `texture` | PBR materials, overrides, texture generation |
+| `animation` / `lod` | Animation state machines, LOD generation and selection |
+| `render.gpu` | GPU resources, meshlet storage, capability probing |
+| `render.vulkan` / `render.gl` | Mesh and indirect drawing for both backends |
+| `render.feature` | Frame submission, batching, FeatureRenderer integration |
 | `integration` | Item / entity / block-entity renderers |
-| `mixin` | Minimal Java mixins for Vulkan & Iris integration |
 
 </details>
-
-## Debugging
-
-Load an external model and inspect rendering state without writing code:
-
-```
-/libgltf_debug load <path>
-/libgltf_debug mode auto|gpu|cpu
-/libgltf_debug lod <n>
-/libgltf_debug anim [<index>|stop]
-/libgltf_debug variant <index>
-/libgltf_debug scene <index>
-/libgltf_debug bones on|off
-/libgltf_debug mesh on|off|auto
-```
-
-Press F3 to see backend, vendor, mesh/OIT state, batch counts, LOD, animation, UV, variant, scene and bone status.
 
 ## Building
 
@@ -143,7 +141,7 @@ Output → `build/libs/libgltf-0.01-fabric.jar`
 
 > [!IMPORTANT]
 > Requires Minecraft **26.3-snapshot-7**, Fabric Loader **0.19.3+**, Fabric API, Fabric Language Kotlin and Java **25**.
-> The mesh-shader path needs `VK_EXT_mesh_shader` (Vulkan) or `GL_EXT_mesh_shader` / `GL_NV_mesh_shader` (OpenGL).
+> The mesh-shader path needs `VK_EXT_mesh_shader` / `VK_NV_mesh_shader` (Vulkan) or `GL_EXT_mesh_shader` / `GL_NV_mesh_shader` (OpenGL).
 
 ---
 
