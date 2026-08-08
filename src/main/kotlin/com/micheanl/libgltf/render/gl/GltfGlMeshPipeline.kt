@@ -23,6 +23,7 @@ import org.lwjgl.system.MemoryStack
 class GltfGlMeshPipeline private constructor(
     private val programId: Int,
     private val paramsUbo: Int,
+    private val fallbackUbo: Int,
     private val useNv: Boolean,
     private val transmittance: Boolean,
     private val accumulate: Boolean
@@ -37,12 +38,13 @@ class GltfGlMeshPipeline private constructor(
         instanceCulling: Boolean,
         meshletCulling: Boolean,
         maxDrawCount: Int
-    ) {
+    ): Boolean {
+        val projection = RenderSystem.getProjectionMatrixBuffer() ?: return false
         GL33C.glUseProgram(programId)
-        bindUbo(BINDING_PROJECTION, RenderSystem.getProjectionMatrixBuffer() ?: return)
+        bindUbo(BINDING_PROJECTION, projection)
         bindUbo(BINDING_DYNAMIC_TRANSFORMS, preparedRenderType.dynamicTransforms())
-        RenderSystem.getShaderFog()?.let { bindUbo(BINDING_FOG, it) }
-        RenderSystem.getShaderLights()?.let { bindUbo(BINDING_LIGHTING, it) }
+        bindUboOrFallback(BINDING_FOG, RenderSystem.getShaderFog())
+        bindUboOrFallback(BINDING_LIGHTING, RenderSystem.getShaderLights())
         bindSsbo(BINDING_GEOMETRY, geometry)
         bindSsbo(BINDING_INSTANCES, instances)
         bindSsbo(BINDING_MESHLETS, meshlets.metadataBuffer)
@@ -66,11 +68,13 @@ class GltfGlMeshPipeline private constructor(
             baseCandidate += groups.toLong() * TASK_WORKGROUP
         }
         GL33C.glUseProgram(0)
+        return true
     }
 
     override fun close() {
         GL33C.glDeleteProgram(programId)
         GL33C.glDeleteBuffers(paramsUbo)
+        GL33C.glDeleteBuffers(fallbackUbo)
     }
 
     private fun bindUbo(binding: Int, slice: GpuBufferSlice) {
@@ -81,6 +85,14 @@ class GltfGlMeshPipeline private constructor(
             slice.offset(),
             slice.length()
         )
+    }
+
+    private fun bindUboOrFallback(binding: Int, slice: GpuBufferSlice?) {
+        if (slice != null) {
+            bindUbo(binding, slice)
+        } else {
+            GL33C.glBindBufferBase(GL33C.GL_UNIFORM_BUFFER, binding, fallbackUbo)
+        }
     }
 
     private fun bindSsbo(binding: Int, buffer: GpuBuffer) {
@@ -174,6 +186,7 @@ class GltfGlMeshPipeline private constructor(
                         return GltfGlMeshPipeline(
                             program,
                             GL33C.glGenBuffers(),
+                            createFallbackUbo(),
                             useNv,
                             oit && defines.flags().contains("OIT_TRANSMITTANCE"),
                             oit && defines.flags().contains("OIT_ACCUMULATE")
@@ -275,6 +288,14 @@ class GltfGlMeshPipeline private constructor(
         private fun setSampler(program: Int, name: String, unit: Int) {
             val location = GL33C.glGetUniformLocation(program, name)
             if (location >= 0) GL33C.glUniform1i(location, unit)
+        }
+
+        private fun createFallbackUbo(): Int {
+            val ubo = GL33C.glGenBuffers()
+            GL33C.glBindBuffer(GL33C.GL_UNIFORM_BUFFER, ubo)
+            GL33C.glBufferData(GL33C.GL_UNIFORM_BUFFER, 64, GL33C.GL_STATIC_DRAW)
+            GL33C.glBindBuffer(GL33C.GL_UNIFORM_BUFFER, 0)
+            return ubo
         }
 
         private const val BINDING_PROJECTION = 0

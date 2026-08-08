@@ -81,11 +81,12 @@ class GltfGlMeshPipelineCache : AutoCloseable {
         if (!supported || failed.contains(renderPipeline)) return false
         val pipeline = pipelines[renderPipeline] ?: try {
             GltfGlMeshPipeline.create(renderPipeline, useNv, meshWorkgroupSize).also { pipelines[renderPipeline] = it }
-        } catch (_: RuntimeException) {
+        } catch (error: RuntimeException) {
+            LOGGER.error("libgltf GL mesh pipeline creation failed for {}", renderPipeline.getLocation(), error)
             failed.add(renderPipeline)
             return false
         }
-        pipeline.draw(
+        return pipeline.draw(
             preparedRenderType,
             geometry,
             instances,
@@ -96,7 +97,6 @@ class GltfGlMeshPipelineCache : AutoCloseable {
             meshletCulling,
             maxDrawCount
         )
-        return true
     }
 
     override fun close() {

@@ -2,6 +2,7 @@ package com.micheanl.libgltf.render.vulkan
 
 import com.micheanl.libgltf.render.gpu.GltfMeshletLod
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
+import com.mojang.logging.LogUtils
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.pipeline.BlendFunction
 import com.mojang.renderpearl.api.pipeline.RenderPipeline
@@ -76,7 +77,8 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
         if (!supported || failed.contains(renderPipeline)) return false
         val pipeline = pipelines[renderPipeline] ?: try {
             GltfVulkanMeshPipeline.create(device, original, renderPipeline, maxPushDescriptors).also { pipelines[renderPipeline] = it }
-        } catch (_: RuntimeException) {
+        } catch (error: RuntimeException) {
+            LOGGER.error("libgltf Vulkan mesh pipeline creation failed for {}", renderPipeline.getLocation(), error)
             failed.add(renderPipeline)
             return false
         }
@@ -98,7 +100,8 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
     private fun pipeline(renderPipeline: RenderPipeline, original: VulkanRenderPipeline): GltfVulkanMeshPipeline? =
         pipelines[renderPipeline] ?: try {
             GltfVulkanMeshPipeline.create(device, original, renderPipeline, maxPushDescriptors).also { pipelines[renderPipeline] = it }
-        } catch (_: RuntimeException) {
+        } catch (error: RuntimeException) {
+            LOGGER.error("libgltf Vulkan mesh pipeline creation failed for {}", renderPipeline.getLocation(), error)
             failed.add(renderPipeline)
             null
         }
@@ -107,6 +110,10 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
         pipelines.values.forEach(GltfVulkanMeshPipeline::close)
         pipelines.clear()
         failed.clear()
+    }
+
+    companion object {
+        private val LOGGER = LogUtils.getLogger()
     }
 }
 
