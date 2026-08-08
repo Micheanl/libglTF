@@ -11,6 +11,7 @@ import com.mojang.renderpearl.api.pipeline.RenderPipeline
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.commands.RenderPass
 import com.mojang.blaze3d.systems.RenderSystem
+import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.rendertype.PreparedRenderType
 
 class GltfGpuDrivenBatch : AutoCloseable {
@@ -26,9 +27,19 @@ class GltfGpuDrivenBatch : AutoCloseable {
     private var meshletCulling = false
     private var benchmark: GltfVulkanBenchmarkReadback? = null
 
-    fun prepare(primitive: GltfGpuPrimitive, lod: Int, instanceCount: Int, skinned: Boolean, transparent: Boolean, meshShader: Boolean): Boolean {
+    fun prepare(
+        primitive: GltfGpuPrimitive,
+        lod: Int,
+        instanceCount: Int,
+        skinned: Boolean,
+        transparent: Boolean,
+        meshShader: Boolean,
+        driver: GltfGpuDriver?
+    ): Boolean {
         val meshletLod = primitive.meshlets?.getOrNull(lod)
-        if (skinned || transparent || meshletLod == null) {
+        val meshOit = driver is GltfVulkanGpuDriven &&
+            Minecraft.getInstance().gameRenderer.useImprovedTransparency()
+        if (skinned || (transparent && !meshOit) || meshletLod == null) {
             active = false
             return false
         }

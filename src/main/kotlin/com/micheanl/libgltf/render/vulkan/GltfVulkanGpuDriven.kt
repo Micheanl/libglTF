@@ -6,6 +6,7 @@ import com.micheanl.libgltf.render.gpu.GltfGpuDriver
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
 import com.mojang.renderpearl.api.device.GpuDevice
 import com.mojang.renderpearl.backend.vulkan.VulkanDevice
+import com.mojang.logging.LogUtils
 
 class GltfVulkanGpuDriven private constructor(
     val pipeline: GltfVulkanComputePipeline,
@@ -35,11 +36,21 @@ class GltfVulkanGpuDriven private constructor(
                 GltfGpuDrivenSettings.meshShader &&
                 backend.vkDevice().capabilities.VK_EXT_mesh_shader
             ) {
-                GltfVulkanMeshPipelineCache(backend).takeIf { it.supported }
+                GltfVulkanMeshPipelineCache(backend).also {
+                    LOGGER.info("libgltf Vulkan mesh shader enabled vendor={} supported={}", profile.vendor, it.supported)
+                }.takeIf { it.supported }
             } else {
+                LOGGER.info(
+                    "libgltf Vulkan mesh shader disabled vendor={} enabled={} extension={}",
+                    profile.vendor,
+                    GltfGpuDrivenSettings.meshShader,
+                    backend.vkDevice().capabilities.VK_EXT_mesh_shader
+                )
                 null
             }
             return GltfVulkanGpuDriven(GltfVulkanComputePipeline.create(backend), mesh)
         }
+
+        private val LOGGER = LogUtils.getLogger()
     }
 }

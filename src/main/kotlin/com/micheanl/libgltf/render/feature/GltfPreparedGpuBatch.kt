@@ -69,7 +69,8 @@ class GltfPreparedGpuBatch : AutoCloseable {
                 instanceCount,
                 skinned,
                 first.renderType.hasBlending(),
-                driver?.meshSupported == true
+                driver?.meshSupported == true,
+                driver
             )
             active = true
         } catch (error: RuntimeException) {
@@ -118,13 +119,18 @@ class GltfPreparedGpuBatch : AutoCloseable {
             renderPass.setUniform(texture.name, texture.textureView, texture.sampler)
         }
         if (meshRequested) {
+            val meshPipeline = if (stage != null) {
+                preparedRenderType.oitPipelineSet()?.getPipeline(stage) ?: preparedRenderType.pipeline()
+            } else {
+                preparedRenderType.pipeline()
+            }
             meshDrawn = gpuDriven.drawMesh(
                 renderPass,
                 requireNotNull(gpuDrivenDriver),
                 primitive,
                 instanceGpuBuffer,
                 instanceCount,
-                preparedRenderType.pipeline(),
+                meshPipeline,
                 preparedRenderType
             )
             if (!meshDrawn) {
