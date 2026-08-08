@@ -6,20 +6,12 @@ import com.mojang.logging.LogUtils
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.pipeline.BlendFunction
 import com.mojang.renderpearl.api.pipeline.RenderPipeline
-import com.mojang.renderpearl.api.pipeline.ShaderSource
-import com.mojang.renderpearl.api.pipeline.ShaderType
 import com.mojang.renderpearl.api.pipeline.UniformType
 import com.mojang.renderpearl.backend.vulkan.VulkanConst
 import com.mojang.renderpearl.backend.vulkan.VulkanDevice
 import com.mojang.renderpearl.backend.vulkan.VulkanGpuBuffer
-import com.mojang.renderpearl.backend.vulkan.VulkanGpuSampler
-import com.mojang.renderpearl.backend.vulkan.VulkanGpuTextureView
 import com.mojang.renderpearl.backend.vulkan.VulkanRenderPipeline
-import com.mojang.renderpearl.frontend.shaders.GlslCompiler
-import com.mojang.renderpearl.util.TextureViewAndSampler
 import it.unimi.dsi.fastutil.longs.LongArrayList
-import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.ShaderDefines
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
 import org.lwjgl.util.shaderc.Shaderc
@@ -87,8 +79,7 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
         sphere: FloatArray,
         instanceCount: Int,
         instanceCulling: Boolean,
-        meshletCulling: Boolean,
-        sampler1: Any?
+        meshletCulling: Boolean
     ): Boolean {
         if (!supported || failed.contains(renderPipeline)) return false
         val pipeline = pipelines[renderPipeline] ?: try {
@@ -109,8 +100,7 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
             instanceCount,
             instanceCulling,
             meshletCulling,
-            maxDrawCount,
-            sampler1
+            maxDrawCount
         )
         return true
     }
@@ -159,8 +149,7 @@ private class GltfVulkanMeshPipeline(
         instanceCount: Int,
         instanceCulling: Boolean,
         meshletCulling: Boolean,
-        maxDrawCount: Int,
-        sampler1: Any?
+        maxDrawCount: Int
     ) {
         VK10.vkCmdBindPipeline(
             commandBuffer,
@@ -169,25 +158,13 @@ private class GltfVulkanMeshPipeline(
         )
         MemoryStack.stackPush().use { stack ->
             val buffers = arrayOf(geometry, instances, meshlets.metadataBuffer, meshlets.vertexBuffer, meshlets.triangleBuffer)
-            val descriptorCount = buffers.size + if (sampler1 != null) 1 else 0
             val infos = VkDescriptorBufferInfo.calloc(buffers.size, stack)
-            val imageInfo = if (sampler1 != null) VkDescriptorImageInfo.calloc(1, stack) else null
-            val writes = VkWriteDescriptorSet.calloc(descriptorCount, stack)
+            val writes = VkWriteDescriptorSet.calloc(buffers.size, stack)
             for (index in buffers.indices) {
                 infos[index].buffer((buffers[index] as VulkanGpuBuffer).vkBuffer()).offset(0L).range(buffers[index].size())
                 writes[index].`sType$Default`().dstBinding(index).descriptorCount(1)
                     .descriptorType(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
                     .pBufferInfo(VkDescriptorBufferInfo.create(infos[index].address(), 1))
-            }
-            if (sampler1 != null) {
-                val texture = sampler1 as TextureViewAndSampler
-                requireNotNull(imageInfo)
-                    .sampler((texture.sampler() as VulkanGpuSampler).vkSampler())
-                    .imageView((texture.view() as VulkanGpuTextureView).vkImageView())
-                    .imageLayout(VK10.VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-                writes[buffers.size].`sType$Default`().dstBinding(buffers.size).descriptorCount(1)
-                    .descriptorType(VK10.VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
-                    .pImageInfo(VkDescriptorImageInfo.create(requireNotNull(imageInfo).address(), 1))
             }
             KHRPushDescriptor.vkCmdPushDescriptorSetKHR(
                 commandBuffer,
@@ -244,41 +221,50 @@ private class GltfVulkanMeshPipeline(
             meshWorkgroupSize: Int
         ): GltfVulkanMeshPipeline {
             val uniforms = original.uniforms()
-            val meshUniforms = uniforms.filter { it.name() != "Sampler1" }
-            if (meshUniforms.size > maxPushDescriptors) {
+            if (uniforms.size > maxPushDescriptors) {
                 LOGGER.warn(
                     "libgltf Vulkan mesh descriptor set uniforms={} maxPushDescriptors={} names={}",
-                    meshUniforms.size,
+                    uniforms.size,
                     maxPushDescriptors,
-                    meshUniforms.joinToString { it.name() }
+                    uniforms.joinToString { it.name() }
                 )
                 require(maxPushDescriptors == 0) { "Vulkan mesh descriptor set exceeds push descriptor limit" }
             }
-            val sampler0Binding = meshUniforms.indexOfFirst { it.name() == "Sampler0" }
-            require(sampler0Binding >= 0)
-            val bindings = mapOf(
-                "PROJECTION_BINDING" to meshUniforms.indexOfFirst { it.name() == "Projection" },
-                "DYNAMIC_TRANSFORMS_BINDING" to meshUniforms.indexOfFirst { it.name() == "DynamicTransforms" },
-                "LIGHTING_BINDING" to meshUniforms.indexOfFirst { it.name() == "Lighting" },
-                "SAMPLER1_BINDING" to STORAGE_BUFFER_COUNT,
-                "SAMPLER2_BINDING" to meshUniforms.indexOfFirst { it.name() == "Sampler2" },
-                "GEOMETRY_BINDING" to 0,
-                "INSTANCES_BINDING" to 1,
-                "MESHLETS_BINDING" to 2,
-                "MESHLET_VERTICES_BINDING" to 3,
-                "MESHLET_TRIANGLES_BINDING" to 4
-            )
+            val bindings = buildMap {
+                put("PROJECTION_BINDING", uniforms.indexOfFirst { it.name() == "Projection" })
+                put("DYNAMIC_TRANSFORMS_BINDING", uniforms.indexOfFirst { it.name() == "DynamicTransforms" })
+                put("LIGHTING_BINDING", uniforms.indexOfFirst { it.name() == "Lighting" })
+                put("FOG_BINDING", uniforms.indexOfFirst { it.name() == "Fog" })
+                put("SAMPLER0_BINDING", uniforms.indexOfFirst { it.name() == "Sampler0" })
+                put("SAMPLER1_BINDING", uniforms.indexOfFirst { it.name() == "Sampler1" })
+                put("SAMPLER2_BINDING", uniforms.indexOfFirst { it.name() == "Sampler2" })
+                put("GEOMETRY_BINDING", 0)
+                put("INSTANCES_BINDING", 1)
+                put("MESHLETS_BINDING", 2)
+                put("MESHLET_VERTICES_BINDING", 3)
+                put("MESHLET_TRIANGLES_BINDING", 4)
+                uniforms.indexOfFirst { it.name() == "DepthBoundsSampler" }
+                    .takeIf { it >= 0 }
+                    ?.let { put("DEPTH_BOUNDS_BINDING", it) }
+                uniforms.indexOfFirst { it.name() == "Coeff0" }
+                    .takeIf { it >= 0 }
+                    ?.let { put("COEFF0_BINDING", it) }
+                uniforms.indexOfFirst { it.name() == "Coeff1" }
+                    .takeIf { it >= 0 }
+                    ?.let { put("COEFF1_BINDING", it) }
+            }
             require(bindings.values.none { it < 0 })
-            val taskModule = compileModule(device, TASK_SHADER, Shaderc.shaderc_task_shader, bindings)
+            val macros = bindings.mapValues { it.value.toString() }
+            val taskModule = compileModule(device, TASK_SHADER, Shaderc.shaderc_task_shader, macros)
             try {
                 val meshModule = compileModule(
                     device,
                     MESH_SHADER,
                     Shaderc.shaderc_mesh_shader,
-                    bindings + ("MESH_WORKGROUP_SIZE" to meshWorkgroupSize)
+                    macros + ("MESH_WORKGROUP_SIZE" to meshWorkgroupSize.toString())
                 )
                 try {
-                    val fragmentModule = compileFragment(device, renderPipeline, sampler0Binding)
+                    val fragmentModule = compileFragment(device, renderPipeline, bindings)
                     try {
                         return create(device, original, renderPipeline, taskModule, meshModule, fragmentModule)
                     } catch (error: RuntimeException) {
@@ -303,7 +289,7 @@ private class GltfVulkanMeshPipeline(
             meshModule: Long,
             fragmentModule: Long
         ): GltfVulkanMeshPipeline = MemoryStack.stackPush().use { stack ->
-            val uniforms = original.uniforms().filter { it.name() != "Sampler1" }
+            val uniforms = original.uniforms()
             val bindings = VkDescriptorSetLayoutBinding.calloc(uniforms.size, stack)
             for (index in uniforms.indices) {
                 bindings[index].binding(index).descriptorCount(1)
@@ -322,23 +308,11 @@ private class GltfVulkanMeshPipeline(
             checkVk(VK10.vkCreateDescriptorSetLayout(device.vkDevice(), descriptorInfo, null, pointer))
             val descriptorSetLayout = pointer[0]
             try {
-                val storageBindings = VkDescriptorSetLayoutBinding.calloc(DESCRIPTOR_COUNT, stack)
-                for (index in 0 until DESCRIPTOR_COUNT) {
+                val storageBindings = VkDescriptorSetLayoutBinding.calloc(STORAGE_BUFFER_COUNT, stack)
+                for (index in 0 until STORAGE_BUFFER_COUNT) {
                     storageBindings[index].binding(index).descriptorCount(1)
-                        .descriptorType(
-                            if (index < STORAGE_BUFFER_COUNT) {
-                                VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
-                            } else {
-                                VK10.VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
-                            }
-                        )
-                        .stageFlags(
-                            if (index < STORAGE_BUFFER_COUNT) {
-                                EXTMeshShader.VK_SHADER_STAGE_TASK_BIT_EXT or EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT
-                            } else {
-                                EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT
-                            }
-                        )
+                        .descriptorType(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+                        .stageFlags(EXTMeshShader.VK_SHADER_STAGE_TASK_BIT_EXT or EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT)
                 }
                 val storageInfo = VkDescriptorSetLayoutCreateInfo.calloc(stack).`sType$Default`()
                     .flags(KHRPushDescriptor.VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR)
@@ -477,7 +451,7 @@ private class GltfVulkanMeshPipeline(
             device: VulkanDevice,
             path: String,
             kind: Int,
-            bindings: Map<String, Int>
+            macros: Map<String, String>
         ): Long {
             val source = requireNotNull(GltfVulkanMeshPipeline::class.java.getResourceAsStream(path))
                 .bufferedReader()
@@ -490,8 +464,8 @@ private class GltfVulkanMeshPipeline(
                 Shaderc.shaderc_target_env_vulkan,
                 Shaderc.shaderc_env_version_vulkan_1_3
             )
-            for ((name, value) in bindings) {
-                Shaderc.shaderc_compile_options_add_macro_definition(options, name, value.toString())
+            for ((name, value) in macros) {
+                Shaderc.shaderc_compile_options_add_macro_definition(options, name, value)
             }
             return compileSpv(device, compiler, options, source, path, kind)
         }
@@ -499,55 +473,17 @@ private class GltfVulkanMeshPipeline(
         private fun compileFragment(
             device: VulkanDevice,
             renderPipeline: RenderPipeline,
-            sampler0Binding: Int
+            bindings: Map<String, Int>
         ): Long {
-            val shader = requireNotNull(renderPipeline.getShaders()[ShaderType.FRAGMENT])
-            val source = requireNotNull(gameShaderSource.get(shader, ShaderType.FRAGMENT))
-            val info = device.getDeviceInfo()
-            val compiler = GlslCompiler(info.isZZeroToOne(), info.features().shaderDrawParameters())
-            try {
-                val defines = renderPipeline.getShaderDefines()
-                val fragmentDefines = ShaderDefines(
-                    defines.values() + ("SAMPLER0_BINDING" to sampler0Binding.toString()),
-                    defines.flags()
-                )
-                val spv = compiler.compileToSpv(
-                    shader.toString(),
-                    source,
-                    ShaderType.FRAGMENT,
-                    fragmentDefines,
-                    gameShaderSource
-                )
-                try {
-                    MemoryStack.stackPush().use { stack ->
-                        val pointer = stack.mallocLong(1)
-                        checkVk(
-                            VK10.vkCreateShaderModule(
-                                device.vkDevice(),
-                                VkShaderModuleCreateInfo.calloc(stack).`sType$Default`().pCode(spv.spv()),
-                                null,
-                                pointer
-                            )
-                        )
-                        return pointer[0]
-                    }
-                } finally {
-                    spv.close()
-                }
-            } finally {
-                compiler.close()
-            }
-        }
-
-        private val gameShaderSource = ShaderSource { id, type ->
-            val location = if (type == null) {
-                id.withPrefix("shaders/include/")
-            } else {
-                type.idConverter().idToFile(id)
-            }
-            val resource = Minecraft.getInstance().resourceManager.getResource(location).orElse(null)
-                ?: return@ShaderSource null
-            resource.openAsReader().use { it.readText() }
+            val source = requireNotNull(GltfVulkanMeshPipeline::class.java.getResourceAsStream(FRAGMENT_SHADER))
+                .bufferedReader()
+                .use { it.readText() }
+            val macros = HashMap(bindings.mapValues { it.value.toString() })
+            val defines = renderPipeline.getShaderDefines()
+            for ((name, value) in defines.values()) macros[name] = value
+            for (flag in defines.flags()) macros[flag] = ""
+            if (device.getDeviceInfo().isZZeroToOne()) macros["RENDERPEARL_DEPTH_IS_ZERO_TO_ONE"] = ""
+            return compileModule(device, FRAGMENT_SHADER, Shaderc.shaderc_fragment_shader, macros)
         }
 
         private fun compileSpv(
@@ -604,8 +540,8 @@ private class GltfVulkanMeshPipeline(
 
         private const val TASK_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh.task"
         private const val MESH_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh.mesh"
+        private const val FRAGMENT_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh.fsh"
         private const val STORAGE_BUFFER_COUNT = 5
-        private const val DESCRIPTOR_COUNT = 6
         private const val TASK_WORKGROUP = 32
         private const val PUSH_CONSTANT_SIZE = 36
         private val LOGGER = LogUtils.getLogger()

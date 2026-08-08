@@ -10,7 +10,6 @@ import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import com.mojang.renderpearl.backend.vulkan.VulkanGpuBuffer;
 import com.mojang.renderpearl.backend.vulkan.VulkanRenderPass;
 import com.mojang.renderpearl.backend.vulkan.VulkanRenderPipeline;
-import it.unimi.dsi.fastutil.objects.ReferenceList;
 import org.jspecify.annotations.Nullable;
 import org.lwjgl.vulkan.VK12;
 import org.lwjgl.vulkan.VkCommandBuffer;
@@ -30,9 +29,6 @@ public abstract class VulkanRenderPassIndirectMixin implements VulkanIndirectRen
     private VkCommandBuffer commandBuffer() {
         throw new AssertionError();
     }
-
-    @Shadow
-    protected ReferenceList<Object> uniforms;
 
     @Shadow
     private void pushDescriptors() {
@@ -76,14 +72,6 @@ public abstract class VulkanRenderPassIndirectMixin implements VulkanIndirectRen
         if (descriptorPipeline == null) {
             return false;
         }
-        Object sampler1 = null;
-        var originalUniforms = original.uniforms();
-        for (int i = 0; i < originalUniforms.size(); i++) {
-            if ("Sampler1".equals(originalUniforms.get(i).name()) && i < uniforms.size()) {
-                sampler1 = uniforms.get(i);
-                break;
-            }
-        }
         pipeline = descriptorPipeline;
         try {
             pushDescriptors();
@@ -101,8 +89,7 @@ public abstract class VulkanRenderPassIndirectMixin implements VulkanIndirectRen
                 sphere,
                 instanceCount,
                 instanceCulling,
-                meshletCulling,
-                sampler1
+                meshletCulling
         );
     }
 }
