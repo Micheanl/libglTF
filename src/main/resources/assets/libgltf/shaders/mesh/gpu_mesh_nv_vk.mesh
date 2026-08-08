@@ -103,6 +103,13 @@ void main() {
     uint overlay = instanceWords[io + 33];
     vec2 uvOffset = vec2(uintBitsToFloat(instanceWords[io + 35]), uintBitsToFloat(instanceWords[io + 36]));
     mat2 uvTransform = mat2(uintBitsToFloat(instanceWords[io + 37]), uintBitsToFloat(instanceWords[io + 39]), uintBitsToFloat(instanceWords[io + 38]), uintBitsToFloat(instanceWords[io + 40]));
+#ifdef OIT_ALPHA_ONLY
+    vec4 lightMapColorValue = vec4(1.0);
+    vec4 overlayColorValue = vec4(0.0);
+#else
+    vec4 lightMapColorValue = sampleLightmap(ivec2(signed16(light), signed16(light >> 16)));
+    vec4 overlayColorValue = texelFetch(Sampler1, ivec2(signed16(overlay), signed16(overlay >> 16)), 0);
+#endif
     for (uint vertex = invocation; vertex < meshlet.vertexCount; vertex += gl_WorkGroupSize.x) {
         uint vertexIndex = meshletVertices[meshlet.vertexOffset + vertex];
         uint vo = vertexIndex * 15;
@@ -117,13 +124,8 @@ void main() {
         sphericalVertexDistance[vertex] = length(worldPosition.xyz);
         cylindricalVertexDistance[vertex] = max(length(worldPosition.xz), abs(worldPosition.y));
         vertexColor[vertex] = mixLight(worldNormal, color * instanceColor);
-#ifdef OIT_ALPHA_ONLY
-        lightMapColor[vertex] = vec4(1.0);
-        overlayColor[vertex] = vec4(0.0);
-#else
-        lightMapColor[vertex] = sampleLightmap(ivec2(signed16(light), signed16(light >> 16)));
-        overlayColor[vertex] = texelFetch(Sampler1, ivec2(signed16(overlay), signed16(overlay >> 16)), 0);
-#endif
+        lightMapColor[vertex] = lightMapColorValue;
+        overlayColor[vertex] = overlayColorValue;
         texCoord0[vertex] = uv0;
     }
     for (uint triangle = invocation; triangle < meshlet.triangleCount; triangle += gl_WorkGroupSize.x) {
