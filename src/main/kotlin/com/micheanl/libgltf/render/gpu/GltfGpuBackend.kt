@@ -63,14 +63,10 @@ object GltfGpuBackend {
             ?: VertexFormat.MAX_VERTEX_ELEMENTS
         val instancing = backend != GltfGpuBackendType.UNKNOWN &&
             GltfGpuFormats.REQUIRED_VERTEX_ATTRIBUTES <= limit
-        val nativeMeshShader = meshShader &&
-            backend == GltfGpuBackendType.VULKAN &&
-            GltfGpuDrivenSettings.meshShaderEnabled() &&
-            (profile.preferVulkanMeshShader || GltfGpuDrivenSettings.meshShaderOverride == true) &&
+        val nativeMeshShader = backend == GltfGpuBackendType.VULKAN &&
+            meshShader &&
             ((device as FrontendGpuDeviceAccessor).libgltfBackend as? VulkanDevice)?.vkDevice()?.capabilities?.VK_EXT_mesh_shader == true
         val nativeNvMeshShader = backend == GltfGpuBackendType.VULKAN &&
-            GltfGpuDrivenSettings.meshShaderEnabled() &&
-            (profile.preferVulkanMeshShader || GltfGpuDrivenSettings.meshShaderOverride == true) &&
             ((device as FrontendGpuDeviceAccessor).libgltfBackend as? VulkanDevice)?.vkDevice()?.capabilities?.VK_NV_mesh_shader == true
         vertexAttributeLimit = limit
         capabilities = GltfGpuCapabilities(
@@ -84,7 +80,7 @@ object GltfGpuBackend {
             features.nonZeroFirstInstance(),
             features.persistentMapping(),
             meshShader,
-            false,
+            nativeMeshShader,
             nativeNvMeshShader,
             if (instancing) GltfGpuPath.INSTANCED else GltfGpuPath.CPU
         )
