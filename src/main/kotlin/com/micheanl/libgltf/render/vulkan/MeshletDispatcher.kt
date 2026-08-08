@@ -2,11 +2,11 @@ package com.micheanl.libgltf.render.vulkan
 
 import com.micheanl.libgltf.mixin.FrontendRenderPassAccessor
 import com.micheanl.libgltf.render.gl.GlMeshRenderPass
-import com.micheanl.libgltf.render.gl.GltfGlGpuDriver
-import com.micheanl.libgltf.render.gpu.GltfGpuBackend
-import com.micheanl.libgltf.render.gpu.GltfGpuDriver
-import com.micheanl.libgltf.render.gpu.GltfGpuMesh
-import com.micheanl.libgltf.render.gpu.GltfMeshletStorage
+import com.micheanl.libgltf.render.gl.GlGpuDriver
+import com.micheanl.libgltf.render.gpu.GpuBackend
+import com.micheanl.libgltf.render.gpu.GpuDriver
+import com.micheanl.libgltf.render.gpu.GpuMesh
+import com.micheanl.libgltf.render.gpu.MeshletStorage
 import com.mojang.renderpearl.api.pipeline.RenderPipeline
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.commands.RenderPass
@@ -14,42 +14,42 @@ import com.mojang.blaze3d.systems.RenderSystem
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.rendertype.PreparedRenderType
 
-class GltfMeshletDispatcher : AutoCloseable {
-    private var commandRing: GltfVulkanBufferRing? = null
-    private var statsRing: GltfVulkanBufferRing? = null
+class MeshletDispatcher : AutoCloseable {
+    private var commandRing: VulkanBufferRing? = null
+    private var statsRing: VulkanBufferRing? = null
     private var commandCapacity = 0
     private var maxDrawCount = 0
     private var meshletCount = 0
     private var useMeshlets = false
     private var metadata: GpuBuffer? = null
-    private var meshlets: GltfMeshletStorage? = null
+    private var meshlets: MeshletStorage? = null
     private var indexBuffer: GpuBuffer? = null
     private var active = false
     private var meshletCulling = false
 
     fun prepare(
-        primitive: GltfGpuMesh,
+        primitive: GpuMesh,
         lod: Int,
         instanceCount: Int,
         skinned: Boolean,
         transparent: Boolean,
         meshShader: Boolean,
-        driver: GltfGpuDriver?
+        driver: GpuDriver?
     ): Boolean {
         val meshletLod = primitive.meshlets?.getOrNull(lod)
         val meshOit = Minecraft.getInstance().gameRenderer.useImprovedTransparency() &&
-            (driver is GltfVulkanGpuDriver || driver is GltfGlGpuDriver)
+            (driver is VulkanGpuDriver || driver is GlGpuDriver)
         if (skinned || (transparent && !meshOit) || meshletLod == null) {
             active = false
             return false
         }
         meshlets = meshletLod
-        val profile = GltfGpuBackend.vendorProfile()
+        val profile = GpuBackend.vendorProfile()
         useMeshlets = profile.enableMeshletCulling && meshletLod.meshletCount > 1
-        meshletCulling = useMeshlets && GltfRenderConfig.meshletCulling
+        meshletCulling = useMeshlets && RenderConfig.meshletCulling
         meshletCount = if (meshletCulling) meshletLod.meshletCount else 1
         val workloadMeshletCount = if (meshShader) meshletLod.meshletCount else meshletCount
-        if (!GltfRenderConfig.profitable(instanceCount, workloadMeshletCount)) {
+        if (!RenderConfig.profitable(instanceCount, workloadMeshletCount)) {
             active = false
             return false
         }
@@ -61,9 +61,9 @@ class GltfMeshletDispatcher : AutoCloseable {
         return true
     }
 
-    fun dispatch(driver: GltfGpuDriver, primitive: GltfGpuMesh, instances: GpuBuffer, instanceCount: Int): Boolean {
+    fun dispatch(driver: GpuDriver, primitive: GpuMesh, instances: GpuBuffer, instanceCount: Int): Boolean {
         if (!active) return false
-        if (driver !is GltfVulkanGpuDriver) return false
+        if (driver !is VulkanGpuDriver) return false
         val projection = RenderSystem.getProjectionMatrixBuffer() ?: return false
         driver.pipeline.dispatch(
             instances,
@@ -75,30 +75,30 @@ class GltfMeshletDispatcher : AutoCloseable {
             primitive.boundsSphere,
             instanceCount,
             meshletCount,
-            GltfGpuBackend.vendorProfile().enableInstanceCulling && GltfRenderConfig.instanceCulling,
+            GpuBackend.vendorProfile().enableInstanceCulling && RenderConfig.instanceCulling,
             meshletCulling
         )
         return true
     }
 
-    fun meshReady(driver: GltfGpuDriver): Boolean = active && useMeshlets && driver.meshSupported
+    fun meshReady(driver: GpuDriver): Boolean = active && useMeshlets && driver.meshSupported
 
     fun currentMeshletCount(): Int = meshletCount
 
     fun drawMesh(
         renderPass: RenderPass,
-        driver: GltfGpuDriver,
-        primitive: GltfGpuMesh,
+        driver: GpuDriver,
+        primitive: GpuMesh,
         instances: GpuBuffer,
         instanceCount: Int,
         renderPipeline: RenderPipeline,
         preparedRenderType: PreparedRenderType
     ): Boolean {
         if (!active) return false
-        val instanceCulling = GltfGpuBackend.vendorProfile().enableInstanceCulling && GltfRenderConfig.instanceCulling
+        val instanceCulling = GpuBackend.vendorProfile().enableInstanceCulling && RenderConfig.instanceCulling
         val backend = (renderPass as FrontendRenderPassAccessor).libgltfBackend
         return when (driver) {
-            is GltfVulkanGpuDriver -> (backend as? VulkanMeshRenderPass)?.drawMeshTasks(
+            is VulkanGpuDriver -> (backend as? VulkanMeshRenderPass)?.drawMeshTasks(
                 driver.meshPipelines ?: return false,
                 renderPipeline,
                 primitive.vertexBuffer,
@@ -109,7 +109,7 @@ class GltfMeshletDispatcher : AutoCloseable {
                 instanceCulling,
                 meshletCulling
             ) == true
-            is GltfGlGpuDriver -> (backend as? GlMeshRenderPass)?.drawMeshTasks(
+            is GlGpuDriver -> (backend as? GlMeshRenderPass)?.drawMeshTasks(
                 driver.meshPipelines ?: return false,
                 renderPipeline,
                 preparedRenderType,
@@ -159,17 +159,17 @@ class GltfMeshletDispatcher : AutoCloseable {
         statsRing?.close()
         commandCapacity = capacity(required)
         val device = RenderSystem.getDevice()
-        commandRing = GltfVulkanBufferRing(
+        commandRing = VulkanBufferRing(
             device,
             "libgltf indirect commands",
-            GpuBuffer.USAGE_INDIRECT_PARAMETERS or GltfVulkanUsage.STORAGE,
+            GpuBuffer.USAGE_INDIRECT_PARAMETERS or VulkanUsage.STORAGE,
             commandCapacity
         )
-        statsRing = GltfVulkanBufferRing(
+        statsRing = VulkanBufferRing(
             device,
             "libgltf indirect stats",
-            GpuBuffer.USAGE_INDIRECT_PARAMETERS or GpuBuffer.USAGE_COPY_SRC or GltfVulkanUsage.STORAGE,
-            GltfVulkanComputePipeline.STATS_SIZE
+            GpuBuffer.USAGE_INDIRECT_PARAMETERS or GpuBuffer.USAGE_COPY_SRC or VulkanUsage.STORAGE,
+            VulkanComputePipeline.STATS_SIZE
         )
     }
 

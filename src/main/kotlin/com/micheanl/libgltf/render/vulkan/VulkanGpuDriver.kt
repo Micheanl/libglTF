@@ -1,17 +1,17 @@
 package com.micheanl.libgltf.render.vulkan
 
 import com.micheanl.libgltf.mixin.FrontendGpuDeviceAccessor
-import com.micheanl.libgltf.render.GltfGpuBackendType
-import com.micheanl.libgltf.render.gpu.GltfGpuDriver
-import com.micheanl.libgltf.render.gpu.GltfGpuBackend
-import com.micheanl.libgltf.render.gpu.GltfOcclusionDepth
+import com.micheanl.libgltf.render.GpuBackendType
+import com.micheanl.libgltf.render.gpu.GpuDriver
+import com.micheanl.libgltf.render.gpu.GpuBackend
+import com.micheanl.libgltf.render.gpu.OcclusionDepth
 import com.mojang.renderpearl.api.device.GpuDevice
 import com.mojang.renderpearl.backend.vulkan.VulkanDevice
 
-class GltfVulkanGpuDriver private constructor(
-    val pipeline: GltfVulkanComputePipeline,
-    val meshPipelines: GltfVulkanMeshCache?
-) : GltfGpuDriver {
+class VulkanGpuDriver private constructor(
+    val pipeline: VulkanComputePipeline,
+    val meshPipelines: VulkanMeshCache?
+) : GpuDriver {
     override val meshSupported: Boolean
         get() = meshPipelines?.supported == true
 
@@ -21,32 +21,32 @@ class GltfVulkanGpuDriver private constructor(
     }
 
     companion object {
-        fun create(device: GpuDevice): GltfVulkanGpuDriver? {
-            val capabilities = GltfGpuBackend.capabilities()
-            if (!GltfRenderConfig.enabled ||
-                capabilities.backend != GltfGpuBackendType.VULKAN ||
+        fun create(device: GpuDevice): VulkanGpuDriver? {
+            val capabilities = GpuBackend.capabilities()
+            if (!RenderConfig.enabled ||
+                capabilities.backend != GpuBackendType.VULKAN ||
                 !capabilities.drawIndirect ||
                 !capabilities.multiDrawIndirect ||
                 !capabilities.nonZeroFirstInstance
             ) return null
             val backend = (device as FrontendGpuDeviceAccessor).libgltfBackend as? VulkanDevice ?: return null
-            val profile = GltfGpuBackend.vendorProfile()
+            val profile = GpuBackend.vendorProfile()
             val mesh = if (
                 profile.preferMeshShader &&
-                GltfRenderConfig.meshShaderEnabled()
+                RenderConfig.meshShaderEnabled()
             ) {
                 if (capabilities.meshShaderNvActive) {
-                    GltfVulkanNvMeshPipelineCache(backend).takeIf { it.supported }
+                    VulkanNvMeshPipelineCache(backend).takeIf { it.supported }
                 } else if (backend.vkDevice().capabilities.VK_EXT_mesh_shader) {
-                    GltfVulkanMeshPipelineCache(backend).takeIf { it.supported }
+                    VulkanMeshPipelineCache(backend).takeIf { it.supported }
                 } else {
                     null
                 }
             } else {
                 null
             }
-            GltfOcclusionDepth.ensureCreated()
-            return GltfVulkanGpuDriver(GltfVulkanComputePipeline.create(backend), mesh)
+            OcclusionDepth.ensureCreated()
+            return VulkanGpuDriver(VulkanComputePipeline.create(backend), mesh)
         }
     }
 }

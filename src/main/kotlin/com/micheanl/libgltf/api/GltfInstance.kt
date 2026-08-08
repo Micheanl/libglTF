@@ -7,7 +7,7 @@ import com.micheanl.libgltf.lod.LodSelector
 import com.micheanl.libgltf.material.GltfMaterial
 import com.micheanl.libgltf.material.MaterialOverride
 import com.micheanl.libgltf.render.cpu.GltfGeometryRenderer
-import com.micheanl.libgltf.render.feature.GltfGpuSubmit
+import com.micheanl.libgltf.render.feature.GpuSubmit
 import com.micheanl.libgltf.render.gpu.GpuAnimationState
 import org.joml.Matrix4f
 import org.joml.Matrix4fc
@@ -21,7 +21,7 @@ class GltfInstance internal constructor(val handle: GltfHandle) {
     private val materialMappings: IntArray = IntArray(handle.asset.materials.size) { it }
     internal var sceneMask: BooleanArray = handle.asset.sceneNodeMasks[handle.asset.defaultScene]
     internal val geometryRenderers: Array<Array<GltfGeometryRenderer>> = createRenderers()
-    internal val gpuSubmits: Array<Array<Array<GltfGpuSubmit>>> = createGpuSubmits()
+    internal val gpuSubmits: Array<Array<Array<GpuSubmit>>> = createGpuSubmits()
 
     var renderMode: GltfRenderMode = GltfRenderMode.AUTO
     var automaticAnimation: Boolean = true
@@ -162,7 +162,7 @@ class GltfInstance internal constructor(val handle: GltfHandle) {
         }
     }
 
-    private fun createGpuSubmits(): Array<Array<Array<GltfGpuSubmit>>> =
+    private fun createGpuSubmits(): Array<Array<Array<GpuSubmit>>> =
         Array(handle.asset.nodes.size) { nodeIndex ->
         val meshIndex = handle.asset.nodes[nodeIndex].meshIndex
         if (meshIndex < 0) {
@@ -170,7 +170,7 @@ class GltfInstance internal constructor(val handle: GltfHandle) {
         } else {
             val instanceCount = (handle.asset.nodes[nodeIndex].instanceMatrices.size / 16).coerceAtLeast(1)
             Array(handle.asset.meshes[meshIndex].primitives.size) { primitiveIndex ->
-                Array(instanceCount) { GltfGpuSubmit(this, nodeIndex, meshIndex, primitiveIndex) }
+                Array(instanceCount) { GpuSubmit(this, nodeIndex, meshIndex, primitiveIndex) }
             }
         }
     }

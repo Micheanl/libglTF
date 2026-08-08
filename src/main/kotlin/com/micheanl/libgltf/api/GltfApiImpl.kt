@@ -4,11 +4,11 @@ import com.micheanl.libgltf.asset.GltfLoadResult
 import com.micheanl.libgltf.asset.GltfLoader
 import com.micheanl.libgltf.lod.LodPolicy
 import com.micheanl.libgltf.model.GltfAsset
-import com.micheanl.libgltf.render.GltfGpuCapabilities
+import com.micheanl.libgltf.render.GpuCapabilities
 import com.micheanl.libgltf.render.GltfRenderRegistry
 import com.micheanl.libgltf.render.GltfRenderSystem
 import com.micheanl.libgltf.render.GltfSceneRenderer
-import com.micheanl.libgltf.render.gpu.GltfGpuBackend
+import com.micheanl.libgltf.render.gpu.GpuBackend
 import com.mojang.blaze3d.vertex.PoseStack
 import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
@@ -30,7 +30,7 @@ object GltfApiImpl : GltfApi {
 
     override fun unregister(id: GltfInstanceId): Boolean = GltfRenderRegistry.unregister(id)
 
-    override fun gpuCapabilities(): GltfGpuCapabilities = GltfGpuBackend.capabilities()
+    override fun gpuCapabilities(): GpuCapabilities = GpuBackend.capabilities()
 
     override fun submit(
         instance: GltfInstance,

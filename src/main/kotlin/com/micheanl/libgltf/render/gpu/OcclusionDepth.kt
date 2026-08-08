@@ -1,7 +1,7 @@
 package com.micheanl.libgltf.render.gpu
 
-import com.micheanl.libgltf.render.vulkan.GltfRenderConfig
-import com.micheanl.libgltf.render.GltfGpuBackendType
+import com.micheanl.libgltf.render.vulkan.RenderConfig
+import com.micheanl.libgltf.render.GpuBackendType
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.pipeline.TextureTarget
 import com.mojang.renderpearl.api.GpuFormat
@@ -9,7 +9,7 @@ import com.mojang.renderpearl.api.textures.GpuTexture
 import com.mojang.renderpearl.api.textures.GpuTextureView
 import net.minecraft.client.Minecraft
 
-object GltfOcclusionDepth : AutoCloseable {
+object OcclusionDepth : AutoCloseable {
     private var target: TextureTarget? = null
     private var retired: TextureTarget? = null
     @Volatile
@@ -53,5 +53,5 @@ object GltfOcclusionDepth : AutoCloseable {
     }
 
     private fun active(): Boolean =
-        GltfRenderConfig.occlusionCulling && GltfGpuBackend.capabilities().backend == GltfGpuBackendType.VULKAN
+        RenderConfig.occlusionCulling && GpuBackend.capabilities().backend == GpuBackendType.VULKAN
 }

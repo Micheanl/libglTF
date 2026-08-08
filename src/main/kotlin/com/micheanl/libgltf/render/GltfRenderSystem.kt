@@ -2,8 +2,8 @@ package com.micheanl.libgltf.render
 
 import com.micheanl.libgltf.api.GltfHandle
 import com.micheanl.libgltf.model.GltfAsset
-import com.micheanl.libgltf.render.feature.GltfGpuFeature
-import com.micheanl.libgltf.render.gpu.GltfGpuBackend
+import com.micheanl.libgltf.render.feature.GpuFeature
+import com.micheanl.libgltf.render.gpu.GpuBackend
 import com.mojang.blaze3d.systems.RenderSystem
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionEvents
@@ -21,10 +21,10 @@ object GltfRenderSystem {
     fun initialize() {
         if (!initialized.compareAndSet(false, true)) return
         GltfConfig.load()
-        GltfGpuBackend.refresh()
-        ClientLifecycleEvents.CLIENT_STARTED.register { _ -> GltfGpuBackend.refresh() }
+        GpuBackend.refresh()
+        ClientLifecycleEvents.CLIENT_STARTED.register { _ -> GpuBackend.refresh() }
         ClientLifecycleEvents.CLIENT_STOPPING.register { _ -> closeAll() }
-        GltfGpuFeature.initialize()
+        GpuFeature.initialize()
         LevelExtractionEvents.END_EXTRACTION.register { GltfFrameState.capture() }
         LevelRenderEvents.COLLECT_SUBMITS.register(GltfWorldRenderer::submit)
     }

@@ -1,10 +1,10 @@
 package com.micheanl.libgltf.render.feature
 
-import com.micheanl.libgltf.render.vulkan.GltfRenderConfig
-import com.micheanl.libgltf.render.vulkan.GltfVulkanGpuDriver
-import com.micheanl.libgltf.render.gpu.GltfOcclusionDepth
-import com.micheanl.libgltf.render.gl.GltfGlGpuDriver
-import com.micheanl.libgltf.render.gpu.GltfGpuDriver
+import com.micheanl.libgltf.render.vulkan.RenderConfig
+import com.micheanl.libgltf.render.vulkan.VulkanGpuDriver
+import com.micheanl.libgltf.render.gpu.OcclusionDepth
+import com.micheanl.libgltf.render.gl.GlGpuDriver
+import com.micheanl.libgltf.render.gpu.GpuDriver
 import com.mojang.renderpearl.api.commands.RenderPass
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.logging.LogUtils
@@ -12,8 +12,8 @@ import net.minecraft.client.renderer.feature.FeatureFrameContext
 import net.minecraft.client.renderer.feature.FeatureRenderer
 import net.minecraft.client.renderer.oit.OitStage
 
-class GltfGpuSubmitRenderer : FeatureRenderer<GltfGpuSubmit> {
-    private val batches = ArrayList<GltfGpuBatch>()
+class GpuSubmitRenderer : FeatureRenderer<GpuSubmit> {
+    private val batches = ArrayList<GpuBatch>()
     private var groupStarts = IntArray(INITIAL_GROUP_CAPACITY)
     private var groupCounts = IntArray(INITIAL_GROUP_CAPACITY)
     private var preparedBatchCount = 0
@@ -25,7 +25,7 @@ class GltfGpuSubmitRenderer : FeatureRenderer<GltfGpuSubmit> {
             gpuDriven = null
             gpuDrivenAttempted = true
             try {
-                gpuDriven = GltfVulkanGpuDriver.create(RenderSystem.getDevice()) ?: GltfGlGpuDriver.create()
+                gpuDriven = VulkanGpuDriver.create(RenderSystem.getDevice()) ?: GlGpuDriver.create()
                 activeMesh = gpuDriven?.meshSupported == true
             } catch (error: RuntimeException) {
                 activeMesh = false
@@ -36,7 +36,7 @@ class GltfGpuSubmitRenderer : FeatureRenderer<GltfGpuSubmit> {
         preparedGroupCount = 0
     }
 
-    override fun prepareGroup(context: FeatureFrameContext, submits: List<GltfGpuSubmit>, strictlyOrdered: Boolean) {
+    override fun prepareGroup(context: FeatureFrameContext, submits: List<GpuSubmit>, strictlyOrdered: Boolean) {
         ensureGroupCapacity(preparedGroupCount + 1)
         val start = preparedBatchCount
         if (strictlyOrdered) {
@@ -49,7 +49,7 @@ class GltfGpuSubmitRenderer : FeatureRenderer<GltfGpuSubmit> {
         preparedGroupCount++
     }
 
-    private fun prepareBatches(submits: List<GltfGpuSubmit>) {
+    private fun prepareBatches(submits: List<GpuSubmit>) {
         if (submits.isEmpty()) return
         var fromIndex = 0
         var key = submits[0].batchKey()
@@ -69,7 +69,7 @@ class GltfGpuSubmitRenderer : FeatureRenderer<GltfGpuSubmit> {
         stage: OitStage?,
         renderPass: RenderPass,
         groupIndex: Int,
-        submits: List<GltfGpuSubmit>,
+        submits: List<GpuSubmit>,
         strictlyOrdered: Boolean
     ) {
         val start = groupStarts[groupIndex]
@@ -86,14 +86,14 @@ class GltfGpuSubmitRenderer : FeatureRenderer<GltfGpuSubmit> {
         batches.clear()
         gpuDriven?.close()
         gpuDriven = null
-        GltfOcclusionDepth.close()
+        OcclusionDepth.close()
     }
 
-    private fun prepareBatch(submits: List<GltfGpuSubmit>, fromIndex: Int, toIndex: Int) {
+    private fun prepareBatch(submits: List<GpuSubmit>, fromIndex: Int, toIndex: Int) {
         val batch = if (preparedBatchCount < batches.size) {
             batches[preparedBatchCount]
         } else {
-            GltfGpuBatch().also(batches::add)
+            GpuBatch().also(batches::add)
         }
         batch.prepare(submits, fromIndex, toIndex, gpuDriven)
         preparedBatchCount++
@@ -109,7 +109,7 @@ class GltfGpuSubmitRenderer : FeatureRenderer<GltfGpuSubmit> {
     companion object {
         const val INITIAL_GROUP_CAPACITY = 16
         @Volatile
-        var gpuDriven: GltfGpuDriver? = null
+        var gpuDriven: GpuDriver? = null
 
         @Volatile
         var gpuDrivenAttempted = false

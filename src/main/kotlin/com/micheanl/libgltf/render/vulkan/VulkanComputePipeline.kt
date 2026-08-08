@@ -12,7 +12,7 @@ import org.lwjgl.util.shaderc.Shaderc
 import org.lwjgl.vulkan.*
 import java.nio.ByteBuffer
 
-class GltfVulkanComputePipeline private constructor(
+class VulkanComputePipeline private constructor(
     private val device: VulkanDevice,
     private val descriptorSetLayout: Long,
     private val pipelineLayout: Long,
@@ -99,8 +99,8 @@ class GltfVulkanComputePipeline private constructor(
     private fun vulkan(buffer: GpuBuffer): Long = (buffer as VulkanGpuBuffer).vkBuffer()
 
     companion object {
-        fun create(device: VulkanDevice): GltfVulkanComputePipeline {
-            val source = requireNotNull(GltfVulkanComputePipeline::class.java.getResourceAsStream(SHADER_PATH))
+        fun create(device: VulkanDevice): VulkanComputePipeline {
+            val source = requireNotNull(VulkanComputePipeline::class.java.getResourceAsStream(SHADER_PATH))
                 .bufferedReader().use { it.readText() }
             val compiler = Shaderc.shaderc_compiler_initialize()
             check(compiler != MemoryUtil.NULL)
@@ -119,7 +119,7 @@ class GltfVulkanComputePipeline private constructor(
             }
         }
 
-        private fun create(device: VulkanDevice, code: ByteBuffer): GltfVulkanComputePipeline {
+        private fun create(device: VulkanDevice, code: ByteBuffer): VulkanComputePipeline {
             MemoryStack.stackPush().use { stack ->
                 val bindings = VkDescriptorSetLayoutBinding.calloc(DESCRIPTOR_COUNT, stack)
                 for (index in 0 until DESCRIPTOR_COUNT) {
@@ -157,7 +157,7 @@ class GltfVulkanComputePipeline private constructor(
                                 .stage(stage).layout(pipelineLayout)
                             val pipelinePointer = stack.mallocLong(1)
                             checkVk(VK10.vkCreateComputePipelines(device.vkDevice(), 0L, pipelineInfo, null, pipelinePointer))
-                            return GltfVulkanComputePipeline(device, descriptorSetLayout, pipelineLayout, pipelinePointer[0])
+                            return VulkanComputePipeline(device, descriptorSetLayout, pipelineLayout, pipelinePointer[0])
                         } finally {
                             VK10.vkDestroyShaderModule(device.vkDevice(), shaderModule, null)
                         }

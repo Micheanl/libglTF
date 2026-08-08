@@ -1,7 +1,7 @@
 package com.micheanl.libgltf.mixin;
 
 import com.micheanl.libgltf.LibGltf;
-import com.micheanl.libgltf.render.gpu.GltfGpuBackend;
+import com.micheanl.libgltf.render.gpu.GpuBackend;
 import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import java.util.Optional;
 import net.minecraft.resources.Identifier;
@@ -23,7 +23,7 @@ public abstract class RenderPipelineBuilderMixin {
     private int libgltf$vertexAttributeLimit(int original) {
         Identifier pipelineLocation = location.orElse(null);
         return pipelineLocation != null && LibGltf.MOD_ID.equals(pipelineLocation.getNamespace())
-                ? GltfGpuBackend.INSTANCE.vertexAttributeLimit()
+                ? GpuBackend.INSTANCE.vertexAttributeLimit()
                 : original;
     }
 }

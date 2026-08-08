@@ -1,5 +1,5 @@
 package com.micheanl.libgltf.render.gpu
 
-interface GltfGpuDriver : AutoCloseable {
+interface GpuDriver : AutoCloseable {
     val meshSupported: Boolean
 }

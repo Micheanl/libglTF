@@ -1,7 +1,7 @@
 package com.micheanl.libgltf.render.gl
 
-import com.micheanl.libgltf.render.gpu.GltfMeshletStorage
-import com.micheanl.libgltf.render.gpu.GltfGpuBackend
+import com.micheanl.libgltf.render.gpu.MeshletStorage
+import com.micheanl.libgltf.render.gpu.GpuBackend
 import com.mojang.logging.LogUtils
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.pipeline.RenderPipeline
@@ -13,8 +13,8 @@ import org.lwjgl.opengl.NVMeshShader
 import java.util.Collections
 import java.util.IdentityHashMap
 
-class GltfGlMeshPipelineCache : AutoCloseable {
-    private val pipelines = Collections.synchronizedMap(IdentityHashMap<RenderPipeline, GltfGlMeshPipeline>())
+class GlMeshPipelineCache : AutoCloseable {
+    private val pipelines = Collections.synchronizedMap(IdentityHashMap<RenderPipeline, GlMeshPipeline>())
     private val failed = Collections.newSetFromMap(IdentityHashMap<RenderPipeline, Boolean>())
     private val maxTaskGroups: Int
     private val useNv: Boolean
@@ -31,7 +31,7 @@ class GltfGlMeshPipelineCache : AutoCloseable {
         val taskInvocationTarget = if (useNv) NVMeshShader.GL_MAX_TASK_WORK_GROUP_INVOCATIONS_NV else EXTMeshShader.GL_MAX_TASK_WORK_GROUP_INVOCATIONS_EXT
         val meshInvocationTarget = if (useNv) NVMeshShader.GL_MAX_MESH_WORK_GROUP_INVOCATIONS_NV else EXTMeshShader.GL_MAX_MESH_WORK_GROUP_INVOCATIONS_EXT
         val maxMeshInvocations = if (extSupported || nvSupported) query(meshInvocationTarget) else 0
-        val preferredWorkgroupSize = GltfGpuBackend.vendorProfile().maxMeshWorkGroupSize
+        val preferredWorkgroupSize = GpuBackend.vendorProfile().maxMeshWorkGroupSize
         meshWorkgroupSize = if (useNv) {
             if (maxMeshInvocations >= 32) 32 else 0
         } else {
@@ -73,7 +73,7 @@ class GltfGlMeshPipelineCache : AutoCloseable {
         preparedRenderType: PreparedRenderType,
         geometry: GpuBuffer,
         instances: GpuBuffer,
-        meshlets: GltfMeshletStorage,
+        meshlets: MeshletStorage,
         sphere: FloatArray,
         instanceCount: Int,
         instanceCulling: Boolean,
@@ -81,7 +81,7 @@ class GltfGlMeshPipelineCache : AutoCloseable {
     ): Boolean {
         if (!supported || failed.contains(renderPipeline)) return false
         val pipeline = pipelines[renderPipeline] ?: try {
-            GltfGlMeshPipeline.create(renderPipeline, useNv, meshWorkgroupSize).also { pipelines[renderPipeline] = it }
+            GlMeshPipeline.create(renderPipeline, useNv, meshWorkgroupSize).also { pipelines[renderPipeline] = it }
         } catch (error: RuntimeException) {
             LOGGER.error("libgltf GL mesh pipeline creation failed for {}", renderPipeline.getLocation(), error)
             failed.add(renderPipeline)
@@ -101,7 +101,7 @@ class GltfGlMeshPipelineCache : AutoCloseable {
     }
 
     override fun close() {
-        pipelines.values.forEach(GltfGlMeshPipeline::close)
+        pipelines.values.forEach(GlMeshPipeline::close)
         pipelines.clear()
         failed.clear()
     }

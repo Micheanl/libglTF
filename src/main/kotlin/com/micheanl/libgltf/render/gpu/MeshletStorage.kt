@@ -1,6 +1,6 @@
 package com.micheanl.libgltf.render.gpu
 
-import com.micheanl.libgltf.render.vulkan.GltfVulkanUsage
+import com.micheanl.libgltf.render.vulkan.VulkanUsage
 import com.micheanl.libgltf.model.VertexLayout
 import com.mojang.renderpearl.api.pipeline.IndexType
 import com.mojang.renderpearl.api.buffers.GpuBuffer
@@ -14,7 +14,7 @@ import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
 
-class GltfMeshletStorage private constructor(
+class MeshletStorage private constructor(
     val indexBuffer: GpuBuffer,
     val metadataBuffer: GpuBuffer,
     val vertexBuffer: GpuBuffer,
@@ -42,7 +42,7 @@ class GltfMeshletStorage private constructor(
             maxVertices: Int,
             maxTriangles: Int,
             bounds: FloatArray
-        ): GltfMeshletStorage {
+        ): MeshletStorage {
             val indexCount = indices.remaining()
             val maxMeshlets = MeshOptimizer.meshopt_buildMeshletsBound(
                 indexCount.toLong(), maxVertices.toLong(), maxTriangles.toLong()
@@ -218,13 +218,13 @@ class GltfMeshletStorage private constructor(
                 vertexData.position(usedVertices * COMPACT_VERTEX_WORDS * Int.SIZE_BYTES).flip()
                 triangleData.flip()
                 wholeMetadata.flip()
-                return GltfMeshletStorage(
+                return MeshletStorage(
                     device.createBuffer({ "$label meshlet indices" }, GpuBuffer.USAGE_INDEX, packedIndices),
-                    device.createBuffer({ "$label meshlet metadata" }, GltfVulkanUsage.STORAGE, metadata),
-                    device.createBuffer({ "$label meshlet vertices" }, GltfVulkanUsage.STORAGE, vertexData),
-                    device.createBuffer({ "$label meshlet triangles" }, GltfVulkanUsage.STORAGE, triangleData),
+                    device.createBuffer({ "$label meshlet metadata" }, VulkanUsage.STORAGE, metadata),
+                    device.createBuffer({ "$label meshlet vertices" }, VulkanUsage.STORAGE, vertexData),
+                    device.createBuffer({ "$label meshlet triangles" }, VulkanUsage.STORAGE, triangleData),
                     meshletCount,
-                    device.createBuffer({ "$label primitive metadata" }, GltfVulkanUsage.STORAGE, wholeMetadata)
+                    device.createBuffer({ "$label primitive metadata" }, VulkanUsage.STORAGE, wholeMetadata)
                 )
             } finally {
                 MemoryUtil.memFree(wholeMetadata)

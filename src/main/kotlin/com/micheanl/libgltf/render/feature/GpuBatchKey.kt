@@ -2,7 +2,7 @@ package com.micheanl.libgltf.render.feature
 
 import net.minecraft.client.renderer.rendertype.RenderType
 
-data class GltfGpuBatchKey(
+data class GpuBatchKey(
     val resourceId: Long,
     val meshIndex: Int,
     val primitiveIndex: Int,

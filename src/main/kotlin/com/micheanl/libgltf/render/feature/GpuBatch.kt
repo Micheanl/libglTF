@@ -1,15 +1,15 @@
 package com.micheanl.libgltf.render.feature
 
 import com.micheanl.libgltf.api.GltfInstance
-import com.micheanl.libgltf.render.GltfGpuBackendType
-import com.micheanl.libgltf.render.gpu.GltfGpuDriver
-import com.micheanl.libgltf.render.gpu.GltfGpuBackend
-import com.micheanl.libgltf.render.gpu.GltfGpuFormats
-import com.micheanl.libgltf.render.gpu.GltfGpuMesh
-import com.micheanl.libgltf.render.vulkan.GltfMeshletDispatcher
-import com.micheanl.libgltf.render.vulkan.GltfRenderConfig
-import com.micheanl.libgltf.render.vulkan.GltfVulkanGpuDriver
-import com.micheanl.libgltf.render.vulkan.GltfVulkanUsage
+import com.micheanl.libgltf.render.GpuBackendType
+import com.micheanl.libgltf.render.gpu.GpuDriver
+import com.micheanl.libgltf.render.gpu.GpuBackend
+import com.micheanl.libgltf.render.gpu.GpuFormats
+import com.micheanl.libgltf.render.gpu.GpuMesh
+import com.micheanl.libgltf.render.vulkan.MeshletDispatcher
+import com.micheanl.libgltf.render.vulkan.RenderConfig
+import com.micheanl.libgltf.render.vulkan.VulkanGpuDriver
+import com.micheanl.libgltf.render.vulkan.VulkanUsage
 import com.mojang.renderpearl.api.commands.RenderPass
 import com.mojang.renderpearl.api.pipeline.IndexType
 import com.mojang.renderpearl.api.buffers.GpuBuffer
@@ -23,12 +23,12 @@ import net.minecraft.client.renderer.rendertype.PreparedRenderType
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-class GltfGpuBatch : AutoCloseable {
+class GpuBatch : AutoCloseable {
     private var instanceBuffer: MappableRingBuffer? = null
     private var paletteBuffer: MappableRingBuffer? = null
     private var sortedIndexBuffer: MappableRingBuffer? = null
-    private val gpuDriven = GltfMeshletDispatcher()
-    private var gpuDrivenDriver: GltfGpuDriver? = null
+    private val gpuDriven = MeshletDispatcher()
+    private var gpuDrivenDriver: GpuDriver? = null
     private var storageInstances = false
     private var instanceCapacity = 0
     private var paletteCapacity = 0
@@ -36,7 +36,7 @@ class GltfGpuBatch : AutoCloseable {
     private var sortingCenters: CompactVectorArray? = null
     private val sortingPosition = FloatArray(3)
     private lateinit var preparedRenderType: PreparedRenderType
-    private lateinit var primitive: GltfGpuMesh
+    private lateinit var primitive: GpuMesh
     private var lod = 0
     private var instanceCount = 0
     private var skinned = false
@@ -45,7 +45,7 @@ class GltfGpuBatch : AutoCloseable {
     private var frameUsed = false
     private var frameIndirect = false
 
-    fun prepare(submits: List<GltfGpuSubmit>, fromIndex: Int, toIndex: Int, driver: GltfGpuDriver?) {
+    fun prepare(submits: List<GpuSubmit>, fromIndex: Int, toIndex: Int, driver: GpuDriver?) {
         val first = submits[fromIndex]
         gpuDrivenDriver = driver
         val gpu = first.resource.gpu()
@@ -174,7 +174,7 @@ class GltfGpuBatch : AutoCloseable {
         active = false
     }
 
-    private fun prepareSortedIndices(submit: GltfGpuSubmit) {
+    private fun prepareSortedIndices(submit: GpuSubmit) {
         val indices = primitive.indices[lod]
         val cachedCenters = requireNotNull(primitive.triangleCenters)[lod]
         val triangleCount = indices.size / 3
@@ -266,9 +266,9 @@ class GltfGpuBatch : AutoCloseable {
         sortingPosition[2] = if (totalWeight > 0.0f) z else sourceZ
     }
 
-    private fun writeInstances(submits: List<GltfGpuSubmit>, fromIndex: Int, toIndex: Int) {
+    private fun writeInstances(submits: List<GpuSubmit>, fromIndex: Int, toIndex: Int) {
         val stride = instanceStride()
-        val gl = GltfGpuBackend.capabilities().backend == GltfGpuBackendType.OPENGL
+        val gl = GpuBackend.capabilities().backend == GpuBackendType.OPENGL
         val view = requireNotNull(instanceBuffer)
             .currentBuffer()
             .slice(0L, (instanceCount * stride).toLong())
@@ -299,13 +299,13 @@ class GltfGpuBatch : AutoCloseable {
         }
     }
 
-    private fun instanceStride(): Int = if (GltfGpuBackend.capabilities().backend == GltfGpuBackendType.OPENGL) {
-        GltfGpuFormats.INSTANCE_STRIDE_GL
+    private fun instanceStride(): Int = if (GpuBackend.capabilities().backend == GpuBackendType.OPENGL) {
+        GpuFormats.INSTANCE_STRIDE_GL
     } else {
-        GltfGpuFormats.INSTANCE_STRIDE
+        GpuFormats.INSTANCE_STRIDE
     }
 
-    private fun writeInstanceGl(data: ByteBuffer, offset: Int, submit: GltfGpuSubmit, paletteOffset: Int) {
+    private fun writeInstanceGl(data: ByteBuffer, offset: Int, submit: GpuSubmit, paletteOffset: Int) {
         submit.modelMatrix.get(offset, data)
         val normal = submit.normalMatrix
         data.putFloat(offset + 64, normal.m00())
@@ -335,7 +335,7 @@ class GltfGpuBatch : AutoCloseable {
         data.putFloat(offset + 164, submit.uvTransform1[1])
     }
 
-    private fun writeInstance(data: ByteBuffer, offset: Int, submit: GltfGpuSubmit, paletteOffset: Int) {
+    private fun writeInstance(data: ByteBuffer, offset: Int, submit: GpuSubmit, paletteOffset: Int) {
         submit.modelMatrix.get(offset, data)
         val normal = submit.normalMatrix
         data.putFloat(offset + 64, normal.m00())
@@ -365,7 +365,7 @@ class GltfGpuBatch : AutoCloseable {
         data.putFloat(offset + 160, submit.uvTransform1[1])
     }
 
-    private fun writePalettes(submits: List<GltfGpuSubmit>, fromIndex: Int, toIndex: Int) {
+    private fun writePalettes(submits: List<GpuSubmit>, fromIndex: Int, toIndex: Int) {
         val written = HashSet<GltfInstance>()
         var floatCount = 0
         for (index in fromIndex until toIndex) {
@@ -397,7 +397,7 @@ class GltfGpuBatch : AutoCloseable {
         val usage = GpuBuffer.USAGE_MAP_WRITE or
             GpuBuffer.USAGE_HINT_CLIENT_STORAGE or
             GpuBuffer.USAGE_VERTEX or
-            if (storage) GltfVulkanUsage.STORAGE else 0
+            if (storage) VulkanUsage.STORAGE else 0
         instanceBuffer = MappableRingBuffer({ "libgltf instance buffer" }, usage, instanceCapacity)
     }
     private fun ensurePaletteCapacity(required: Int) {

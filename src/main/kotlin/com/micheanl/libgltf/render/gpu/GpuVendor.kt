@@ -2,7 +2,7 @@ package com.micheanl.libgltf.render.gpu
 
 import com.mojang.renderpearl.api.device.DeviceInfo
 
-enum class GltfGpuVendor {
+enum class GpuVendor {
     NVIDIA,
     AMD,
     INTEL,
@@ -10,8 +10,8 @@ enum class GltfGpuVendor {
     UNKNOWN
 }
 
-data class GltfGpuVendorProfile(
-    val vendor: GltfGpuVendor,
+data class GpuVendorProfile(
+    val vendor: GpuVendor,
     val preferMeshShader: Boolean,
     val preferVulkanMeshShader: Boolean,
     val enableInstanceCulling: Boolean,
@@ -20,11 +20,11 @@ data class GltfGpuVendorProfile(
     val maxMeshWorkGroupSize: Int
 )
 
-object GltfGpuVendors {
-    fun profile(info: DeviceInfo): GltfGpuVendorProfile {
+object GpuVendors {
+    fun profile(info: DeviceInfo): GpuVendorProfile {
         val vendor = vendor(info.vendorName())
         return when (vendor) {
-            GltfGpuVendor.NVIDIA -> GltfGpuVendorProfile(
+            GpuVendor.NVIDIA -> GpuVendorProfile(
                 vendor,
                 true,
                 true,
@@ -33,7 +33,7 @@ object GltfGpuVendors {
                 65535,
                 64
             )
-            GltfGpuVendor.AMD -> GltfGpuVendorProfile(
+            GpuVendor.AMD -> GpuVendorProfile(
                 vendor,
                 true,
                 true,
@@ -42,7 +42,7 @@ object GltfGpuVendors {
                 65535,
                 64
             )
-            GltfGpuVendor.INTEL -> GltfGpuVendorProfile(
+            GpuVendor.INTEL -> GpuVendorProfile(
                 vendor,
                 false,
                 false,
@@ -51,7 +51,7 @@ object GltfGpuVendors {
                 65535,
                 64
             )
-            GltfGpuVendor.APPLE -> GltfGpuVendorProfile(
+            GpuVendor.APPLE -> GpuVendorProfile(
                 vendor,
                 false,
                 false,
@@ -60,7 +60,7 @@ object GltfGpuVendors {
                 0,
                 0
             )
-            GltfGpuVendor.UNKNOWN -> GltfGpuVendorProfile(
+            GpuVendor.UNKNOWN -> GpuVendorProfile(
                 vendor,
                 true,
                 true,
@@ -72,14 +72,14 @@ object GltfGpuVendors {
         }
     }
 
-    fun vendor(vendorName: String): GltfGpuVendor {
+    fun vendor(vendorName: String): GpuVendor {
         val name = vendorName.uppercase()
         return when {
-            name.contains("NVIDIA") -> GltfGpuVendor.NVIDIA
-            name.contains("AMD") || name.contains("ATI") -> GltfGpuVendor.AMD
-            name.contains("INTEL") -> GltfGpuVendor.INTEL
-            name.contains("APPLE") -> GltfGpuVendor.APPLE
-            else -> GltfGpuVendor.UNKNOWN
+            name.contains("NVIDIA") -> GpuVendor.NVIDIA
+            name.contains("AMD") || name.contains("ATI") -> GpuVendor.AMD
+            name.contains("INTEL") -> GpuVendor.INTEL
+            name.contains("APPLE") -> GpuVendor.APPLE
+            else -> GpuVendor.UNKNOWN
         }
     }
 }

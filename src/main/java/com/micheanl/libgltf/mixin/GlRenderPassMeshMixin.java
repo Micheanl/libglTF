@@ -1,8 +1,8 @@
 package com.micheanl.libgltf.mixin;
 
 import com.micheanl.libgltf.render.gl.GlMeshRenderPass;
-import com.micheanl.libgltf.render.gl.GltfGlMeshPipelineCache;
-import com.micheanl.libgltf.render.gpu.GltfMeshletStorage;
+import com.micheanl.libgltf.render.gl.GlMeshPipelineCache;
+import com.micheanl.libgltf.render.gpu.MeshletStorage;
 import com.mojang.renderpearl.api.buffers.GpuBuffer;
 import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import com.mojang.renderpearl.backend.opengl.GlRenderPipeline;
@@ -17,12 +17,12 @@ public abstract class GlRenderPassMeshMixin implements GlMeshRenderPass {
 
     @Override
     public boolean drawMeshTasks(
-            GltfGlMeshPipelineCache cache,
+            GlMeshPipelineCache cache,
             RenderPipeline renderPipeline,
             PreparedRenderType preparedRenderType,
             GpuBuffer geometry,
             GpuBuffer instances,
-            GltfMeshletStorage meshlets,
+            MeshletStorage meshlets,
             float[] sphere,
             int instanceCount,
             boolean instanceCulling,

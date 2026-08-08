@@ -6,8 +6,8 @@ import com.micheanl.libgltf.material.TextureWrap
 import com.micheanl.libgltf.model.GltfPrimitive
 import com.micheanl.libgltf.model.PrimitiveMode
 import com.micheanl.libgltf.render.cpu.GltfGeometryRenderer
-import com.micheanl.libgltf.render.feature.GltfGpuSubmit
-import com.micheanl.libgltf.render.gpu.GltfGpuBackend
+import com.micheanl.libgltf.render.feature.GpuSubmit
+import com.micheanl.libgltf.render.gpu.GpuBackend
 import com.micheanl.libgltf.render.iris.IrisCompat
 import com.mojang.blaze3d.vertex.PoseStack
 import java.util.function.Consumer
@@ -45,7 +45,7 @@ object GltfSceneRenderer {
         val textures = resource.textures()
         val gpuEnabled =
             instance.renderMode != GltfRenderMode.CPU &&
-                GltfGpuBackend.capabilities().instancing &&
+                GpuBackend.capabilities().instancing &&
                 !IrisCompat.shaderPackActive()
         val asset = instance.handle.asset
         val camera = Minecraft.getInstance().gameRenderer.gameRenderState().levelRenderState.cameraRenderState
@@ -169,7 +169,7 @@ object GltfSceneRenderer {
     private fun submitInstance(
         submitNodeCollector: OrderedSubmitNodeCollector,
         renderer: GltfGeometryRenderer,
-        submit: GltfGpuSubmit
+        submit: GpuSubmit
     ) {
         if (renderer.transparent()) {
             submitNodeCollector.submitCustom(SubmitRenderPhases.TRANSLUCENT_MODELS, submit)
@@ -248,7 +248,7 @@ object GltfSceneRenderer {
 
     private fun gpuCompatible(instance: GltfInstance, nodeIndex: Int, primitive: GltfPrimitive): Boolean {
         if (primitive.mode != PrimitiveMode.TRIANGLES || primitive.morphTargetCount > 0) return false
-        if (GltfGpuBackend.capabilities().backend == GltfGpuBackendType.OPENGL && primitive.skin != null) return false
+        if (GpuBackend.capabilities().backend == GpuBackendType.OPENGL && primitive.skin != null) return false
         val asset = instance.handle.asset
         val node = asset.nodes[nodeIndex]
         if (primitive.skin != null && node.skinIndex < 0) return false

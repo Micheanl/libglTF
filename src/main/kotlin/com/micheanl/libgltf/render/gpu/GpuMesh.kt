@@ -3,8 +3,8 @@ package com.micheanl.libgltf.render.gpu
 import com.micheanl.libgltf.model.GltfPrimitive
 import com.micheanl.libgltf.model.PrimitiveMode
 import com.micheanl.libgltf.model.VertexLayout
-import com.micheanl.libgltf.render.GltfGpuBackendType
-import com.micheanl.libgltf.render.vulkan.GltfVulkanUsage
+import com.micheanl.libgltf.render.GpuBackendType
+import com.micheanl.libgltf.render.vulkan.VulkanUsage
 import com.mojang.renderpearl.api.pipeline.IndexType
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.device.GpuDevice
@@ -14,7 +14,7 @@ import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
 
-class GltfGpuMesh private constructor(
+class GpuMesh private constructor(
     val vertexBuffer: GpuBuffer,
     val skinBuffer: GpuBuffer?,
     val indexBuffers: Array<GpuBuffer>,
@@ -25,17 +25,17 @@ class GltfGpuMesh private constructor(
     val sortingPositions: FloatArray?,
     val sortingSkin: ShortArray?,
     val boundsSphere: FloatArray,
-    val meshlets: Array<GltfMeshletStorage>?
+    val meshlets: Array<MeshletStorage>?
 ) : AutoCloseable {
     override fun close() {
         vertexBuffer.close()
         skinBuffer?.close()
         for (buffer in indexBuffers) buffer.close()
-        meshlets?.forEach(GltfMeshletStorage::close)
+        meshlets?.forEach(MeshletStorage::close)
     }
 
     companion object {
-        fun create(device: GpuDevice, label: String, primitive: GltfPrimitive, buildMeshlets: Boolean): GltfGpuMesh {
+        fun create(device: GpuDevice, label: String, primitive: GltfPrimitive, buildMeshlets: Boolean): GpuMesh {
             val sourceVertices = directCopy(primitive.vertices)
             val sourceSkin = primitive.skin?.let(::directCopy)
             val positions = extractPositions(sourceVertices, primitive.vertexCount)
@@ -90,7 +90,7 @@ class GltfGpuMesh private constructor(
                 val sortingPositions = if (sortingSkin == null) null else copyPositions(remappedPositions)
                 val vertexBuffer = device.createBuffer(
                     { "$label vertices" },
-                    GpuBuffer.USAGE_VERTEX or if (buildMeshlets) GltfVulkanUsage.STORAGE else 0,
+                    GpuBuffer.USAGE_VERTEX or if (buildMeshlets) VulkanUsage.STORAGE else 0,
                     remappedVertices.position(0)
                 )
                 val skinBuffer = remappedSkin?.let {
@@ -106,9 +106,9 @@ class GltfGpuMesh private constructor(
                 }
                 val boundsSphere = boundingSphere(primitive.bounds)
                 val meshlets = if (buildMeshlets && primitive.mode == PrimitiveMode.TRIANGLES) {
-                    val gl = GltfGpuBackend.capabilities().backend == GltfGpuBackendType.OPENGL
+                    val gl = GpuBackend.capabilities().backend == GpuBackendType.OPENGL
                     Array(optimized.size) { level ->
-                        GltfMeshletStorage.create(
+                        MeshletStorage.create(
                             device,
                             "$label lod $level",
                             optimized[level],
@@ -124,7 +124,7 @@ class GltfGpuMesh private constructor(
                 } else {
                     null
                 }
-                return GltfGpuMesh(
+                return GpuMesh(
                     vertexBuffer,
                     skinBuffer,
                     indexBuffers,

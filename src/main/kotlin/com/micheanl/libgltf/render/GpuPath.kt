@@ -1,6 +1,6 @@
 package com.micheanl.libgltf.render
 
-enum class GltfGpuPath {
+enum class GpuPath {
     CPU,
     INSTANCED,
     MESH_SHADER

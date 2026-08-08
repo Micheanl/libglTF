@@ -2,7 +2,7 @@ package com.micheanl.libgltf.render.gl
 
 import com.micheanl.libgltf.mixin.GlBufferAccessor
 import com.micheanl.libgltf.mixin.GlSamplerAccessor
-import com.micheanl.libgltf.render.gpu.GltfMeshletStorage
+import com.micheanl.libgltf.render.gpu.MeshletStorage
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice
@@ -20,7 +20,7 @@ import org.lwjgl.opengl.GL43C
 import org.lwjgl.opengl.NVMeshShader
 import org.lwjgl.system.MemoryStack
 
-class GltfGlMeshPipeline private constructor(
+class GlMeshPipeline private constructor(
     private val programId: Int,
     private val paramsUbo: Int,
     private val fallbackUbo: Int,
@@ -33,7 +33,7 @@ class GltfGlMeshPipeline private constructor(
         preparedRenderType: PreparedRenderType,
         geometry: GpuBuffer,
         instances: GpuBuffer,
-        meshlets: GltfMeshletStorage,
+        meshlets: MeshletStorage,
         sphere: FloatArray,
         instanceCount: Int,
         instanceCulling: Boolean,
@@ -163,7 +163,7 @@ class GltfGlMeshPipeline private constructor(
     }
 
     companion object {
-        fun create(renderPipeline: RenderPipeline, useNv: Boolean, meshWorkgroupSize: Int): GltfGlMeshPipeline {
+        fun create(renderPipeline: RenderPipeline, useNv: Boolean, meshWorkgroupSize: Int): GlMeshPipeline {
             val taskType = if (useNv) NVMeshShader.GL_TASK_SHADER_NV else EXTMeshShader.GL_TASK_SHADER_EXT
             val meshType = if (useNv) NVMeshShader.GL_MESH_SHADER_NV else EXTMeshShader.GL_MESH_SHADER_EXT
             val meshPath = if (useNv) "/assets/libgltf/shaders/mesh/gpu_mesh_nv.mesh" else "/assets/libgltf/shaders/mesh/gpu_mesh_gl.mesh"
@@ -187,7 +187,7 @@ class GltfGlMeshPipeline private constructor(
                     try {
                         val program = link(task, mesh, fragment)
                         setup(program)
-                        return GltfGlMeshPipeline(
+                        return GlMeshPipeline(
                             program,
                             GL33C.glGenBuffers(),
                             createFallbackUbo(),
@@ -210,7 +210,7 @@ class GltfGlMeshPipeline private constructor(
         }
 
         private fun shader(path: String): String =
-            requireNotNull(GltfGlMeshPipeline::class.java.getResourceAsStream(path))
+            requireNotNull(GlMeshPipeline::class.java.getResourceAsStream(path))
                 .bufferedReader()
                 .use { it.readText() }
 

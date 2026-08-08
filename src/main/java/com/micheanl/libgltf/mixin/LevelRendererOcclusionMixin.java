@@ -1,6 +1,6 @@
 package com.micheanl.libgltf.mixin;
 
-import com.micheanl.libgltf.render.gpu.GltfOcclusionDepth;
+import com.micheanl.libgltf.render.gpu.OcclusionDepth;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,6 +18,6 @@ public abstract class LevelRendererOcclusionMixin {
             FeatureRenderDispatcher.PreparedFrame featureFrame,
             CallbackInfo ci
     ) {
-        GltfOcclusionDepth.INSTANCE.update();
+        OcclusionDepth.INSTANCE.update();
     }
 }

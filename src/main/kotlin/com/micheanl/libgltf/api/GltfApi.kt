@@ -3,7 +3,7 @@ package com.micheanl.libgltf.api
 import com.micheanl.libgltf.asset.GltfLoadResult
 import com.micheanl.libgltf.lod.LodPolicy
 import com.micheanl.libgltf.model.GltfAsset
-import com.micheanl.libgltf.render.GltfGpuCapabilities
+import com.micheanl.libgltf.render.GpuCapabilities
 import com.mojang.blaze3d.vertex.PoseStack
 import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
@@ -17,7 +17,7 @@ interface GltfApi {
     fun createInstance(handle: GltfHandle): GltfInstance
     fun register(instance: GltfInstance): GltfInstanceId
     fun unregister(id: GltfInstanceId): Boolean
-    fun gpuCapabilities(): GltfGpuCapabilities
+    fun gpuCapabilities(): GpuCapabilities
     fun submit(
         instance: GltfInstance,
         poseStack: PoseStack,

@@ -3,7 +3,7 @@ package com.micheanl.libgltf.render.vulkan
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.device.GpuDevice
 
-class GltfVulkanBufferRing(
+class VulkanBufferRing(
     device: GpuDevice,
     label: String,
     usage: Int,

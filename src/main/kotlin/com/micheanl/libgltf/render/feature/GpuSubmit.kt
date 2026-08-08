@@ -14,7 +14,7 @@ import org.joml.Matrix4fc
 import kotlin.math.cos
 import kotlin.math.sin
 
-class GltfGpuSubmit(
+class GpuSubmit(
     val instance: GltfInstance,
     val nodeIndex: Int,
     val meshIndex: Int,
@@ -45,14 +45,14 @@ class GltfGpuSubmit(
     lateinit var renderType: RenderType
         private set
 
-    private lateinit var batchKey: GltfGpuBatchKey
+    private lateinit var batchKey: GpuBatchKey
     private var cachedResourceId = Long.MIN_VALUE
     private var cachedMaterialRevision = Long.MIN_VALUE
     private var cachedSkinned = false
     private var cachedLod = -1
     private var distanceToCameraSquared = 0.0f
 
-    override fun featureType(): FeatureRendererType<GltfGpuSubmit> = GltfGpuFeature.TYPE
+    override fun featureType(): FeatureRendererType<GpuSubmit> = GpuFeature.TYPE
 
     override fun batchKey(): Any = batchKey
 
@@ -154,7 +154,7 @@ class GltfGpuSubmit(
         }
 
         if (renderStateChanged || cachedLod != lod) {
-            batchKey = GltfGpuBatchKey(
+            batchKey = GpuBatchKey(
                 resource.id,
                 meshIndex,
                 primitiveIndex,

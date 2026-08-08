@@ -4,9 +4,9 @@ import com.micheanl.libgltf.LibGltf
 import com.micheanl.libgltf.material.AlphaMode
 import com.micheanl.libgltf.material.GltfMaterial
 import com.micheanl.libgltf.model.PrimitiveMode
-import com.micheanl.libgltf.render.gpu.GltfGpuFormats
-import com.micheanl.libgltf.render.gpu.GltfGpuBackend
-import com.micheanl.libgltf.render.GltfGpuBackendType
+import com.micheanl.libgltf.render.gpu.GpuFormats
+import com.micheanl.libgltf.render.gpu.GpuBackend
+import com.micheanl.libgltf.render.GpuBackendType
 import com.micheanl.libgltf.render.iris.IrisCompat
 import com.mojang.renderpearl.api.GpuFormat
 import com.mojang.renderpearl.api.pipeline.PrimitiveTopology
@@ -132,20 +132,20 @@ object GltfRenderTypes {
         skinned: Boolean
     ): RenderType {
         val suffix = "gpu_${resourceId}_${materialIndex}_${textureIndex}_${mode.ordinal}_${alphaCutoff.toBits()}_${if (skinned) 1 else 0}"
-        val gl = GltfGpuBackend.capabilities().backend == GltfGpuBackendType.OPENGL
+        val gl = GpuBackend.capabilities().backend == GpuBackendType.OPENGL
         val builder = RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
             .withLocation(LibGltf.id("pipeline/runtime_$suffix"))
             .withVertexShader(if (gl) LibGltf.id("core/entity_gpu_gl") else LibGltf.id("core/entity_gpu"))
             .withFragmentShader(LibGltf.id("core/entity"))
             .withBindGroupLayout(BindGroupLayouts.SAMPLER1)
-            .withVertexBinding(0, if (gl) GltfGpuFormats.GEOMETRY_GL else GltfGpuFormats.GEOMETRY)
-            .withVertexBinding(1, if (gl) GltfGpuFormats.INSTANCE_GL else GltfGpuFormats.INSTANCE)
+            .withVertexBinding(0, if (gl) GpuFormats.GEOMETRY_GL else GpuFormats.GEOMETRY)
+            .withVertexBinding(1, if (gl) GpuFormats.INSTANCE_GL else GpuFormats.INSTANCE)
             .withPrimitiveTopology(topology(mode))
             .withCull(!material.doubleSided)
         if (skinned && !gl) {
             builder
                 .withBindGroupLayout(JOINT_MATRICES_LAYOUT)
-                .withVertexBinding(2, GltfGpuFormats.SKIN)
+                .withVertexBinding(2, GpuFormats.SKIN)
                 .withShaderDefine("SKINNED")
         }
         val oitPipelineSet = if (material.alphaMode == AlphaMode.BLEND) buildOitPipelineSet(suffix, builder) else null

@@ -3,7 +3,7 @@ package com.micheanl.libgltf.render.gpu
 import com.mojang.renderpearl.api.GpuFormat
 import com.mojang.renderpearl.api.vertex.VertexFormat
 
-object GltfGpuFormats {
+object GpuFormats {
     val GEOMETRY: VertexFormat = VertexFormat.builder(0)
         .addAttribute("Position", GpuFormat.RGB32_FLOAT)
         .addAttribute("Normal", GpuFormat.RGB32_FLOAT)

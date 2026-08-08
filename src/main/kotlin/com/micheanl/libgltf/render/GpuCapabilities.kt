@@ -1,7 +1,7 @@
 package com.micheanl.libgltf.render
 
-data class GltfGpuCapabilities(
-    val backend: GltfGpuBackendType,
+data class GpuCapabilities(
+    val backend: GpuBackendType,
     val instancing: Boolean,
     val shaderDrawParameters: Boolean,
     val multiDrawDirectInterleaved: Boolean,
@@ -13,5 +13,5 @@ data class GltfGpuCapabilities(
     val meshShaderExtensionPresent: Boolean,
     val nativeMeshShaderActive: Boolean,
     val meshShaderNvActive: Boolean,
-    val path: GltfGpuPath
+    val path: GpuPath
 )

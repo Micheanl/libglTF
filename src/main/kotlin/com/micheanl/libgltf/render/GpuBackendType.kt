@@ -1,6 +1,6 @@
 package com.micheanl.libgltf.render
 
-enum class GltfGpuBackendType {
+enum class GpuBackendType {
     OPENGL,
     VULKAN,
     UNKNOWN
