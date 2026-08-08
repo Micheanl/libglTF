@@ -65,9 +65,10 @@ void main() {
     uint candidateCount = parameters.instanceCount * parameters.meshletCount;
     uint instanceIndex = candidate < candidateCount ? candidate / parameters.meshletCount : 0;
     uint meshletIndex = candidate < candidateCount ? candidate - instanceIndex * parameters.meshletCount : 0;
-    mat4 transform = ProjMat * ModelViewMat * instanceMatrix(instanceIndex * 41);
-    bool instanceVisible = parameters.instanceCulling == 0 || visibleSphere(parameters.primitiveSphere, transform);
-    bool meshletVisible = parameters.meshletCulling == 0 || visibleSphere(meshlets[meshletIndex].sphere, transform);
+    mat4 worldTransform = instanceMatrix(instanceIndex * 41);
+    mat4 clipTransform = ProjMat * ModelViewMat * worldTransform;
+    bool instanceVisible = parameters.instanceCulling == 0 || visibleSphere(parameters.primitiveSphere, clipTransform);
+    bool meshletVisible = parameters.meshletCulling == 0 || visibleSphere(meshlets[meshletIndex].sphere, clipTransform);
     if (candidate >= candidateCount || !(instanceVisible && meshletVisible)) {
         SetMeshOutputsEXT(0, 0);
         return;
@@ -89,7 +90,7 @@ void main() {
         vec2 uv = vec2(uintBitsToFloat(geometryWords[vo + 10]), uintBitsToFloat(geometryWords[vo + 11]));
         vec2 uv0 = uvOffset + uvTransform * uv;
         vec4 color = unpackUnorm4x8(geometryWords[vo + 14]);
-        vec4 worldPosition = transform * vec4(position, 1.0);
+        vec4 worldPosition = worldTransform * vec4(position, 1.0);
         vec3 worldNormal = normalize(normalTransform * normal);
         gl_MeshVerticesEXT[invocation].gl_Position = ProjMat * ModelViewMat * worldPosition;
         sphericalVertexDistance[invocation] = length(worldPosition.xyz);
