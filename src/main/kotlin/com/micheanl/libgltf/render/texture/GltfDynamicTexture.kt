@@ -60,6 +60,16 @@ class GltfDynamicTexture(
             val expectedWidth = gpuTexture.getWidth(level)
             val expectedHeight = gpuTexture.getHeight(level)
             val source = levels[level]
+            if (expectedWidth <= 0 || expectedHeight <= 0) {
+                LOGGER.warn(
+                    "libgltf texture {} mip {} has invalid GPU size {}x{}, skipping",
+                    label,
+                    level,
+                    expectedWidth,
+                    expectedHeight
+                )
+                continue
+            }
             if (source.width == expectedWidth && source.height == expectedHeight) {
                 encoder.writeToTexture(gpuTexture, source, level, 0, 0, 0)
             } else {
@@ -94,7 +104,7 @@ class GltfDynamicTexture(
             var width = image.width
             var height = image.height
             var count = 1
-            while (width > 1 || height > 1) {
+            while (width > 1 && height > 1) {
                 width = max(1, width / 2)
                 height = max(1, height / 2)
                 count++
