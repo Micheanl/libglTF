@@ -29,6 +29,9 @@ object GltfGpuDrivenSettings {
     @Volatile
     var meshGroupLimit: Int = intProperty("libgltf.vulkan.meshShader.groupLimit", 65535)
 
+    @Volatile
+    var meshBatchSize: Int = intProperty("libgltf.vulkan.meshShader.batchSize", 4)
+
     fun meshShaderEnabled(): Boolean = meshShaderOverride ?: meshShader
 
     fun profitable(instanceCount: Int, meshletCount: Int): Boolean = force ||

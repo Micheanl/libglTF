@@ -184,6 +184,18 @@ object GltfDebugCommands {
                                             }
                                     )
                             )
+                            .then(
+                                ClientCommands.literal("batch")
+                                    .then(
+                                        ClientCommands.argument("size", IntegerArgumentType.integer(1, 4))
+                                            .executes { context ->
+                                                meshBatch(
+                                                    context.source,
+                                                    context.getArgument("size", Int::class.java)
+                                                )
+                                            }
+                                    )
+                            )
                     )
             )
         }
@@ -266,6 +278,7 @@ object GltfDebugCommands {
             "flat=${if (GltfGpuDrivenSettings.debugMeshFlat) "on" else "off"} " +
             "counters=${if (GltfGpuDrivenSettings.debugMeshCounters) "on" else "off"} " +
             "limit=${GltfGpuDrivenSettings.meshGroupLimit} " +
+            "batch=${GltfGpuDrivenSettings.meshBatchSize} " +
             "cull=${if (GltfGpuDrivenSettings.instanceCulling && GltfGpuDrivenSettings.meshletCulling) "on" else "off"} " +
             "occlusion=${if (GltfGpuDrivenSettings.occlusionCulling) "on" else "off"} " +
             "bench=${if (GltfGpuDrivenSettings.benchmark) "on" else "off"} " +
@@ -521,6 +534,12 @@ object GltfDebugCommands {
     private fun meshLimit(source: FabricClientCommandSource, groups: Int): Int {
         GltfGpuDrivenSettings.meshGroupLimit = groups
         source.sendFeedback(Component.literal("Mesh group limit set to $groups"))
+        return 0
+    }
+
+    private fun meshBatch(source: FabricClientCommandSource, size: Int): Int {
+        GltfGpuDrivenSettings.meshBatchSize = size
+        source.sendFeedback(Component.literal("Mesh batch size set to $size"))
         return 0
     }
 

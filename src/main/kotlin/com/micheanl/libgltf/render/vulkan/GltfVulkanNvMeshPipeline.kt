@@ -238,8 +238,10 @@ private class GltfVulkanNvMeshPipeline(
                 )
             }
             var baseCandidate = 0L
+            val meshBatch = GltfGpuDrivenSettings.meshBatchSize.coerceIn(1, 4)
             while (baseCandidate < candidateCount) {
-                val groups = minOf(chunkGroups.toLong(), candidateCount - baseCandidate).toInt()
+                val remaining = candidateCount - baseCandidate
+                val groups = minOf(chunkGroups.toLong(), (remaining + meshBatch - 1) / meshBatch).toInt()
                 val parameters = stack.malloc(PUSH_CONSTANT_SIZE)
                 for (index in sphere.indices) parameters.putFloat(index * Float.SIZE_BYTES, sphere[index])
                 val main = Minecraft.getInstance().gameRenderer.mainRenderTarget()
@@ -252,6 +254,7 @@ private class GltfVulkanNvMeshPipeline(
                 parameters.putInt(40, if (instanceCulling) 1 else 0)
                 parameters.putInt(44, if (meshletCulling) 1 else 0)
                 parameters.putInt(48, baseCandidate.toInt())
+                parameters.putInt(52, meshBatch)
                 parameters.position(0).limit(PUSH_CONSTANT_SIZE)
                 VK10.vkCmdPushConstants(
                     commandBuffer,
@@ -261,7 +264,7 @@ private class GltfVulkanNvMeshPipeline(
                     parameters
                 )
                 NVMeshShader.vkCmdDrawMeshTasksNV(commandBuffer, groups, 0)
-                baseCandidate += groups
+                baseCandidate += groups.toLong() * meshBatch
             }
         }
     }
@@ -688,7 +691,7 @@ private class GltfVulkanNvMeshPipeline(
         private const val FRAGMENT_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh.fsh"
         private const val STORAGE_BUFFER_COUNT = 5
         private const val STORAGE_CACHE_CAPACITY = 16
-        private const val PUSH_CONSTANT_SIZE = 52
+        private const val PUSH_CONSTANT_SIZE = 56
         private val LOGGER = LogUtils.getLogger()
     }
 }

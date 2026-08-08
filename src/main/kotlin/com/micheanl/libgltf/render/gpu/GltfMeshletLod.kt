@@ -419,8 +419,8 @@ class GltfMeshletLod private constructor(
 
         private fun align4(value: Int): Int = (value + 3) and -4
 
-        private const val MAX_VERTICES = 256
-        private const val MAX_TRIANGLES = 256
+        private const val MAX_VERTICES = 64
+        private const val MAX_TRIANGLES = 64
         private const val CONE_WEIGHT = 0.25f
         private const val POSITION_STRIDE = 12
         private const val COMPACT_VERTEX_WORDS = 4

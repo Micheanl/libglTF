@@ -252,6 +252,7 @@ private class GltfVulkanMeshPipeline(
                 parameters.putInt(40, if (instanceCulling) 1 else 0)
                 parameters.putInt(44, if (meshletCulling) 1 else 0)
                 parameters.putInt(48, baseCandidate.toInt())
+                parameters.putInt(52, 1)
                 parameters.position(0).limit(PUSH_CONSTANT_SIZE)
                 VK10.vkCmdPushConstants(
                     commandBuffer,
@@ -679,7 +680,7 @@ private class GltfVulkanMeshPipeline(
         private const val FRAGMENT_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh.fsh"
         private const val STORAGE_BUFFER_COUNT = 4
         private const val STORAGE_CACHE_CAPACITY = 16
-        private const val PUSH_CONSTANT_SIZE = 52
+        private const val PUSH_CONSTANT_SIZE = 56
         private val LOGGER = LogUtils.getLogger()
     }
 }
