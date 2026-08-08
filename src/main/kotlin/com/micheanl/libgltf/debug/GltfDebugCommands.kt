@@ -7,12 +7,19 @@ import com.micheanl.libgltf.api.GltfInstanceId
 import com.micheanl.libgltf.api.GltfRenderMode
 import com.micheanl.libgltf.asset.GltfLoadFailure
 import com.micheanl.libgltf.asset.GltfLoadSuccess
+import com.micheanl.libgltf.LibGltf
+import com.micheanl.libgltf.render.GltfGpuBackendType
+import com.micheanl.libgltf.render.GltfRenderRegistry
+import com.micheanl.libgltf.render.feature.GltfGpuFeatureRenderer
+import com.micheanl.libgltf.render.gpu.GltfGpuBackend
 import com.mojang.brigadier.arguments.FloatArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.components.debug.DebugScreenEntries
+import net.minecraft.client.gui.components.debug.DebugScreenEntryStatus
 import net.minecraft.network.chat.Component
 import java.nio.file.Files
 import java.nio.file.Path
@@ -21,8 +28,12 @@ object GltfDebugCommands {
     private var handle: GltfHandle? = null
     private var instance: GltfInstance? = null
     private var instanceId: GltfInstanceId? = null
+    private var loadedName: String = ""
+    private var loadedStats: String = ""
 
     fun initialize() {
+        val entryId = DebugScreenEntries.register(LibGltf.id("debug"), GltfDebugEntry())
+        Minecraft.getInstance().debugEntries.setStatus(entryId, DebugScreenEntryStatus.IN_OVERLAY)
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
             dispatcher.register(
                 ClientCommands.literal("libgltf_debug")
@@ -98,11 +109,11 @@ object GltfDebugCommands {
                         instanceId = GltfApiImpl.register(newInstance)
                         handle = newHandle
                         instance = newInstance
+                        loadedName = result.asset.name
+                        loadedStats = "${result.asset.stats.nodeCount} nodes, ${result.asset.stats.triangleCount} tris"
                         source.sendFeedback(
                             Component.literal(
-                                "Loaded ${result.asset.name}: " +
-                                    "${result.asset.stats.nodeCount} nodes, " +
-                                    "${result.asset.stats.triangleCount} triangles"
+                                "Loaded $loadedName: $loadedStats"
                             )
                         )
                     }
@@ -119,8 +130,33 @@ object GltfDebugCommands {
         instanceId = null
         handle = null
         instance = null
+        loadedName = ""
+        loadedStats = ""
         source?.sendFeedback(Component.literal("Unloaded external model"))
         return 0
+    }
+
+    fun statusLines(): List<String> {
+        val capabilities = GltfGpuBackend.capabilities()
+        val profile = GltfGpuBackend.vendorProfile()
+        val oit = Minecraft.getInstance().gameRenderer.useImprovedTransparency()
+        val lines = ArrayList<String>()
+        lines += "libgltf backend=${capabilities.backend} vendor=${profile.vendor} path=${capabilities.path}"
+        lines += "libgltf mesh=${if (GltfGpuFeatureRenderer.activeMesh) "on" else "off"} " +
+            "oit=${if (oit) "on" else "off"}"
+        if (loadedName.isEmpty()) {
+            lines += "libgltf model=none"
+        } else {
+            lines += "libgltf model=$loadedName ($loadedStats)"
+            val current = instance
+            if (current != null) {
+                val transform = current.transform
+                lines += "libgltf mode=${current.renderMode} " +
+                    "pos=(${transform.m30()}, ${transform.m31()}, ${transform.m32()}) " +
+                    "scale=${transform.m00()} instances=${GltfRenderRegistry.instances().size}"
+            }
+        }
+        return lines
     }
 
     private fun position(source: FabricClientCommandSource, x: Float, y: Float, z: Float): Int {

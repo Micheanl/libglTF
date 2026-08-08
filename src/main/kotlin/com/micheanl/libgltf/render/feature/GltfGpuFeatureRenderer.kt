@@ -25,7 +25,9 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
             gpuDrivenAttempted = true
             try {
                 gpuDriven = GltfVulkanGpuDriven.create(RenderSystem.getDevice()) ?: GltfGlGpuDriven.create()
+                activeMesh = gpuDriven?.meshSupported == true
             } catch (error: RuntimeException) {
+                activeMesh = false
                 LOGGER.error("libgltf Vulkan GPU-driven initialization failed", error)
             }
         }
@@ -88,8 +90,11 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
         groupCounts = groupCounts.copyOf(capacity)
     }
 
-    private companion object {
+    companion object {
         const val INITIAL_GROUP_CAPACITY = 16
+        @JvmField
+        @Volatile
+        var activeMesh: Boolean = false
         val LOGGER = LogUtils.getLogger()
     }
 }
