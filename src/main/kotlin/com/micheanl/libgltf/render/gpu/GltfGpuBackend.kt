@@ -10,7 +10,6 @@ import com.mojang.renderpearl.api.vertex.VertexFormat
 import com.mojang.renderpearl.api.device.DeviceInfo
 import com.mojang.renderpearl.backend.vulkan.VulkanDevice
 import org.lwjgl.opengl.GL
-import org.lwjgl.vulkan.NVMeshShader
 
 object GltfGpuBackend {
     @Volatile
@@ -69,7 +68,6 @@ object GltfGpuBackend {
             ((device as FrontendGpuDeviceAccessor).libgltfBackend as? VulkanDevice)?.vkDevice()?.capabilities?.VK_EXT_mesh_shader == true
         val nativeNvMeshShader = backend == GltfGpuBackendType.VULKAN &&
             GltfGpuDrivenSettings.meshShaderEnabled() &&
-            info.underlyingExtensions().any { it == NVMeshShader.VK_NV_MESH_SHADER_EXTENSION_NAME } &&
             ((device as FrontendGpuDeviceAccessor).libgltfBackend as? VulkanDevice)?.vkDevice()?.capabilities?.VK_NV_mesh_shader == true
         vertexAttributeLimit = limit
         capabilities = GltfGpuCapabilities(

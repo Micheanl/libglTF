@@ -31,6 +31,13 @@ class GltfVulkanGpuDriven private constructor(
             ) return null
             val backend = (device as FrontendGpuDeviceAccessor).libgltfBackend as? VulkanDevice ?: return null
             val profile = GltfGpuBackend.vendorProfile()
+            LOGGER.info(
+                "libgltf Vulkan mesh decision vendor={} nvActive={} nvEnabled={} extEnabled={}",
+                profile.vendor,
+                capabilities.meshShaderNvActive,
+                backend.vkDevice().capabilities.VK_NV_mesh_shader,
+                backend.vkDevice().capabilities.VK_EXT_mesh_shader
+            )
             val mesh = if (profile.preferMeshShader && GltfGpuDrivenSettings.meshShaderEnabled()) {
                 if (capabilities.meshShaderNvActive) {
                     GltfVulkanNvMeshPipelineCache(backend, GltfGpuDrivenSettings.debugMeshMinimal).also {

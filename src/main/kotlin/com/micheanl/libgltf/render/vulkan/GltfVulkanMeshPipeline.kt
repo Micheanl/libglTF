@@ -35,7 +35,7 @@ class GltfVulkanMeshPipelineCache(
             val mesh = VkPhysicalDeviceMeshShaderPropertiesEXT.calloc(stack).`sType$Default`()
             val push = VkPhysicalDevicePushDescriptorPropertiesKHR.calloc(stack).`sType$Default`()
             mesh.pNext(push.address())
-            val root = VkPhysicalDeviceProperties2.calloc(stack).`sType$Default`().pNext(mesh)
+            val root = VkPhysicalDeviceProperties2.calloc(stack).`sType$Default`().pNext(mesh.address())
             VK12.vkGetPhysicalDeviceProperties2(device.vkDevice().physicalDevice, root)
             val maxMeshTotalCount = mesh.maxMeshWorkGroupTotalCount()
             maxMeshGroups = minOf(
