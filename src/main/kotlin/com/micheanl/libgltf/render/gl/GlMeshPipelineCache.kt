@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.gl
 /**
  * libgltf · GlMeshPipelineCache
  *
- * ```
+ * <pre><code>
  * val cache = GlMeshPipelineCache()
- * ```
+ * </code></pre>
  *
  * OpenGL mesh 管线缓存
  *

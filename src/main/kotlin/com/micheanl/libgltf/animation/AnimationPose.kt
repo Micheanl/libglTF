@@ -3,9 +3,9 @@ package com.micheanl.libgltf.animation
 /**
  * libgltf · AnimationPose
  *
- * ```
+ * <pre><code>
  * val pose: AnimationPose = AnimationPose(asset.nodes.size, asset.totalMorphWeights, asset.materials.size)
- * ```
+ * </code></pre>
  *
  * @author Chen Micheanl
  * @license MIT

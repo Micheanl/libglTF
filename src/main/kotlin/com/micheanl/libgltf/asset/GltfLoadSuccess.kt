@@ -3,9 +3,9 @@ package com.micheanl.libgltf.asset
 /**
  * libgltf · GltfLoadSuccess
  *
- * ```
+ * <pre><code>
  * GltfLoadSuccess(parse(path, lodPolicy))
- * ```
+ * </code></pre>
  *
  * @author Chen Micheanl
  * @license MIT

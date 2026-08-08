@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.vulkan
 /**
  * libgltf · RenderConfig
  *
- * ```
+ * <pre><code>
  * if (!extensionAvailable || !profile.preferMeshShader || !RenderConfig.meshShaderEnabled()) {
- * ```
+ * </code></pre>
  *
  * 渲染性能配置与 config 文件映射
  *

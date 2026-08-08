@@ -3,14 +3,14 @@ package com.micheanl.libgltf.render.vulkan
 /**
  * libgltf · VulkanBufferRing
  *
- * ```
+ * <pre><code>
  * commandRing = VulkanBufferRing(
  * device,
  * "libgltf indirect commands",
  * GpuBuffer.USAGE_INDIRECT_PARAMETERS or VulkanUsage.STORAGE,
  * commandCapacity
  * )
- * ```
+ * </code></pre>
  *
  * Vulkan 环形缓冲
  *

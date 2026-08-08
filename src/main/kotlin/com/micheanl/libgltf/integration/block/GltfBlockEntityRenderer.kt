@@ -3,9 +3,9 @@ package com.micheanl.libgltf.integration.block
 /**
  * libgltf · GltfBlockEntityRenderer
  *
- * ```
- * ): GltfBlockEntityRenderer<T> = GltfBlockEntityRenderer(provider)
- * ```
+ * <pre><code>
+ * ): GltfBlockEntityRenderer&lt;T&gt; = GltfBlockEntityRenderer(provider)
+ * </code></pre>
  *
  * @author Chen Micheanl
  * @license MIT

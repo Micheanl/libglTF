@@ -3,7 +3,7 @@ package com.micheanl.libgltf.material
 /**
  * libgltf · ClearcoatMaterial
  *
- * ```
+ * <pre><code>
  * ClearcoatMaterial(
  * JsonFields.float(it, "clearcoatFactor"),
  * parseBinding(JsonFields.value(it, "clearcoatTexture")),
@@ -12,7 +12,7 @@ package com.micheanl.libgltf.material
  * parseBinding(JsonFields.value(it, "clearcoatNormalTexture")),
  * JsonFields.float(JsonFields.value(it, "clearcoatNormalTexture"), "scale", 1.0f)
  * )
- * ```
+ * </code></pre>
  *
  * @author Chen Micheanl
  * @license MIT

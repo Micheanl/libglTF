@@ -3,7 +3,7 @@ package com.micheanl.libgltf.animation
 /**
  * libgltf · AnimationStateMachine
  *
- * ```
+ * <pre><code>
  * fun build(): AnimationStateMachine = AnimationStateMachine(
  * parameters.toTypedArray(),
  * states.toTypedArray(),
@@ -13,7 +13,7 @@ package com.micheanl.libgltf.animation
  * intCount,
  * booleanCount
  * )
- * ```
+ * </code></pre>
  *
  * @author Chen Micheanl
  * @license MIT

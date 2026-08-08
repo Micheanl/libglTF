@@ -3,9 +3,9 @@ package com.micheanl.libgltf.asset
 /**
  * libgltf · GlbPayload
  *
- * ```
+ * <pre><code>
  * return GlbPayload(json, binary)
- * ```
+ * </code></pre>
  *
  * @author Chen Micheanl
  * @license MIT

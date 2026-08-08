@@ -3,14 +3,14 @@ package com.micheanl.libgltf.render.gpu
 /**
  * libgltf · GpuMesh
  *
- * ```
+ * <pre><code>
  * primitive = GpuMesh.create(
  * RenderSystem.getDevice(),
  * "libgltf $resourceId mesh $meshIndex primitive $primitiveIndex",
  * asset.meshes[meshIndex].primitives[primitiveIndex],
- * RenderConfig.enabled && GpuBackend.meshletBuilding()
+ * RenderConfig.enabled &amp;&amp; GpuBackend.meshletBuilding()
  * )
- * ```
+ * </code></pre>
  *
  * 网格的 GPU 资源与 LOD 缓冲
  *

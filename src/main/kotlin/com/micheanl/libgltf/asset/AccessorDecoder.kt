@@ -3,9 +3,9 @@ package com.micheanl.libgltf.asset
 /**
  * libgltf · AccessorDecoder
  *
- * ```
+ * <pre><code>
  * val decoder = AccessorDecoder(root, resolver)
- * ```
+ * </code></pre>
  *
  * @author Chen Micheanl
  * @license MIT

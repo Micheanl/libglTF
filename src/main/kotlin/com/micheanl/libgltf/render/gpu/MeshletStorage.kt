@@ -3,7 +3,7 @@ package com.micheanl.libgltf.render.gpu
 /**
  * libgltf · MeshletStorage
  *
- * ```
+ * <pre><code>
  * MeshletStorage.create(
  * device,
  * "$label lod $level",
@@ -16,7 +16,7 @@ package com.micheanl.libgltf.render.gpu
  * if (gl) 256 else 64,
  * primitive.bounds
  * )
- * ```
+ * </code></pre>
  *
  * meshlet 的 GPU 缓冲：紧凑顶点、三角形与元数据
  *

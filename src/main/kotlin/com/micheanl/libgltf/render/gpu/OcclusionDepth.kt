@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.gpu
 /**
  * libgltf · OcclusionDepth
  *
- * ```
+ * <pre><code>
  * OcclusionDepth.close()
- * ```
+ * </code></pre>
  *
  * 上一帧深度遮挡纹理与复制
  *

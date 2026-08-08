@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.iris
 /**
  * libgltf · IrisPbrTextures
  *
- * ```
+ * <pre><code>
  * PBRTextureHolder holder = IrisPbrTextures.get(id);
- * ```
+ * </code></pre>
  *
  * @author Chen Micheanl
  * @license MIT

@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.gpu
 /**
  * libgltf · GpuResources
  *
- * ```
+ * <pre><code>
  * resources = GpuResources(id, asset)
- * ```
+ * </code></pre>
  *
  * 资源对应的 GPU 数据
  *

@@ -3,9 +3,9 @@ package com.micheanl.libgltf.asset
 /**
  * libgltf · GltfLoader
  *
- * ```
+ * <pre><code>
  * override fun load(path: Path, lodPolicy: LodPolicy): GltfLoadResult = GltfLoader.load(path, lodPolicy)
- * ```
+ * </code></pre>
  *
  * glTF 解析入口
  *

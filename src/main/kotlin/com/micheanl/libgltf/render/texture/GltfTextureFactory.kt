@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.texture
 /**
  * libgltf · GltfTextureFactory
  *
- * ```
+ * <pre><code>
  * textures = GltfTextureFactory.create(asset, id)
- * ```
+ * </code></pre>
  *
  * 纹理创建
  *

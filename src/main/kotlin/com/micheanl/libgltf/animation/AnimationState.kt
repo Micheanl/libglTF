@@ -3,9 +3,9 @@ package com.micheanl.libgltf.animation
 /**
  * libgltf · AnimationState
  *
- * ```
+ * <pre><code>
  * states.add(AnimationState(name, segment, looping, speed))
- * ```
+ * </code></pre>
  *
  * @author Chen Micheanl
  * @license MIT

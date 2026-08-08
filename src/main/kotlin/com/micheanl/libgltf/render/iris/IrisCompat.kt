@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.iris
 /**
  * libgltf · IrisCompat
  *
- * ```
+ * <pre><code>
  * IrisCompat.registerPbr(albedo, normal, specular)
- * ```
+ * </code></pre>
  *
  * Iris 兼容性检测
  *

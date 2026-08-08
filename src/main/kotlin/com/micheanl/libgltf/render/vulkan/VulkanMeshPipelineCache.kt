@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.vulkan
 /**
  * libgltf · VulkanMeshPipelineCache
  *
- * ```
+ * <pre><code>
  * VulkanMeshPipelineCache(backend).takeIf { it.supported }
- * ```
+ * </code></pre>
  *
  * Vulkan EXT mesh 管线缓存
  *

@@ -3,7 +3,7 @@ package com.micheanl.libgltf.model
 /**
  * libgltf · GltfNode
  *
- * ```
+ * <pre><code>
  * GltfNode(
  * JsonFields.string(node, "name", "node_$index"),
  * -1,
@@ -18,7 +18,7 @@ package com.micheanl.libgltf.model
  * JsonFields.floats(node, "scale", floatArrayOf(1.0f, 1.0f, 1.0f)),
  * JsonFields.value(node, "matrix")?.let { JsonFields.floats(node, "matrix") },
  * JsonFields.floats(node, "weights")
- * ```
+ * </code></pre>
  *
  * @author Chen Micheanl
  * @license MIT

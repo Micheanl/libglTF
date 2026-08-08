@@ -3,7 +3,7 @@ package com.micheanl.libgltf.model
 /**
  * libgltf · GltfAsset
  *
- * ```
+ * <pre><code>
  * return GltfAsset(
  * path.fileName.toString(),
  * resolvedNodes,
@@ -18,7 +18,7 @@ package com.micheanl.libgltf.model
  * materials,
  * materialVariantNames,
  * cameras,
- * ```
+ * </code></pre>
  *
  * 解析后的 glTF 资源模型
  *

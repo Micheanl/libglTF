@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render
 /**
  * libgltf · GltfConfig
  *
- * ```
+ * <pre><code>
  * GltfConfig.load()
- * ```
+ * </code></pre>
  *
  * config 文件加载与默认生成
  *

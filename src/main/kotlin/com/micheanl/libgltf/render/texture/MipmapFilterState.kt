@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.texture
 /**
  * libgltf · MipmapFilterState
  *
- * ```
+ * <pre><code>
  * return MipmapFilterState.nearest() ? VK10.VK_SAMPLER_MIPMAP_MODE_NEAREST : original;
- * ```
+ * </code></pre>
  *
  * @author Chen Micheanl
  * @license MIT

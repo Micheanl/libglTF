@@ -3,9 +3,9 @@ package com.micheanl.libgltf.integration.entity
 /**
  * libgltf · GltfEntityRenderState
  *
- * ```
+ * <pre><code>
  * override fun createRenderState(): GltfEntityRenderState = GltfEntityRenderState()
- * ```
+ * </code></pre>
  *
  * @author Chen Micheanl
  * @license MIT

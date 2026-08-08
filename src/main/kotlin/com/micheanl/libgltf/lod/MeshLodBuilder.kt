@@ -3,9 +3,9 @@ package com.micheanl.libgltf.lod
 /**
  * libgltf · MeshLodBuilder
  *
- * ```
+ * <pre><code>
  * MeshLodBuilder.build(indices, positions, lodPolicy.triangleRatios)
- * ```
+ * </code></pre>
  *
  * LOD 网格简化
  *

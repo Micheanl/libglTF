@@ -3,7 +3,7 @@ package com.micheanl.libgltf.animation
 /**
  * libgltf · AnimationChannel
  *
- * ```
+ * <pre><code>
  * parsed += AnimationChannel(
  * -1,
  * AnimationPath.MATERIAL_UV,
@@ -15,7 +15,7 @@ package com.micheanl.libgltf.animation
  * materialTarget.textureSlot,
  * materialTarget.textureProperty
  * )
- * ```
+ * </code></pre>
  *
  * @author Chen Micheanl
  * @license MIT

@@ -3,7 +3,7 @@ package com.micheanl.libgltf.render
 /**
  * libgltf · GltfRenderTypes
  *
- * ```
+ * <pre><code>
  * val renderType = GltfRenderTypes.get(
  * resource.id,
  * materialIndex,
@@ -13,7 +13,7 @@ package com.micheanl.libgltf.render
  * material,
  * texture
  * )
- * ```
+ * </code></pre>
  *
  * 运行时 RenderType 构建
  *
