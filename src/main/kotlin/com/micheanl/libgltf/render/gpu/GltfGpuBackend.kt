@@ -42,7 +42,8 @@ object GltfGpuBackend {
         val device = RenderSystem.tryGetDevice() ?: return
         val info = device.deviceInfo
         cachedInfo = info
-        vendorProfile = GltfGpuVendors.profile(info)
+        val profile = GltfGpuVendors.profile(info)
+        vendorProfile = profile
         val backend = when (info.backendName()) {
             "OpenGL" -> GltfGpuBackendType.OPENGL
             "Vulkan" -> GltfGpuBackendType.VULKAN
@@ -65,9 +66,11 @@ object GltfGpuBackend {
         val nativeMeshShader = meshShader &&
             backend == GltfGpuBackendType.VULKAN &&
             GltfGpuDrivenSettings.meshShaderEnabled() &&
+            (profile.preferVulkanMeshShader || GltfGpuDrivenSettings.meshShaderOverride == true) &&
             ((device as FrontendGpuDeviceAccessor).libgltfBackend as? VulkanDevice)?.vkDevice()?.capabilities?.VK_EXT_mesh_shader == true
         val nativeNvMeshShader = backend == GltfGpuBackendType.VULKAN &&
             GltfGpuDrivenSettings.meshShaderEnabled() &&
+            (profile.preferVulkanMeshShader || GltfGpuDrivenSettings.meshShaderOverride == true) &&
             ((device as FrontendGpuDeviceAccessor).libgltfBackend as? VulkanDevice)?.vkDevice()?.capabilities?.VK_NV_mesh_shader == true
         vertexAttributeLimit = limit
         capabilities = GltfGpuCapabilities(
@@ -103,6 +106,7 @@ object GltfGpuBackend {
 
     private val DEFAULT_VENDOR_PROFILE = GltfGpuVendorProfile(
         GltfGpuVendor.UNKNOWN,
+        true,
         true,
         true,
         true,

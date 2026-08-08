@@ -13,6 +13,7 @@ enum class GltfGpuVendor {
 data class GltfGpuVendorProfile(
     val vendor: GltfGpuVendor,
     val preferMeshShader: Boolean,
+    val preferVulkanMeshShader: Boolean,
     val enableInstanceCulling: Boolean,
     val enableMeshletCulling: Boolean,
     val maxTaskGroupCount: Int,
@@ -26,6 +27,7 @@ object GltfGpuVendors {
             GltfGpuVendor.NVIDIA -> GltfGpuVendorProfile(
                 vendor,
                 true,
+                false,
                 true,
                 true,
                 65535,
@@ -36,11 +38,13 @@ object GltfGpuVendors {
                 true,
                 true,
                 true,
+                true,
                 65535,
                 64
             )
             GltfGpuVendor.INTEL -> GltfGpuVendorProfile(
                 vendor,
+                false,
                 false,
                 true,
                 false,
@@ -52,11 +56,13 @@ object GltfGpuVendors {
                 false,
                 false,
                 false,
+                false,
                 0,
                 0
             )
             GltfGpuVendor.UNKNOWN -> GltfGpuVendorProfile(
                 vendor,
+                true,
                 true,
                 true,
                 true,

@@ -38,7 +38,11 @@ class GltfVulkanGpuDriven private constructor(
                 backend.vkDevice().capabilities.VK_NV_mesh_shader,
                 backend.vkDevice().capabilities.VK_EXT_mesh_shader
             )
-            val mesh = if (profile.preferMeshShader && GltfGpuDrivenSettings.meshShaderEnabled()) {
+            val mesh = if (
+                profile.preferMeshShader &&
+                GltfGpuDrivenSettings.meshShaderEnabled() &&
+                (profile.preferVulkanMeshShader || GltfGpuDrivenSettings.meshShaderOverride == true)
+            ) {
                 if (capabilities.meshShaderNvActive) {
                     GltfVulkanNvMeshPipelineCache(backend, GltfGpuDrivenSettings.debugMeshMinimal).also {
                         LOGGER.info(
@@ -62,9 +66,10 @@ class GltfVulkanGpuDriven private constructor(
                 }
             } else {
                 LOGGER.info(
-                    "libgltf Vulkan mesh shader disabled vendor={} enabled={} extension={}",
+                    "libgltf Vulkan mesh shader disabled vendor={} enabled={} preferVulkan={} extension={}",
                     profile.vendor,
                     GltfGpuDrivenSettings.meshShaderEnabled(),
+                    profile.preferVulkanMeshShader,
                     backend.vkDevice().capabilities.VK_EXT_mesh_shader
                 )
                 null
