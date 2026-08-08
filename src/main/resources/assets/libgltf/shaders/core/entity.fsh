@@ -7,7 +7,7 @@
 #ifdef GLINT
 #include <minecraft:globals.glsl>
 uniform sampler2D GlintSampler;
-in vec2 texCoordGlint;
+layout(location = 6) in vec2 texCoordGlint;
 #endif
 
 #ifdef SAMPLER0_BINDING
@@ -16,15 +16,15 @@ layout(binding = SAMPLER0_BINDING) uniform sampler2D Sampler0;
 uniform sampler2D Sampler0;
 #endif
 
-in float sphericalVertexDistance;
-in float cylindricalVertexDistance;
-in vec4 vertexColor;
-in vec4 lightMapColor;
-in vec4 overlayColor;
-in vec2 texCoord0;
+layout(location = 0) in float sphericalVertexDistance;
+layout(location = 1) in float cylindricalVertexDistance;
+layout(location = 2) in vec4 vertexColor;
+layout(location = 3) in vec4 lightMapColor;
+layout(location = 4) in vec4 overlayColor;
+layout(location = 5) in vec2 texCoord0;
 
 #ifndef OIT_ALPHA_ONLY
-out vec4 fragColor;
+layout(location = 0) out vec4 fragColor;
 #endif
 
 void main() {
