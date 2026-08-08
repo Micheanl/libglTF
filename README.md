@@ -31,12 +31,18 @@
 |---|---|
 | **glTF 2.0 / GLB** | Meshes, node hierarchies, skins, PBR materials, `OPAQUE` / `MASK` / `BLEND` |
 | **GPU-driven (Vulkan)** | Compute-shader instance & meshlet frustum culling → `vkCmdDrawIndexedIndirectCount` |
-| **Mesh shaders** | Optional `VK_EXT_mesh_shader` task/mesh pipeline with automatic fallback chain |
+| **Mesh shaders** | Vulkan `VK_EXT_mesh_shader` and OpenGL `GL_EXT_mesh_shader` / `GL_NV_mesh_shader` task/mesh pipelines with automatic fallback chain |
 | **Instancing & skinning** | Bone palettes streamed via triple-buffered `MappableRingBuffer`, zero cross-frame races |
 | **Animation** | Clip playback, blending, parameterized state machine with conditions & transitions |
 | **LOD** | meshoptimizer-generated LOD chains, configurable selection policies |
 | **True transparency** | Mojang `VertexSorting`-based per-face sorting for `BLEND` materials |
 | **Iris compatible** | Dedicated OpenGL pipeline mapping when shader packs are enabled |
+| **KHR_materials_variants** | Per-primitive variant mappings with runtime switching |
+| **EXT_mesh_gpu_instancing** | Node-level instance transforms on CPU, GPU and glint paths |
+| **KHR_animation_pointer** | Material UV and base-color factor animation with cross-fades |
+| **EXT_meshopt_compression** | Vertex/index decompression with fallback |
+| **Scenes / cameras / lights** | Multi-scene switching plus camera and punctual-light data |
+| **Vendor profiles** | Per-vendor mesh workgroup, culling and task-count tuning (NVIDIA / AMD / Intel) |
 
 > [!TIP]
 > No capable GPU? No problem. libgltf probes device capabilities at startup and transparently falls back **mesh shader → indirect → direct → CPU**, so the same code runs everywhere.
@@ -110,6 +116,23 @@ flowchart LR
 
 </details>
 
+## Debugging
+
+Load an external model and inspect rendering state without writing code:
+
+```
+/libgltf_debug load <path>
+/libgltf_debug mode auto|gpu|cpu
+/libgltf_debug lod <n>
+/libgltf_debug anim [<index>|stop]
+/libgltf_debug variant <index>
+/libgltf_debug scene <index>
+/libgltf_debug bones on|off
+/libgltf_debug mesh on|off|auto
+```
+
+Press F3 to see backend, vendor, mesh/OIT state, batch counts, LOD, animation, UV, variant, scene and bone status.
+
 ## Building
 
 ```powershell
@@ -119,8 +142,8 @@ flowchart LR
 Output → `build/libs/libgltf-0.01-fabric.jar`
 
 > [!IMPORTANT]
-> Requires Minecraft **26.2**, Fabric Loader **0.19.3+**, Fabric API, Fabric Language Kotlin and Java **25**.
-> The mesh-shader path additionally needs a Vulkan device exposing `VK_EXT_mesh_shader`.
+> Requires Minecraft **26.3-snapshot-7**, Fabric Loader **0.19.3+**, Fabric API, Fabric Language Kotlin and Java **25**.
+> The mesh-shader path needs `VK_EXT_mesh_shader` (Vulkan) or `GL_EXT_mesh_shader` / `GL_NV_mesh_shader` (OpenGL).
 
 ---
 
