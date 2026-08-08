@@ -1,5 +1,6 @@
 package com.micheanl.libgltf.render.feature
 
+import com.micheanl.libgltf.api.GltfInstance
 import com.micheanl.libgltf.render.GltfGpuBackendType
 import com.micheanl.libgltf.render.gpu.GltfGpuDriver
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
@@ -44,7 +45,6 @@ class GltfPreparedGpuBatch : AutoCloseable {
     private var active = false
     private var frameUsed = false
     private var frameIndirect = false
-    private var lastPaletteRevision = Long.MIN_VALUE
 
     fun prepare(submits: List<GltfGpuSubmit>, fromIndex: Int, toIndex: Int, driver: GltfGpuDriver?) {
         val first = submits[fromIndex]
@@ -218,7 +218,6 @@ class GltfPreparedGpuBatch : AutoCloseable {
         sortingCenters = null
         useSortedIndexBuffer = false
         active = false
-        lastPaletteRevision = Long.MIN_VALUE
     }
 
     private fun prepareSortedIndices(submit: GltfGpuSubmit) {
@@ -320,12 +319,21 @@ class GltfPreparedGpuBatch : AutoCloseable {
             .map(false, true)
         view.use { mapped ->
             val data = mapped.data().order(ByteOrder.nativeOrder())
+            val paletteOffsets = HashMap<GltfInstance, Int>()
             var paletteOffset = 0
             var destinationIndex = 0
             for (index in fromIndex until toIndex) {
                 val submit = submits[index]
-                writeInstance(data, destinationIndex * GltfGpuFormats.INSTANCE_STRIDE, submit, paletteOffset)
-                if (skinned) paletteOffset += submit.instance.animationState.jointPalettes[submit.skinIndex].size / 4
+                val instancePaletteOffset = if (skinned) {
+                    paletteOffsets.getOrPut(submit.instance) {
+                        val offset = paletteOffset
+                        paletteOffset += submit.instance.animationState.jointPalettes[submit.skinIndex].size / 4
+                        offset
+                    }
+                } else {
+                    0
+                }
+                writeInstance(data, destinationIndex * GltfGpuFormats.INSTANCE_STRIDE, submit, instancePaletteOffset)
                 destinationIndex++
             }
         }
@@ -362,32 +370,26 @@ class GltfPreparedGpuBatch : AutoCloseable {
     }
 
     private fun writePalettes(submits: List<GltfGpuSubmit>, fromIndex: Int, toIndex: Int) {
-        if (
-            lastPaletteRevision != Long.MIN_VALUE &&
-            submits.all { it.instance.animationRevision == lastPaletteRevision }
-        ) {
-            return
-        }
+        val written = HashSet<GltfInstance>()
         var floatCount = 0
         for (index in fromIndex until toIndex) {
             val submit = submits[index]
-            floatCount += submit.instance.animationState.jointPalettes[submit.skinIndex].size
+            if (written.add(submit.instance)) {
+                floatCount += submit.instance.animationState.jointPalettes[submit.skinIndex].size
+            }
         }
         val byteCount = floatCount * Float.SIZE_BYTES
         ensurePaletteCapacity(byteCount)
         val view = requireNotNull(paletteBuffer).currentBuffer().slice(0L, byteCount.toLong()).map(false, true)
         view.use { mapped ->
             val data = mapped.data().order(ByteOrder.nativeOrder()).asFloatBuffer()
+            written.clear()
             for (index in fromIndex until toIndex) {
                 val submit = submits[index]
-                data.put(submit.instance.animationState.jointPalettes[submit.skinIndex])
+                if (written.add(submit.instance)) {
+                    data.put(submit.instance.animationState.jointPalettes[submit.skinIndex])
+                }
             }
-        }
-        val revision = submits[fromIndex].instance.animationRevision
-        lastPaletteRevision = if (submits.all { it.instance.animationRevision == revision }) {
-            revision
-        } else {
-            Long.MIN_VALUE
         }
     }
 
