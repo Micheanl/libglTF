@@ -7,13 +7,44 @@ layout(set = 0, binding = DYNAMIC_TRANSFORMS_BINDING, std140) uniform DynamicTra
 layout(set = 0, binding = LIGHTING_BINDING, std140) uniform Lighting { vec3 Light0_Direction; vec3 Light1_Direction; };
 layout(set = 0, binding = SAMPLER1_BINDING) uniform sampler2D Sampler1;
 layout(set = 0, binding = SAMPLER2_BINDING) uniform sampler2D Sampler2;
-layout(push_constant) uniform Parameters { vec4 primitiveSphere; uint instanceCount; uint meshletCount; uint instanceCulling; uint meshletCulling; uint baseCandidate; } parameters;
+layout(push_constant) uniform Parameters { vec4 primitiveSphere; vec4 screenSizeAndFlags; uint instanceCount; uint meshletCount; uint instanceCulling; uint meshletCulling; uint baseCandidate; } parameters;
 layout(set = 1, binding = GEOMETRY_BINDING, std430) readonly buffer Geometry { uint geometryWords[]; };
 layout(set = 1, binding = INSTANCES_BINDING, std430) readonly buffer Instances { uint instanceWords[]; };
 struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint vertexCount; uint triangleCount; uint firstIndex; uint indexCount; uint padding0; uint padding1; vec4 cone; vec4 coneApex; };
 layout(set = 1, binding = MESHLETS_BINDING, std430) readonly buffer Meshlets { Meshlet meshlets[]; };
 layout(set = 1, binding = MESHLET_VERTICES_BINDING, std430) readonly buffer MeshletVertices { uint meshletVertices[]; };
 layout(set = 1, binding = MESHLET_TRIANGLES_BINDING, std430) readonly buffer MeshletTriangles { uint meshletTriangleWords[]; };
+#ifdef MESH_OCCLUSION_CULLING
+layout(set = 1, binding = DEPTH_BINDING) uniform sampler2D DepthSampler;
+float deviceToLinearDepth(float deviceDepth) {
+#ifndef RENDERPEARL_DEPTH_IS_ZERO_TO_ONE
+    deviceDepth = (deviceDepth - 0.5) * 2.0;
+#endif
+    return ProjMat[3][2] / (deviceDepth + ProjMat[2][2]);
+}
+bool occludedByDepth(vec4 sphere, mat4 transform) {
+    vec4 clip = transform * vec4(sphere.xyz, 1.0);
+    if (clip.w <= 0.0) return false;
+    vec2 ndc = clip.xy / clip.w;
+    vec2 uv = ndc * 0.5 + 0.5;
+    if (any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)))) return false;
+    float viewDepth = -clip.w;
+    float nearView = viewDepth - sphere.w;
+    if (nearView <= 0.0) return false;
+    float focalPixels = ProjMat[1][1] * parameters.screenSizeAndFlags.y * 0.5;
+    float radiusPx = max(sphere.w * focalPixels / viewDepth, 1.0);
+    if (radiusPx < 3.0) return false;
+    vec2 step = vec2(radiusPx / parameters.screenSizeAndFlags.x, radiusPx / parameters.screenSizeAndFlags.y);
+    float nearest = 1.0;
+    nearest = min(nearest, texture(DepthSampler, uv).r);
+    nearest = min(nearest, texture(DepthSampler, uv + vec2(step.x, 0.0)).r);
+    nearest = min(nearest, texture(DepthSampler, uv - vec2(step.x, 0.0)).r);
+    nearest = min(nearest, texture(DepthSampler, uv + vec2(0.0, step.y)).r);
+    nearest = min(nearest, texture(DepthSampler, uv - vec2(0.0, step.y)).r);
+    float sampledView = deviceToLinearDepth(nearest);
+    return nearView > sampledView * 1.1 + 0.1;
+}
+#endif
 layout(location = 0) out float sphericalVertexDistance[];
 layout(location = 1) out float cylindricalVertexDistance[];
 layout(location = 2) out vec4 vertexColor[];
@@ -82,6 +113,12 @@ void main() {
         SetMeshOutputsEXT(0, 0);
         return;
     }
+#ifdef MESH_OCCLUSION_CULLING
+    if (parameters.screenSizeAndFlags.z > 0.0 && occludedByDepth(meshlet.sphere, clipTransform)) {
+        SetMeshOutputsEXT(0, 0);
+        return;
+    }
+#endif
     SetMeshOutputsEXT(meshlet.vertexCount, meshlet.triangleCount);
     uint io = instanceIndex * 41;
     mat3 normalTransform = mat3(uintBitsToFloat(instanceWords[io + 16]), uintBitsToFloat(instanceWords[io + 17]), uintBitsToFloat(instanceWords[io + 18]), uintBitsToFloat(instanceWords[io + 20]), uintBitsToFloat(instanceWords[io + 21]), uintBitsToFloat(instanceWords[io + 22]), uintBitsToFloat(instanceWords[io + 24]), uintBitsToFloat(instanceWords[io + 25]), uintBitsToFloat(instanceWords[io + 26]));

@@ -7,6 +7,9 @@ object GltfGpuDrivenSettings {
     var instanceCulling: Boolean = booleanProperty("libgltf.vulkan.instanceCulling", true)
     @Volatile
     var meshletCulling: Boolean = booleanProperty("libgltf.vulkan.meshletCulling", true)
+
+    @Volatile
+    var occlusionCulling: Boolean = booleanProperty("libgltf.vulkan.meshShader.occlusionCulling", false)
     val benchmark: Boolean = booleanProperty("libgltf.vulkan.benchmark", false)
     val force: Boolean = booleanProperty("libgltf.vulkan.gpuDriven.force", false)
 

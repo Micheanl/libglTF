@@ -4,6 +4,7 @@ import com.micheanl.libgltf.mixin.FrontendGpuDeviceAccessor
 import com.micheanl.libgltf.render.GltfGpuBackendType
 import com.micheanl.libgltf.render.gpu.GltfGpuDriver
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
+import com.micheanl.libgltf.render.gpu.GltfOcclusionDepth
 import com.mojang.renderpearl.api.device.GpuDevice
 import com.mojang.renderpearl.backend.vulkan.VulkanDevice
 import com.mojang.logging.LogUtils
@@ -74,6 +75,7 @@ class GltfVulkanGpuDriven private constructor(
                 )
                 null
             }
+            GltfOcclusionDepth.ensureCreated()
             return GltfVulkanGpuDriven(GltfVulkanComputePipeline.create(backend), mesh)
         }
 

@@ -7,6 +7,7 @@
     "GlBufferAccessor",
     "GlRenderPassMeshMixin",
     "GlSamplerAccessor",
+    "LevelRendererOcclusionMixin",
     "FrontendGpuDeviceAccessor",
     "FrontendRenderPassAccessor",
     "RenderPipelineBuilderMixin",

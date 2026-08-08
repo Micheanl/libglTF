@@ -148,6 +148,11 @@ object GltfDebugCommands {
                                     .then(ClientCommands.literal("off").executes { cull(it.source, false) })
                             )
                             .then(
+                                ClientCommands.literal("occlusion")
+                                    .then(ClientCommands.literal("on").executes { meshOcclusion(it.source, true) })
+                                    .then(ClientCommands.literal("off").executes { meshOcclusion(it.source, false) })
+                            )
+                            .then(
                                 ClientCommands.literal("minimal")
                                     .then(ClientCommands.literal("on").executes { meshMinimal(it.source, true) })
                                     .then(ClientCommands.literal("off").executes { meshMinimal(it.source, false) })
@@ -257,6 +262,7 @@ object GltfDebugCommands {
             "counters=${if (GltfGpuDrivenSettings.debugMeshCounters) "on" else "off"} " +
             "limit=${GltfGpuDrivenSettings.meshGroupLimit} " +
             "cull=${if (GltfGpuDrivenSettings.instanceCulling && GltfGpuDrivenSettings.meshletCulling) "on" else "off"} " +
+            "occlusion=${if (GltfGpuDrivenSettings.occlusionCulling) "on" else "off"} " +
             "oit=${if (oit) "on" else "off"}"
         lines += "libgltf gpu=${GltfSceneRenderer.lastGpuSubmits} " +
             "cpu=${GltfSceneRenderer.lastCpuSubmits} " +
@@ -467,6 +473,15 @@ object GltfDebugCommands {
         GltfGpuDrivenSettings.instanceCulling = value
         GltfGpuDrivenSettings.meshletCulling = value
         source.sendFeedback(Component.literal("Mesh culling set to $value"))
+        return 0
+    }
+
+    private fun meshOcclusion(source: FabricClientCommandSource, value: Boolean): Int {
+        Minecraft.getInstance().execute {
+            GltfGpuDrivenSettings.occlusionCulling = value
+            GltfGpuFeatureRenderer.recreate()
+        }
+        source.sendFeedback(Component.literal("Mesh occlusion culling set to $value"))
         return 0
     }
 

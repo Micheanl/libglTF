@@ -3,6 +3,7 @@ package com.micheanl.libgltf.render.feature
 import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenBenchmark
 import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenSettings
 import com.micheanl.libgltf.render.vulkan.GltfVulkanGpuDriven
+import com.micheanl.libgltf.render.gpu.GltfOcclusionDepth
 import com.micheanl.libgltf.render.gl.GltfGlGpuDriven
 import com.micheanl.libgltf.render.gpu.GltfGpuDriver
 import com.mojang.renderpearl.api.commands.RenderPass
@@ -92,6 +93,7 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
         batches.clear()
         gpuDriven?.close()
         gpuDriven = null
+        GltfOcclusionDepth.close()
         GltfGpuDrivenBenchmark.close()
     }
 

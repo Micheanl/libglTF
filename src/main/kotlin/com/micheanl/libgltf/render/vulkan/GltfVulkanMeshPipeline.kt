@@ -2,16 +2,23 @@ package com.micheanl.libgltf.render.vulkan
 
 import com.micheanl.libgltf.render.gpu.GltfMeshletLod
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
+import com.micheanl.libgltf.render.gpu.GltfOcclusionDepth
+import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.logging.LogUtils
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.pipeline.BlendFunction
 import com.mojang.renderpearl.api.pipeline.RenderPipeline
 import com.mojang.renderpearl.api.pipeline.UniformType
+import com.mojang.renderpearl.api.textures.FilterMode
 import com.mojang.renderpearl.backend.vulkan.VulkanConst
 import com.mojang.renderpearl.backend.vulkan.VulkanDevice
 import com.mojang.renderpearl.backend.vulkan.VulkanGpuBuffer
+import com.mojang.renderpearl.backend.vulkan.VulkanGpuSampler
+import com.mojang.renderpearl.backend.vulkan.VulkanGpuTexture
+import com.mojang.renderpearl.backend.vulkan.VulkanGpuTextureView
 import com.mojang.renderpearl.backend.vulkan.VulkanRenderPipeline
 import it.unimi.dsi.fastutil.longs.LongArrayList
+import net.minecraft.client.Minecraft
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
 import org.lwjgl.util.shaderc.Shaderc
@@ -155,7 +162,8 @@ private class GltfVulkanMeshPipeline(
     private val withoutDepthPipeline: Long,
     private val meshModule: Long,
     private val fragmentModule: Long,
-    private val descriptorPipeline: VulkanRenderPipeline
+    private val descriptorPipeline: VulkanRenderPipeline,
+    private val occlusionCulling: Boolean
 ) : AutoCloseable {
     private var diagnosticsLogged = false
 
@@ -182,12 +190,48 @@ private class GltfVulkanMeshPipeline(
         MemoryStack.stackPush().use { stack ->
             val buffers = arrayOf(geometry, instances, meshlets.metadataBuffer, meshlets.vertexBuffer, meshlets.triangleBuffer)
             val infos = VkDescriptorBufferInfo.calloc(buffers.size, stack)
-            val writes = VkWriteDescriptorSet.calloc(buffers.size, stack)
+            val imageInfo = if (occlusionCulling) VkDescriptorImageInfo.calloc(1, stack) else null
+            val writes = VkWriteDescriptorSet.calloc(buffers.size + if (occlusionCulling) 1 else 0, stack)
             for (index in buffers.indices) {
                 infos[index].buffer((buffers[index] as VulkanGpuBuffer).vkBuffer()).offset(0L).range(buffers[index].size())
                 writes[index].`sType$Default`().dstSet(storageSet).dstBinding(index).descriptorCount(1)
                     .descriptorType(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
                     .pBufferInfo(VkDescriptorBufferInfo.create(infos[index].address(), 1))
+            }
+            if (occlusionCulling) {
+                val view = requireNotNull(GltfOcclusionDepth.view()) { "libgltf occlusion depth view missing" }
+                val sampler = requireNotNull(
+                    RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST) as? VulkanGpuSampler
+                ) { "libgltf occlusion sampler missing" }
+                imageInfo!!.imageView((view as VulkanGpuTextureView).vkImageView())
+                    .imageLayout(VK10.VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+                    .sampler(sampler.vkSampler())
+                writes[buffers.size].`sType$Default`().dstSet(storageSet).dstBinding(STORAGE_BUFFER_COUNT)
+                    .descriptorCount(1).descriptorType(VK10.VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+                    .pImageInfo(VkDescriptorImageInfo.create(imageInfo!!.address(), 1))
+                val texture = requireNotNull(GltfOcclusionDepth.texture()) as VulkanGpuTexture
+                val barrier = VkImageMemoryBarrier.calloc(1, stack).`sType$Default`()
+                    .srcAccessMask(VK10.VK_ACCESS_TRANSFER_WRITE_BIT)
+                    .dstAccessMask(VK10.VK_ACCESS_SHADER_READ_BIT)
+                    .oldLayout(VK10.VK_IMAGE_LAYOUT_UNDEFINED)
+                    .newLayout(VK10.VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+                    .srcQueueFamilyIndex(VK10.VK_QUEUE_FAMILY_IGNORED)
+                    .dstQueueFamilyIndex(VK10.VK_QUEUE_FAMILY_IGNORED)
+                    .image(texture.vkImage())
+                    .subresourceRange(
+                        VkImageSubresourceRange.malloc(stack)
+                            .aspectMask(VK10.VK_IMAGE_ASPECT_DEPTH_BIT)
+                            .baseMipLevel(0).levelCount(1).baseArrayLayer(0).layerCount(1)
+                    )
+                VK10.vkCmdPipelineBarrier(
+                    commandBuffer,
+                    VK10.VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT,
+                    0,
+                    null,
+                    null,
+                    barrier
+                )
             }
             VK10.vkUpdateDescriptorSets(device.vkDevice(), writes, null)
             VK10.vkCmdBindDescriptorSets(
@@ -215,11 +259,16 @@ private class GltfVulkanMeshPipeline(
                 val groups = minOf(chunkGroups.toLong(), candidateCount - baseCandidate).toInt()
                 val parameters = stack.malloc(PUSH_CONSTANT_SIZE)
                 for (index in sphere.indices) parameters.putFloat(index * Float.SIZE_BYTES, sphere[index])
-                parameters.putInt(16, instanceCount)
-                parameters.putInt(20, meshlets.meshletCount)
-                parameters.putInt(24, if (instanceCulling) 1 else 0)
-                parameters.putInt(28, if (meshletCulling) 1 else 0)
-                parameters.putInt(32, baseCandidate.toInt())
+                val main = Minecraft.getInstance().gameRenderer.mainRenderTarget()
+                parameters.putFloat(16, main.width.toFloat())
+                parameters.putFloat(20, main.height.toFloat())
+                parameters.putFloat(24, if (occlusionCulling) 1.0f else 0.0f)
+                parameters.putFloat(28, 0.0f)
+                parameters.putInt(32, instanceCount)
+                parameters.putInt(36, meshlets.meshletCount)
+                parameters.putInt(40, if (instanceCulling) 1 else 0)
+                parameters.putInt(44, if (meshletCulling) 1 else 0)
+                parameters.putInt(48, baseCandidate.toInt())
                 parameters.position(0).limit(PUSH_CONSTANT_SIZE)
                 VK10.vkCmdPushConstants(
                     commandBuffer,
@@ -288,6 +337,7 @@ private class GltfVulkanMeshPipeline(
                     ?.let { put("COEFF1_BINDING", it) }
             }
             require(bindings.values.none { it < 0 })
+            val occlusionCulling = GltfGpuDrivenSettings.occlusionCulling
             val macros = bindings.mapValues { it.value.toString() }
             val debugMacros = macros +
                 (if (GltfGpuDrivenSettings.debugMeshCounters) mapOf("MESH_DEBUG_COUNTERS" to "") else emptyMap()) +
@@ -298,12 +348,13 @@ private class GltfVulkanMeshPipeline(
                 Shaderc.shaderc_mesh_shader,
                 debugMacros + ("MESH_WORKGROUP_SIZE" to meshWorkgroupSize.toString()) +
                     (if (renderPipeline.getShaderDefines().flags().contains("OIT_ALPHA_ONLY")) mapOf("OIT_ALPHA_ONLY" to "") else emptyMap()) +
-                    (if (renderPipeline.isCull()) mapOf("MESH_CONE_CULLING" to "") else emptyMap())
+                    (if (renderPipeline.isCull()) mapOf("MESH_CONE_CULLING" to "") else emptyMap()) +
+                    (if (occlusionCulling) mapOf("MESH_OCCLUSION_CULLING" to "", "DEPTH_BINDING" to STORAGE_BUFFER_COUNT.toString()) else emptyMap())
             )
             try {
                 val fragmentModule = compileFragment(device, renderPipeline, bindings)
                 try {
-                    return create(device, original, renderPipeline, meshModule, fragmentModule)
+                    return create(device, original, renderPipeline, meshModule, fragmentModule, occlusionCulling)
                 } catch (error: RuntimeException) {
                     VK10.vkDestroyShaderModule(device.vkDevice(), fragmentModule, null)
                     throw error
@@ -319,7 +370,8 @@ private class GltfVulkanMeshPipeline(
             original: VulkanRenderPipeline,
             renderPipeline: RenderPipeline,
             meshModule: Long,
-            fragmentModule: Long
+            fragmentModule: Long,
+            occlusionCulling: Boolean
         ): GltfVulkanMeshPipeline = MemoryStack.stackPush().use { stack ->
             val uniforms = original.uniforms()
             val bindings = VkDescriptorSetLayoutBinding.calloc(uniforms.size, stack)
@@ -337,10 +389,16 @@ private class GltfVulkanMeshPipeline(
             checkVk(VK10.vkCreateDescriptorSetLayout(device.vkDevice(), descriptorInfo, null, pointer))
             val descriptorSetLayout = pointer[0]
             try {
-                val storageBindings = VkDescriptorSetLayoutBinding.calloc(STORAGE_BUFFER_COUNT, stack)
+                val storageBindingCount = STORAGE_BUFFER_COUNT + if (occlusionCulling) 1 else 0
+                val storageBindings = VkDescriptorSetLayoutBinding.calloc(storageBindingCount, stack)
                 for (index in 0 until STORAGE_BUFFER_COUNT) {
                     storageBindings[index].binding(index).descriptorCount(1)
                         .descriptorType(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+                        .stageFlags(EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT)
+                }
+                if (occlusionCulling) {
+                    storageBindings[STORAGE_BUFFER_COUNT].binding(STORAGE_BUFFER_COUNT).descriptorCount(1)
+                        .descriptorType(VK10.VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
                         .stageFlags(EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT)
                 }
                 val storageInfo = VkDescriptorSetLayoutCreateInfo.calloc(stack).`sType$Default`()
@@ -348,12 +406,15 @@ private class GltfVulkanMeshPipeline(
                 checkVk(VK10.vkCreateDescriptorSetLayout(device.vkDevice(), storageInfo, null, pointer))
                 val storageSetLayout = pointer[0]
                 try {
-                    val poolSize = VkDescriptorPoolSize.calloc(1, stack)
-                        .type(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+                    val poolSizes = VkDescriptorPoolSize.calloc(if (occlusionCulling) 2 else 1, stack)
+                    poolSizes[0].type(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
                         .descriptorCount(STORAGE_BUFFER_COUNT)
+                    if (occlusionCulling) {
+                        poolSizes[1].type(VK10.VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER).descriptorCount(1)
+                    }
                     val poolInfo = VkDescriptorPoolCreateInfo.calloc(stack).`sType$Default`()
                         .maxSets(1)
-                        .pPoolSizes(poolSize)
+                        .pPoolSizes(poolSizes)
                     checkVk(VK10.vkCreateDescriptorPool(device.vkDevice(), poolInfo, null, pointer))
                     val storagePool = pointer[0]
                     try {
@@ -400,7 +461,8 @@ private class GltfVulkanMeshPipeline(
                                 pipelines[1],
                                 meshModule,
                                 fragmentModule,
-                                descriptorPipeline
+                                descriptorPipeline,
+                                occlusionCulling
                             )
                         } catch (error: RuntimeException) {
                             VK10.vkDestroyPipelineLayout(device.vkDevice(), pipelineLayout, null)
@@ -587,7 +649,7 @@ private class GltfVulkanMeshPipeline(
         private const val MESH_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh.mesh"
         private const val FRAGMENT_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh.fsh"
         private const val STORAGE_BUFFER_COUNT = 5
-        private const val PUSH_CONSTANT_SIZE = 36
+        private const val PUSH_CONSTANT_SIZE = 52
         private val LOGGER = LogUtils.getLogger()
     }
 }
