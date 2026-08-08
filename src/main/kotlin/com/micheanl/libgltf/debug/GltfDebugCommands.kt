@@ -153,6 +153,11 @@ object GltfDebugCommands {
                                     .then(ClientCommands.literal("off").executes { meshMinimal(it.source, false) })
                             )
                             .then(
+                                ClientCommands.literal("flat")
+                                    .then(ClientCommands.literal("on").executes { meshFlat(it.source, true) })
+                                    .then(ClientCommands.literal("off").executes { meshFlat(it.source, false) })
+                            )
+                            .then(
                                 ClientCommands.literal("limit")
                                     .then(
                                         ClientCommands.argument("groups", IntegerArgumentType.integer(0))
@@ -243,6 +248,7 @@ object GltfDebugCommands {
         }
         lines += "libgltf mesh=${if (GltfGpuFeatureRenderer.activeMesh) "on" else "off"}($meshMode) " +
             "minimal=${if (GltfGpuDrivenSettings.debugMeshMinimal) "on" else "off"} " +
+            "flat=${if (GltfGpuDrivenSettings.debugMeshFlat) "on" else "off"} " +
             "limit=${GltfGpuDrivenSettings.meshGroupLimit} " +
             "cull=${if (GltfGpuDrivenSettings.instanceCulling && GltfGpuDrivenSettings.meshletCulling) "on" else "off"} " +
             "oit=${if (oit) "on" else "off"}"
@@ -464,6 +470,15 @@ object GltfDebugCommands {
             GltfGpuFeatureRenderer.recreate()
         }
         source.sendFeedback(Component.literal("Mesh minimal debug set to $value"))
+        return 0
+    }
+
+    private fun meshFlat(source: FabricClientCommandSource, value: Boolean): Int {
+        Minecraft.getInstance().execute {
+            GltfGpuDrivenSettings.debugMeshFlat = value
+            GltfGpuFeatureRenderer.recreate()
+        }
+        source.sendFeedback(Component.literal("Mesh flat debug set to $value"))
         return 0
     }
 

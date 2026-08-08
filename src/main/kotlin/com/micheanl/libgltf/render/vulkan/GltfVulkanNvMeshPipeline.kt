@@ -520,6 +520,7 @@ private class GltfVulkanNvMeshPipeline(
                 .use { it.readText() }
             val macros = HashMap(bindings.mapValues { it.value.toString() })
             if (debugMinimal) macros["MESH_DEBUG_MINIMAL"] = ""
+            if (GltfGpuDrivenSettings.debugMeshFlat) macros["MESH_DEBUG_FLAT"] = ""
             val defines = renderPipeline.getShaderDefines()
             for ((name, value) in defines.values()) macros[name] = value
             for (flag in defines.flags()) macros[flag] = ""

@@ -169,10 +169,22 @@ vec4 sampleColorForAccumulation(vec4 color) {
 #endif
 void main() {
 #ifdef MESH_DEBUG_MINIMAL
-    #ifndef OIT_ALPHA_ONLY
+#ifdef OIT_TRANSMITTANCE
+    coeff[0] = vec4(1.0, 0.0, 0.0, 1.0);
+#endif
+#if !defined(OIT_ALPHA_ONLY) || defined(OIT_DEPTH_BOUNDS)
     fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+#endif
     return;
-    #endif
+#endif
+#ifdef MESH_DEBUG_FLAT
+#ifdef OIT_TRANSMITTANCE
+    coeff[0] = vec4(1.0, 0.0, 0.0, 1.0);
+#endif
+#if !defined(OIT_ALPHA_ONLY) || defined(OIT_DEPTH_BOUNDS)
+    fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+#endif
+    return;
 #endif
     vec4 color = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;
 #ifdef ALPHA_CUTOUT
