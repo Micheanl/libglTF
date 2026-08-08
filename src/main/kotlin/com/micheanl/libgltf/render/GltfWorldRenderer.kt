@@ -9,6 +9,20 @@ import net.minecraft.util.Mth
 import net.minecraft.world.level.chunk.status.ChunkStatus
 import org.joml.Matrix4f
 
+/**
+ * libgltf · GltfWorldRenderer
+ *
+ * ```
+ * LevelRenderEvents.COLLECT_SUBMITS.register(GltfWorldRenderer::submit)
+ * ```
+ *
+ * 世界渲染提交
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 object GltfWorldRenderer {
     private val relativeTransform = Matrix4f()
     private val lightPosition = BlockPos.MutableBlockPos()

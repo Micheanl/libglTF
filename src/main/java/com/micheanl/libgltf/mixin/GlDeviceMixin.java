@@ -5,7 +5,22 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(targets = "com.mojang.blaze3d.opengl.GlDevice")
+@Mixin(targets = "com.mojang.renderpearl.backend.opengl.GlDevice")
+
+/**
+ * libgltf · GlDeviceMixin
+ *
+ * ```
+ * @Mixin(targets = "com.mojang.renderpearl.backend.opengl.GlDevice")
+ * ```
+ *
+ * 提供 OpenGL 顶点属性上限的 mixin
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 public abstract class GlDeviceMixin implements VertexAttributeLimitProvider {
     @Override
     public int getMaxVertexAttributes() {

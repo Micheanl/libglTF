@@ -10,6 +10,20 @@ import net.minecraft.client.renderer.texture.OverlayTexture
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.phys.Vec3
 
+/**
+ * libgltf · GltfBlockEntityRenderer
+ *
+ * ```
+ * ): GltfBlockEntityRenderer<T> = GltfBlockEntityRenderer(provider)
+ * ```
+ *
+ * 方块实体 glTF 渲染器
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 class GltfBlockEntityRenderer<T : BlockEntity>(
     private val provider: GltfBlockEntityRenderProvider<T>
 ) : BlockEntityRenderer<T, GltfBlockEntityRenderState> {

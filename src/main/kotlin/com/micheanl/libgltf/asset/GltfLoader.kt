@@ -12,18 +12,24 @@ import com.micheanl.libgltf.animation.Interpolation
 import com.micheanl.libgltf.lod.LodPolicy
 import com.micheanl.libgltf.lod.MeshLodBuilder
 import com.micheanl.libgltf.material.AlphaMode
+import com.micheanl.libgltf.material.AnisotropyMaterial
 import com.micheanl.libgltf.material.ClearcoatMaterial
 import com.micheanl.libgltf.material.GltfMaterial
+import com.micheanl.libgltf.material.IridescenceMaterial
 import com.micheanl.libgltf.material.SheenMaterial
 import com.micheanl.libgltf.material.SpecularMaterial
 import com.micheanl.libgltf.material.TextureBinding
 import com.micheanl.libgltf.material.TextureFilter
 import com.micheanl.libgltf.material.TextureSampler
 import com.micheanl.libgltf.material.TextureWrap
+import com.micheanl.libgltf.model.CameraType
 import com.micheanl.libgltf.model.GltfAsset
+import com.micheanl.libgltf.model.GltfCamera
 import com.micheanl.libgltf.model.GltfImage
+import com.micheanl.libgltf.model.GltfLight
 import com.micheanl.libgltf.model.GltfMesh
 import com.micheanl.libgltf.model.GltfNode
+import com.micheanl.libgltf.model.LightType
 import com.micheanl.libgltf.model.GltfPrimitive
 import com.micheanl.libgltf.model.GltfSkin
 import com.micheanl.libgltf.model.GltfStats
@@ -39,6 +45,21 @@ import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import org.joml.Matrix4f
+
+/**
+ * libgltf · GltfLoader
+ *
+ * ```
+ * override fun load(path: Path, lodPolicy: LodPolicy): GltfLoadResult = GltfLoader.load(path, lodPolicy)
+ * ```
+ *
+ * glTF 解析入口
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
 
 object GltfLoader {
     private val json = Json {
@@ -83,13 +104,37 @@ object GltfLoader {
         val images = parseImages(root, resolver)
         val textures = parseTextures(root)
         val materials = parseMaterials(root)
-        val meshes = parseMeshes(root, decoder, lodPolicy)
-        val nodes = parseNodes(root)
+        val materialVariantNames = parseMaterialVariantNames(root)
+        val meshes = parseMeshes(root, decoder, lodPolicy, materialVariantNames.size)
+        val nodes = parseNodes(root, decoder)
         val parents = parentIndices(nodes)
         val resolvedNodes = Array(nodes.size) { index -> nodes[index].copy(parentIndex = parents[index]) }
         val roots = sceneRoots(root, parents)
         val order = topologicalOrder(resolvedNodes, roots)
+        val scenes = JsonFields.value(root, "scenes")
+        val sceneNames: Array<String>
+        val sceneNodeMasks: Array<BooleanArray>
+        val defaultScene: Int
+        if (scenes == null || scenes.size() == 0) {
+            sceneNames = emptyArray()
+            sceneNodeMasks = arrayOf(BooleanArray(resolvedNodes.size) { true })
+            defaultScene = 0
+        } else {
+            defaultScene = JsonFields.int(root, "scene", 0).coerceIn(0, scenes.size() - 1)
+            sceneNames = Array(scenes.size()) { sceneIndex ->
+                JsonFields.string(scenes[sceneIndex], "name", "scene_$sceneIndex")
+            }
+            sceneNodeMasks = Array(scenes.size()) { sceneIndex ->
+                val mask = BooleanArray(resolvedNodes.size)
+                for (root in JsonFields.ints(scenes[sceneIndex], "nodes")) {
+                    markSceneMask(root, mask, resolvedNodes)
+                }
+                mask
+            }
+        }
         val skins = parseSkins(root, decoder)
+        val cameras = parseCameras(root)
+        val lights = parseLights(root)
         val animations = parseAnimations(root, decoder)
         val morphOffsets = IntArray(resolvedNodes.size)
         var totalMorphWeights = 0
@@ -125,10 +170,16 @@ object GltfLoader {
             resolvedNodes,
             order,
             roots,
+            sceneNames,
+            sceneNodeMasks,
+            defaultScene,
             meshes,
             skins,
             animations,
             materials,
+            materialVariantNames,
+            cameras,
+            lights,
             textures,
             images,
             bounds,
@@ -199,6 +250,12 @@ object GltfLoader {
             val specularExtension = JsonFields.value(extensions, "KHR_materials_specular")
             val clearcoatExtension = JsonFields.value(extensions, "KHR_materials_clearcoat")
             val sheenExtension = JsonFields.value(extensions, "KHR_materials_sheen")
+            val transmissionExtension = JsonFields.value(extensions, "KHR_materials_transmission")
+            val volumeExtension = JsonFields.value(extensions, "KHR_materials_volume")
+            val iorExtension = JsonFields.value(extensions, "KHR_materials_ior")
+            val dispersionExtension = JsonFields.value(extensions, "KHR_materials_dispersion")
+            val anisotropyExtension = JsonFields.value(extensions, "KHR_materials_anisotropy")
+            val iridescenceExtension = JsonFields.value(extensions, "KHR_materials_iridescence")
             GltfMaterial(
                 JsonFields.string(value, "name", "material_$index"),
                 JsonFields.floats(pbr, "baseColorFactor", floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f)),
@@ -242,6 +299,31 @@ object GltfLoader {
                         JsonFields.float(it, "sheenRoughnessFactor"),
                         parseBinding(JsonFields.value(it, "sheenRoughnessTexture"))
                     )
+                },
+                JsonFields.float(transmissionExtension, "transmissionFactor"),
+                parseBinding(JsonFields.value(transmissionExtension, "transmissionTexture")),
+                JsonFields.float(volumeExtension, "thicknessFactor"),
+                parseBinding(JsonFields.value(volumeExtension, "thicknessTexture")),
+                JsonFields.float(volumeExtension, "attenuationDistance", Float.POSITIVE_INFINITY),
+                JsonFields.floats(volumeExtension, "attenuationColor", floatArrayOf(1.0f, 1.0f, 1.0f)),
+                JsonFields.float(iorExtension, "ior", 1.5f),
+                JsonFields.float(dispersionExtension, "dispersion"),
+                anisotropyExtension?.let {
+                    AnisotropyMaterial(
+                        JsonFields.float(it, "anisotropyStrength"),
+                        JsonFields.float(it, "anisotropyRotation"),
+                        parseBinding(JsonFields.value(it, "anisotropyTexture"))
+                    )
+                },
+                iridescenceExtension?.let {
+                    IridescenceMaterial(
+                        JsonFields.float(it, "iridescenceFactor"),
+                        parseBinding(JsonFields.value(it, "iridescenceTexture")),
+                        JsonFields.float(it, "iridescenceIor", 1.3f),
+                        JsonFields.float(it, "iridescenceThicknessMinimum", 100.0f),
+                        JsonFields.float(it, "iridescenceThicknessMaximum", 400.0f),
+                        parseBinding(JsonFields.value(it, "iridescenceThicknessTexture"))
+                    )
                 }
             )
         }
@@ -262,20 +344,32 @@ object GltfLoader {
         )
     }
 
-    private fun parseMeshes(root: JsonValue, decoder: AccessorDecoder, lodPolicy: LodPolicy): Array<GltfMesh> {
+    private fun parseMeshes(
+        root: JsonValue,
+        decoder: AccessorDecoder,
+        lodPolicy: LodPolicy,
+        variantCount: Int
+    ): Array<GltfMesh> {
         val meshes = JsonFields.value(root, "meshes") ?: return emptyArray()
         return Array(meshes.size()) { meshIndex ->
             val mesh = meshes[meshIndex]
             val primitives = JsonFields.value(mesh, "primitives") ?: error("mesh has no primitives")
             GltfMesh(
                 JsonFields.string(mesh, "name", "mesh_$meshIndex"),
-                Array(primitives.size()) { primitiveIndex -> parsePrimitive(primitives[primitiveIndex], decoder, lodPolicy) },
+                Array(primitives.size()) { primitiveIndex ->
+                    parsePrimitive(primitives[primitiveIndex], decoder, lodPolicy, variantCount)
+                },
                 JsonFields.floats(mesh, "weights")
             )
         }
     }
 
-    private fun parsePrimitive(value: JsonValue, decoder: AccessorDecoder, lodPolicy: LodPolicy): GltfPrimitive {
+    private fun parsePrimitive(
+        value: JsonValue,
+        decoder: AccessorDecoder,
+        lodPolicy: LodPolicy,
+        variantCount: Int
+    ): GltfPrimitive {
         val attributes = JsonFields.value(value, "attributes") ?: error("primitive attributes missing")
         val positionAccessor = JsonFields.int(attributes, "POSITION")
         require(positionAccessor >= 0)
@@ -329,12 +423,18 @@ object GltfLoader {
         val targets = JsonFields.value(value, "targets")
         val targetCount = targets?.size() ?: 0
         val morphPositions = FloatArray(targetCount * vertexCount * 3)
+        val morphNormals = FloatArray(targetCount * vertexCount * 3)
         if (targets != null) {
             for (target in 0 until targetCount) {
                 val accessor = JsonFields.int(targets[target], "POSITION")
                 if (accessor >= 0) {
                     val values = decoder.readFloats(accessor)
                     values.copyInto(morphPositions, target * vertexCount * 3, 0, values.size.coerceAtMost(vertexCount * 3))
+                }
+                val normalAccessor = JsonFields.int(targets[target], "NORMAL")
+                if (normalAccessor >= 0) {
+                    val values = decoder.readFloats(normalAccessor)
+                    values.copyInto(morphNormals, target * vertexCount * 3, 0, values.size.coerceAtMost(vertexCount * 3))
                 }
             }
         }
@@ -345,29 +445,88 @@ object GltfLoader {
         } else {
             computeBounds(positions)
         }
+        val variantMappings = JsonFields.value(
+            JsonFields.value(value, "extensions"),
+            "KHR_materials_variants"
+        )
+        val materialMappings = IntArray(variantCount) { -1 }
+        val mappings = JsonFields.value(variantMappings, "mappings")
+        if (mappings != null) {
+            for (mappingIndex in 0 until mappings.size()) {
+                val mapping = mappings[mappingIndex]
+                val material = JsonFields.int(mapping, "material")
+                if (material < 0) continue
+                for (variant in JsonFields.ints(mapping, "variants")) {
+                    if (variant in materialMappings.indices) materialMappings[variant] = material
+                }
+            }
+        }
         return GltfPrimitive(
             vertices,
             skin,
             lodIndices,
             vertexCount,
             JsonFields.int(value, "material", 0),
+            materialMappings,
             mode,
             bounds,
             morphPositions,
+            morphNormals,
             targetCount
         )
     }
 
-    private fun parseNodes(root: JsonValue): Array<GltfNode> {
+    private fun parseMaterialVariantNames(root: JsonValue): Array<String> {
+        val variants = JsonFields.value(
+            JsonFields.value(root, "extensions"),
+            "KHR_materials_variants"
+        )
+        val names = JsonFields.value(variants, "variants") ?: return emptyArray()
+        return Array(names.size()) { index ->
+            JsonFields.string(names[index], "name", "variant_$index")
+        }
+    }
+
+    private fun parseNodes(root: JsonValue, decoder: AccessorDecoder): Array<GltfNode> {
         val values = JsonFields.value(root, "nodes") ?: return emptyArray()
         return Array(values.size()) { index ->
             val node = values[index]
+            val punctualLight = JsonFields.value(JsonFields.value(node, "extensions"), "KHR_lights_punctual")
+            val instancing = JsonFields.value(JsonFields.value(node, "extensions"), "EXT_mesh_gpu_instancing")
+            val attributes = JsonFields.value(instancing, "attributes")
+            val translations = attributes?.let { attributeFloats(it, "TRANSLATION", decoder) } ?: FloatArray(0)
+            val rotations = attributes?.let { attributeFloats(it, "ROTATION", decoder) } ?: FloatArray(0)
+            val scales = attributes?.let { attributeFloats(it, "SCALE", decoder) } ?: FloatArray(0)
+            val instanceCount = maxOf(translations.size / 3, rotations.size / 4, scales.size / 3)
+            val instanceMatrices = FloatArray(instanceCount * 16)
+            for (instance in 0 until instanceCount) {
+                val translation = if (translations.isNotEmpty()) instance * 3 else 0
+                val rotation = if (rotations.isNotEmpty()) instance * 4 else 0
+                val scale = if (scales.isNotEmpty()) instance * 3 else 0
+                Matrix4f()
+                    .translationRotateScale(
+                        translations.getOrElse(translation) { 0.0f },
+                        translations.getOrElse(translation + 1) { 0.0f },
+                        translations.getOrElse(translation + 2) { 0.0f },
+                        rotations.getOrElse(rotation) { 0.0f },
+                        rotations.getOrElse(rotation + 1) { 0.0f },
+                        rotations.getOrElse(rotation + 2) { 0.0f },
+                        rotations.getOrElse(rotation + 3) { 1.0f },
+                        scales.getOrElse(scale) { 1.0f },
+                        scales.getOrElse(scale + 1) { 1.0f },
+                        scales.getOrElse(scale + 2) { 1.0f }
+                    )
+                    .get(instanceMatrices, instance * 16)
+            }
             GltfNode(
                 JsonFields.string(node, "name", "node_$index"),
                 -1,
                 JsonFields.ints(node, "children"),
                 JsonFields.int(node, "mesh"),
                 JsonFields.int(node, "skin"),
+                JsonFields.int(node, "camera"),
+                JsonFields.int(punctualLight, "light"),
+                instanceMatrices,
                 JsonFields.floats(node, "translation", floatArrayOf(0.0f, 0.0f, 0.0f)),
                 JsonFields.floats(node, "rotation", floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f)),
                 JsonFields.floats(node, "scale", floatArrayOf(1.0f, 1.0f, 1.0f)),
@@ -399,6 +558,46 @@ object GltfLoader {
         }
     }
 
+    private fun parseCameras(root: JsonValue): Array<GltfCamera> {
+        val values = JsonFields.value(root, "cameras") ?: return emptyArray()
+        return Array(values.size()) { index ->
+            val value = values[index]
+            val perspective = JsonFields.value(value, "perspective")
+            val orthographic = JsonFields.value(value, "orthographic")
+            GltfCamera(
+                JsonFields.string(value, "name", "camera_$index"),
+                cameraType(JsonFields.string(value, "type", "perspective")),
+                JsonFields.float(perspective, "yfov", 0.7853982f),
+                JsonFields.float(perspective, "znear", 0.01f),
+                JsonFields.float(perspective, "zfar", -1.0f),
+                JsonFields.float(perspective, "aspectRatio", -1.0f),
+                JsonFields.float(orthographic, "xmag", -1.0f),
+                JsonFields.float(orthographic, "ymag", -1.0f)
+            )
+        }
+    }
+
+    private fun parseLights(root: JsonValue): Array<GltfLight> {
+        val lights = JsonFields.value(
+            JsonFields.value(root, "extensions"),
+            "KHR_lights_punctual"
+        )
+        val values = JsonFields.value(lights, "lights") ?: return emptyArray()
+        return Array(values.size()) { index ->
+            val value = values[index]
+            val spot = JsonFields.value(value, "spot")
+            GltfLight(
+                JsonFields.string(value, "name", "light_$index"),
+                lightType(JsonFields.string(value, "type")),
+                JsonFields.floats(value, "color", floatArrayOf(1.0f, 1.0f, 1.0f)),
+                JsonFields.float(value, "intensity", 1.0f),
+                JsonFields.float(value, "range", -1.0f),
+                JsonFields.float(spot, "innerConeAngle", 0.0f),
+                JsonFields.float(spot, "outerConeAngle", 0.7853982f)
+            )
+        }
+    }
+
     private fun parseAnimations(root: JsonValue, decoder: AccessorDecoder): Array<AnimationClip> {
         val values = JsonFields.value(root, "animations") ?: return emptyArray()
         return Array(values.size()) { animationIndex ->
@@ -406,28 +605,105 @@ object GltfLoader {
             val samplers = JsonFields.value(animation, "samplers") ?: error("animation samplers missing")
             val channels = JsonFields.value(animation, "channels") ?: error("animation channels missing")
             var duration = 0.0f
-            val parsed = Array(channels.size()) { channelIndex ->
+            val parsed = ArrayList<AnimationChannel>(channels.size())
+            for (channelIndex in 0 until channels.size()) {
                 val channel = channels[channelIndex]
                 val sampler = samplers[JsonFields.int(channel, "sampler")]
                 val target = JsonFields.value(channel, "target") ?: error("animation target missing")
                 val input = decoder.readFloats(JsonFields.int(sampler, "input"))
                 val output = decoder.readFloats(JsonFields.int(sampler, "output"))
                 if (input.isNotEmpty()) duration = maxOf(duration, input[input.lastIndex])
-                val path = animationPath(JsonFields.string(target, "path"))
                 val interpolation = interpolation(JsonFields.string(sampler, "interpolation", "LINEAR"))
                 val multiplier = if (interpolation == Interpolation.CUBIC_SPLINE) 3 else 1
                 val components = if (input.isEmpty()) 0 else output.size / input.size / multiplier
-                AnimationChannel(
-                    JsonFields.int(target, "node"),
-                    path,
-                    interpolation,
-                    input,
-                    output,
-                    components
-                )
+                val materialTarget = materialUvTarget(target)
+                val materialFactorIndex = materialFactorTarget(target)
+                if (materialTarget != null) {
+                    parsed += AnimationChannel(
+                        -1,
+                        AnimationPath.MATERIAL_UV,
+                        interpolation,
+                        input,
+                        output,
+                        components,
+                        materialTarget.materialIndex,
+                        materialTarget.textureSlot,
+                        materialTarget.textureProperty
+                    )
+                } else if (materialFactorIndex >= 0) {
+                    parsed += AnimationChannel(
+                        -1,
+                        AnimationPath.MATERIAL_FACTOR,
+                        interpolation,
+                        input,
+                        output,
+                        components,
+                        materialFactorIndex
+                    )
+                } else if (!hasAnimationPointer(target)) {
+                    parsed += AnimationChannel(
+                        JsonFields.int(target, "node"),
+                        animationPath(JsonFields.string(target, "path")),
+                        interpolation,
+                        input,
+                        output,
+                        components
+                    )
+                }
             }
-            AnimationClip(JsonFields.string(animation, "name", "animation_$animationIndex"), duration, parsed)
+            AnimationClip(
+                JsonFields.string(animation, "name", "animation_$animationIndex"),
+                duration,
+                parsed.toTypedArray()
+            )
         }
+    }
+
+    private fun hasAnimationPointer(target: JsonValue): Boolean =
+        JsonFields.value(JsonFields.value(target, "extensions"), "KHR_animation_pointer") != null
+
+    private fun materialUvTarget(target: JsonValue): MaterialUvTarget? {
+        val extension = JsonFields.value(JsonFields.value(target, "extensions"), "KHR_animation_pointer")
+        val pointer = JsonFields.string(extension, "pointer")
+        if (pointer.isEmpty()) return null
+        val segments = pointer.split('/')
+        if (segments.size < 7 || segments[1] != "materials") return null
+        val materialIndex = segments[2].toIntOrNull() ?: return null
+        val textureSlot = when (segments.getOrNull(4)) {
+            "baseColorTexture" -> 0
+            else -> return null
+        }
+        val transform = segments.getOrNull(5)
+        val property = if (transform == "extensions" && segments.getOrNull(6) == "KHR_texture_transform") {
+            segments.getOrNull(7)
+        } else if (transform == "KHR_texture_transform") {
+            segments.getOrNull(6)
+        } else {
+            null
+        }
+        val textureProperty = when (property) {
+            "offset" -> 0
+            "rotation" -> 1
+            "scale" -> 2
+            else -> return null
+        }
+        return MaterialUvTarget(materialIndex, textureSlot, textureProperty)
+    }
+
+    private fun materialFactorTarget(target: JsonValue): Int {
+        val extension = JsonFields.value(JsonFields.value(target, "extensions"), "KHR_animation_pointer")
+        val pointer = JsonFields.string(extension, "pointer")
+        if (pointer.isEmpty()) return -1
+        val segments = pointer.split('/')
+        if (
+            segments.size != 5 ||
+            segments[1] != "materials" ||
+            segments[3] != "pbrMetallicRoughness" ||
+            segments[4] != "baseColorFactor"
+        ) {
+            return -1
+        }
+        return segments[2].toIntOrNull() ?: -1
     }
 
     private fun parentIndices(nodes: Array<GltfNode>): IntArray {
@@ -450,6 +726,17 @@ object GltfLoader {
             if (roots.isNotEmpty()) return roots
         }
         return parents.indices.filter { parents[it] < 0 }.toIntArray()
+    }
+
+    private fun markSceneMask(root: Int, mask: BooleanArray, nodes: Array<GltfNode>) {
+        val stack = IntArray(nodes.size)
+        var size = 0
+        stack[size++] = root
+        while (size > 0) {
+            val node = stack[--size]
+            mask[node] = true
+            for (child in nodes[node].children) stack[size++] = child
+        }
     }
 
     private fun topologicalOrder(nodes: Array<GltfNode>, roots: IntArray): IntArray {
@@ -596,6 +883,16 @@ object GltfLoader {
         false,
         null,
         null,
+        null,
+        0.0f,
+        null,
+        0.0f,
+        null,
+        Float.POSITIVE_INFINITY,
+        floatArrayOf(1.0f, 1.0f, 1.0f),
+        1.5f,
+        0.0f,
+        null,
         null
     )
 
@@ -603,6 +900,17 @@ object GltfLoader {
         "MASK" -> AlphaMode.MASK
         "BLEND" -> AlphaMode.BLEND
         else -> AlphaMode.OPAQUE
+    }
+
+    private fun cameraType(value: String): CameraType = when (value) {
+        "orthographic" -> CameraType.ORTHOGRAPHIC
+        else -> CameraType.PERSPECTIVE
+    }
+
+    private fun lightType(value: String): LightType = when (value) {
+        "spot" -> LightType.SPOT
+        "directional" -> LightType.DIRECTIONAL
+        else -> LightType.POINT
     }
 
     private fun animationPath(value: String): AnimationPath = when (value) {

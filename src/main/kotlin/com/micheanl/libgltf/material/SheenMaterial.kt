@@ -1,5 +1,24 @@
 package com.micheanl.libgltf.material
 
+/**
+ * libgltf · SheenMaterial
+ *
+ * ```
+ * SheenMaterial(
+ * JsonFields.floats(it, "sheenColorFactor", floatArrayOf(0.0f, 0.0f, 0.0f)),
+ * parseBinding(JsonFields.value(it, "sheenColorTexture")),
+ * JsonFields.float(it, "sheenRoughnessFactor"),
+ * parseBinding(JsonFields.value(it, "sheenRoughnessTexture"))
+ * )
+ * ```
+ *
+ * 丝绒材质扩展
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 data class SheenMaterial(
     val colorFactor: FloatArray,
     val colorTexture: TextureBinding?,

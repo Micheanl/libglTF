@@ -5,6 +5,20 @@ import com.micheanl.libgltf.api.GltfInstanceId
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
+/**
+ * libgltf · GltfRenderRegistry
+ *
+ * ```
+ * override fun register(instance: GltfInstance): GltfInstanceId = GltfRenderRegistry.register(instance)
+ * ```
+ *
+ * 渲染类型注册表
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 object GltfRenderRegistry {
     private val nextId = AtomicLong(1L)
     private val instancesById = ConcurrentHashMap<Long, GltfInstance>()

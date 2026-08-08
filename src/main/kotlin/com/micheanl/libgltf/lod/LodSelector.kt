@@ -1,5 +1,19 @@
 package com.micheanl.libgltf.lod
 
+/**
+ * libgltf · LodSelector
+ *
+ * ```
+ * lodSelector = LodSelector(value)
+ * ```
+ *
+ * LOD 距离选择
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 class LodSelector(private val policy: LodPolicy) {
     fun select(distanceSquared: Float, previousLevel: Int): Int {
         val distances = policy.levelDistances

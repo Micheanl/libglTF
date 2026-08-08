@@ -7,10 +7,24 @@ import com.micheanl.libgltf.lod.LodSelector
 import com.micheanl.libgltf.material.GltfMaterial
 import com.micheanl.libgltf.material.MaterialOverride
 import com.micheanl.libgltf.render.cpu.GltfGeometryRenderer
-import com.micheanl.libgltf.render.feature.GltfGpuSubmit
+import com.micheanl.libgltf.render.feature.GpuSubmit
 import com.micheanl.libgltf.render.gpu.GpuAnimationState
 import org.joml.Matrix4f
 import org.joml.Matrix4fc
+
+/**
+ * libgltf · GltfInstance
+ *
+ * ```
+ * fun createInstance(handle: GltfHandle): GltfInstance
+ * ```
+ *
+ * 场景中的一个 glTF 实例：变换、材质、动画状态与 LOD
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
 
 class GltfInstance internal constructor(val handle: GltfHandle) {
     val transform: Matrix4f = Matrix4f()
@@ -19,11 +33,15 @@ class GltfInstance internal constructor(val handle: GltfHandle) {
     val animationState: GpuAnimationState = GpuAnimationState(handle.asset)
     val materialOverrides: Array<MaterialOverride?> = arrayOfNulls(handle.asset.materials.size)
     private val materialMappings: IntArray = IntArray(handle.asset.materials.size) { it }
+    internal var sceneMask: BooleanArray = handle.asset.sceneNodeMasks[handle.asset.defaultScene]
     internal val geometryRenderers: Array<Array<GltfGeometryRenderer>> = createRenderers()
-    internal val gpuSubmits: Array<Array<GltfGpuSubmit>> = createGpuSubmits()
+    internal val gpuSubmits: Array<Array<Array<GpuSubmit>>> = createGpuSubmits()
 
     var renderMode: GltfRenderMode = GltfRenderMode.AUTO
     var automaticAnimation: Boolean = true
+    var materialVariant: Int = -1
+    var sceneIndex: Int = handle.asset.defaultScene
+        private set
 
     @Volatile
     var visible: Boolean = true
@@ -115,6 +133,24 @@ class GltfInstance internal constructor(val handle: GltfHandle) {
         return this
     }
 
+    fun selectVariant(index: Int): GltfInstance {
+        val clamped = index.coerceIn(-1, handle.asset.materialVariantNames.lastIndex)
+        if (materialVariant != clamped) {
+            materialVariant = clamped
+            materialRevision++
+        }
+        return this
+    }
+
+    fun selectScene(index: Int): GltfInstance {
+        val clamped = index.coerceIn(0, handle.asset.sceneNodeMasks.lastIndex)
+        if (sceneIndex != clamped) {
+            sceneIndex = clamped
+            sceneMask = handle.asset.sceneNodeMasks[clamped]
+        }
+        return this
+    }
+
     fun setMaterial(index: Int, override: MaterialOverride?): GltfInstance {
         require(index in materialOverrides.indices)
         materialOverrides[index] = override
@@ -124,6 +160,15 @@ class GltfInstance internal constructor(val handle: GltfHandle) {
 
     internal fun resolveMaterial(index: Int): Int = materialMappings[index.coerceIn(0, materialMappings.lastIndex)]
 
+    internal fun resolvePrimitiveMaterial(sourceIndex: Int, variantMappings: IntArray): Int {
+        val variant = materialVariant
+        if (variant in variantMappings.indices) {
+            val mapped = variantMappings[variant]
+            if (mapped >= 0) return mapped
+        }
+        return resolveMaterial(sourceIndex)
+    }
+
     private fun createRenderers(): Array<Array<GltfGeometryRenderer>> = Array(handle.asset.nodes.size) { nodeIndex ->
         val meshIndex = handle.asset.nodes[nodeIndex].meshIndex
         if (meshIndex < 0) emptyArray() else Array(handle.asset.meshes[meshIndex].primitives.size) { primitiveIndex ->
@@ -131,10 +176,16 @@ class GltfInstance internal constructor(val handle: GltfHandle) {
         }
     }
 
-    private fun createGpuSubmits(): Array<Array<GltfGpuSubmit>> = Array(handle.asset.nodes.size) { nodeIndex ->
+    private fun createGpuSubmits(): Array<Array<Array<GpuSubmit>>> =
+        Array(handle.asset.nodes.size) { nodeIndex ->
         val meshIndex = handle.asset.nodes[nodeIndex].meshIndex
-        if (meshIndex < 0) emptyArray() else Array(handle.asset.meshes[meshIndex].primitives.size) { primitiveIndex ->
-            GltfGpuSubmit(this, nodeIndex, meshIndex, primitiveIndex)
+        if (meshIndex < 0) {
+            emptyArray()
+        } else {
+            val instanceCount = (handle.asset.nodes[nodeIndex].instanceMatrices.size / 16).coerceAtLeast(1)
+            Array(handle.asset.meshes[meshIndex].primitives.size) { primitiveIndex ->
+                Array(instanceCount) { GpuSubmit(this, nodeIndex, meshIndex, primitiveIndex) }
+            }
         }
     }
 

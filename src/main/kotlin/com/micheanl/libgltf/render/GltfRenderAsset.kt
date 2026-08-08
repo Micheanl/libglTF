@@ -1,9 +1,23 @@
 package com.micheanl.libgltf.render
 
 import com.micheanl.libgltf.model.GltfAsset
-import com.micheanl.libgltf.render.gpu.GltfGpuResources
+import com.micheanl.libgltf.render.gpu.GpuResources
 import com.micheanl.libgltf.render.texture.GltfTextureFactory
 import com.micheanl.libgltf.render.texture.GltfTextureSet
+
+/**
+ * libgltf · GltfRenderAsset
+ *
+ * ```
+ * fun renderType(resource: GltfRenderAsset, textures: GltfTextureSet): RenderType {
+ * ```
+ *
+ * 渲染资源封装
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
 
 class GltfRenderAsset(
     val id: Long,
@@ -11,7 +25,7 @@ class GltfRenderAsset(
 ) : AutoCloseable {
     @Volatile
     private var textureSet: GltfTextureSet? = null
-    private var gpuResources: GltfGpuResources? = null
+    private var gpuResources: GpuResources? = null
 
     fun textures(): GltfTextureSet {
         var textures = textureSet
@@ -22,10 +36,10 @@ class GltfRenderAsset(
         return textures
     }
 
-    fun gpu(): GltfGpuResources {
+    fun gpu(): GpuResources {
         var resources = gpuResources
         if (resources == null) {
-            resources = GltfGpuResources(id, asset)
+            resources = GpuResources(id, asset)
             gpuResources = resources
         }
         return resources

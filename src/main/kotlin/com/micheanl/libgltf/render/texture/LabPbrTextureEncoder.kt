@@ -10,6 +10,20 @@ import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
+/**
+ * libgltf · LabPbrTextureEncoder
+ *
+ * ```
+ * LabPbrTextureEncoder.normal(asset, material),
+ * ```
+ *
+ * Lab PBR 纹理编码
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 object LabPbrTextureEncoder {
     private const val DIELECTRIC_G_MAX: Int = 229
 

@@ -3,6 +3,20 @@ package com.micheanl.libgltf.render.texture
 import net.minecraft.client.Minecraft
 import net.minecraft.resources.Identifier
 
+/**
+ * libgltf · GltfTextureSet
+ *
+ * ```
+ * textures: GltfTextureSet,
+ * ```
+ *
+ * 资源纹理集合
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 class GltfTextureSet(
     val identifiers: Array<Identifier>,
     private val textures: Array<GltfDynamicTexture>,

@@ -1,0 +1,664 @@
+{
+    "AccessorDecoder":  "val decoder = AccessorDecoder(root, resolver)",
+    "AlphaMode":  "AlphaMode.OPAQUE,",
+    "AnimationChannel":  "val channels: Array\u003cAnimationChannel\u003e",
+    "AnimationClip":  "clip: AnimationClip,",
+    "AnimationComparison":  "val comparison: AnimationComparison,",
+    "AnimationCondition":  "vararg conditions: AnimationCondition",
+    "AnimationController":  "val animator: AnimationController = AnimationController(handle.asset, animation)",
+    "AnimationParameter":  "val parameter: AnimationParameter,",
+    "AnimationParameterType":  "AnimationParameterType.FLOAT -\u003e compare(floats[parameter.index], floatValue)",
+    "AnimationPath":  "val path: AnimationPath,",
+    "AnimationPlayer":  "val player: AnimationPlayer",
+    "AnimationPose":  "fun evaluate(deltaSeconds: Float): AnimationPose {",
+    "AnimationSegment":  "private var activeSegment: AnimationSegment? = null",
+    "AnimationState":  "val states: Array\u003cAnimationState\u003e,",
+    "AnimationStateMachine":  "var machine: AnimationStateMachine? = null",
+    "AnimationStateMachineBuilder":  "AnimationStateMachineBuilder(asset).floatParameter(\"speed\")",
+    "AnimationTransition":  "private fun selectTransition(machine: AnimationStateMachine): AnimationTransition? {",
+    "AnisotropyMaterial":  "AnisotropyMaterial(\nJsonFields.float(it, \"anisotropyStrength\"),\nJsonFields.float(it, \"anisotropyRotation\"),\nparseBinding(JsonFields.value(it, \"anisotropyTexture\"))\n)",
+    "CameraType":  "private fun cameraType(value: String): CameraType = when (value) {",
+    "ClearcoatMaterial":  "ClearcoatMaterial(\nJsonFields.float(it, \"clearcoatFactor\"),\nparseBinding(JsonFields.value(it, \"clearcoatTexture\")),\nJsonFields.float(it, \"clearcoatRoughnessFactor\"),\nparseBinding(JsonFields.value(it, \"clearcoatRoughnessTexture\")),\nparseBinding(JsonFields.value(it, \"clearcoatNormalTexture\")),\nJsonFields.float(JsonFields.value(it, \"clearcoatNormalTexture\"), \"scale\", 1.0f)\n)",
+    "Count":  127,
+    "FrontendGpuDeviceAccessor":  "val limit = ((device as FrontendGpuDeviceAccessor).libgltfBackend as? VertexAttributeLimitProvider)",
+    "FrontendRenderPassAccessor":  "val backend = (renderPass as FrontendRenderPassAccessor).libgltfBackend",
+    "GlbPayload":  "fun read(source: ByteBuffer): GlbPayload {",
+    "GlbReader":  "val payload = if (GlbReader.isGlb(source)) {",
+    "GlBufferAccessor":  "(slice.buffer() as GlBufferAccessor).`libgltf$handle`(),",
+    "GlDeviceMixin":  "@Mixin(targets = \"com.mojang.renderpearl.backend.opengl.GlDevice\")",
+    "GlGpuDriver":  "(driver is VulkanGpuDriver || driver is GlGpuDriver)",
+    "GlMeshPipeline":  "private val pipelines = Collections.synchronizedMap(IdentityHashMap\u003cRenderPipeline, GlMeshPipeline\u003e())",
+    "GlMeshPipelineCache":  "GlMeshPipelineCache cache,",
+    "GlMeshRenderPass":  "public abstract class GlRenderPassMeshMixin implements GlMeshRenderPass {",
+    "GlRenderPassMeshMixin":  "@Mixin(targets = \"com.mojang.renderpearl.backend.opengl.GlRenderPass\")",
+    "GlSamplerAccessor":  "GL33C.glBindSampler(unit, (texture.sampler as GlSamplerAccessor).`libgltf$getId`())",
+    "GltfApi":  "object GltfApiImpl : GltfApi {",
+    "GltfApiImpl":  "object GltfApiImpl : GltfApi {",
+    "GltfAsset":  "private val asset: GltfAsset,",
+    "GltfBlockEntityRenderer":  "): GltfBlockEntityRenderer\u003cT\u003e = GltfBlockEntityRenderer(provider)",
+    "GltfBlockEntityRenderProvider":  "private val provider: GltfBlockEntityRenderProvider\u003cT\u003e",
+    "GltfBlockEntityRenderState":  ") : BlockEntityRenderer\u003cT, GltfBlockEntityRenderState\u003e {",
+    "GltfBlockRenderer":  "fun block(instance: GltfInstance): GltfBlockRenderer = GltfBlockRenderer(instance)",
+    "GltfBufferResolver":  "private val resolver: GltfBufferResolver",
+    "GltfCamera":  "private fun parseCameras(root: JsonValue): Array\u003cGltfCamera\u003e {",
+    "GltfConfig":  "GltfConfig.load()",
+    "GltfDynamicTexture":  "private val albedo: GltfDynamicTexture,",
+    "GltfEntityRenderer":  "): GltfEntityRenderer\u003cT\u003e = GltfEntityRenderer(context, provider)",
+    "GltfEntityRenderProvider":  "private val provider: GltfEntityRenderProvider\u003cT\u003e",
+    "GltfEntityRenderState":  ") : EntityRenderer\u003cT, GltfEntityRenderState\u003e(context) {",
+    "GltfFrameState":  "LevelExtractionEvents.END_EXTRACTION.register { GltfFrameState.capture() }",
+    "GltfGeometryRenderer":  "internal val geometryRenderers: Array\u003cArray\u003cGltfGeometryRenderer\u003e\u003e = createRenderers()",
+    "GltfHandle":  "fun upload(asset: GltfAsset): GltfHandle",
+    "GltfImage":  "private fun parseImages(root: JsonValue, resolver: GltfBufferResolver): Array\u003cGltfImage\u003e {",
+    "GltfInstance":  "fun createInstance(handle: GltfHandle): GltfInstance",
+    "GltfInstanceId":  "fun register(instance: GltfInstance): GltfInstanceId",
+    "GltfItemInstanceProvider":  "fun item(instance: GltfInstance, provider: GltfItemInstanceProvider): GltfItemRenderer =",
+    "GltfItemRenderer":  "fun item(instance: GltfInstance): GltfItemRenderer = GltfItemRenderer(instance)",
+    "GltfLight":  "private fun parseLights(root: JsonValue): Array\u003cGltfLight\u003e {",
+    "GltfLoader":  "override fun load(path: Path, lodPolicy: LodPolicy): GltfLoadResult = GltfLoader.load(path, lodPolicy)",
+    "GltfLoadFailure":  "GltfLoadFailure(throwable.message ?: throwable.javaClass.simpleName, throwable)",
+    "GltfLoadResult":  "fun loadAsync(path: Path, lodPolicy: LodPolicy = LodPolicy.DEFAULT): CompletableFuture\u003cGltfLoadResult\u003e",
+    "GltfLoadSuccess":  "GltfLoadSuccess(parse(path, lodPolicy))",
+    "GltfMaterial":  "fun material(index: Int): GltfMaterial {",
+    "GltfMaterialTexture":  "val materialTextures = arrayOfNulls\u003cGltfMaterialTexture\u003e(asset.materials.size)",
+    "GltfMesh":  "): Array\u003cGltfMesh\u003e {",
+    "GltfNode":  "private fun parseNodes(root: JsonValue, decoder: AccessorDecoder): Array\u003cGltfNode\u003e {",
+    "GltfPrimitive":  "): GltfPrimitive {",
+    "GltfRenderAsset":  "fun renderType(resource: GltfRenderAsset, textures: GltfTextureSet): RenderType {",
+    "GltfRenderers":  "GltfRenderers.item(instance)",
+    "GltfRenderMode":  "var renderMode: GltfRenderMode = GltfRenderMode.AUTO",
+    "GltfRenderRegistry":  "override fun register(instance: GltfInstance): GltfInstanceId = GltfRenderRegistry.register(instance)",
+    "GltfRenderSystem":  "GltfRenderSystem.initialize()",
+    "GltfRenderTypes":  "val renderType = GltfRenderTypes.get(\nresource.id,\nmaterialIndex,\ntextureIndex,\nalphaCutoff,\nprimitive.mode,\nmaterial,\ntexture\n)",
+    "GltfSceneRenderer":  "GltfSceneRenderer.submit(instance, poseStack, submitNodeCollector, light, overlay, distanceSquared)",
+    "GltfSkin":  "private fun parseSkins(root: JsonValue, decoder: AccessorDecoder): Array\u003cGltfSkin\u003e {",
+    "GltfStats":  "val stats = GltfStats(\nresolvedNodes.size,\nmeshes.size,\nprimitiveCount,\ntriangleCount,\nmaterials.size,\ntextures.size,\nskins.size,\nmorphTargetCount\n)",
+    "GltfTexture":  "private fun parseTextures(root: JsonValue): Array\u003cGltfTexture\u003e {",
+    "GltfTextureFactory":  "textures = GltfTextureFactory.create(asset, id)",
+    "GltfTextureSet":  "textures: GltfTextureSet,",
+    "GltfWorldRenderer":  "LevelRenderEvents.COLLECT_SUBMITS.register(GltfWorldRenderer::submit)",
+    "GpuAnimationState":  "val animationState: GpuAnimationState = GpuAnimationState(handle.asset)",
+    "GpuBackend":  "? GpuBackend.INSTANCE.vertexAttributeLimit()",
+    "GpuBackendType":  "val gl = GpuBackend.capabilities().backend == GpuBackendType.OPENGL",
+    "GpuBatch":  "private val batches = ArrayList\u003cGpuBatch\u003e()",
+    "GpuBatchKey":  "private lateinit var batchKey: GpuBatchKey",
+    "GpuCapabilities":  "fun gpuCapabilities(): GpuCapabilities",
+    "GpuDriver":  "private var gpuDrivenDriver: GpuDriver? = null",
+    "GpuFeature":  "override fun featureType(): FeatureRendererType\u003cGpuSubmit\u003e = GpuFeature.TYPE",
+    "GpuFormats":  "GpuFormats.INSTANCE_STRIDE_GL",
+    "GpuMesh":  "private lateinit var primitive: GpuMesh",
+    "GpuPath":  "GpuPath.CPU",
+    "GpuResources":  "private var gpuResources: GpuResources? = null",
+    "GpuSubmit":  "internal val gpuSubmits: Array\u003cArray\u003cArray\u003cGpuSubmit\u003e\u003e\u003e = createGpuSubmits()",
+    "GpuSubmitRenderer":  "FeatureRendererRegistry.register(TYPE, ::GpuSubmitRenderer)",
+    "GpuVendor":  "GpuVendor.UNKNOWN,",
+    "Interpolation":  "val interpolation: Interpolation,",
+    "IridescenceMaterial":  "IridescenceMaterial(\nJsonFields.float(it, \"iridescenceFactor\"),\nparseBinding(JsonFields.value(it, \"iridescenceTexture\")),\nJsonFields.float(it, \"iridescenceIor\", 1.3f),\nJsonFields.float(it, \"iridescenceThicknessMinimum\", 100.0f),\nJsonFields.float(it, \"iridescenceThicknessMaximum\", 400.0f),\nparseBinding(JsonFields.value(it, \"iridescenceThicknessTexture\"))\n)",
+    "IrisCompat":  "!IrisCompat.shaderPackActive()",
+    "IrisInterop":  "fun shaderPackActive(): Boolean = loaded \u0026\u0026 IrisInterop.shaderPackActive()",
+    "IrisMixinPlugin":  "class IrisMixinPlugin : IMixinConfigPlugin",
+    "IrisPbrHolder":  "holders[id] = IrisPbrHolder(normal, specular)",
+    "IrisPbrTextures":  "PBRTextureHolder holder = IrisPbrTextures.get(id);",
+    "IsFixedSize":  true,
+    "IsReadOnly":  false,
+    "IsSynchronized":  false,
+    "JsonFields":  "val componentCount = componentCount(JsonFields.string(accessor, \"type\"))",
+    "JsonValue":  "private val root: JsonValue,",
+    "LabPbrTextureEncoder":  "LabPbrTextureEncoder.normal(asset, material),",
+    "Length":  127,
+    "LevelRendererOcclusionMixin":  "@Mixin(LevelRenderer.class)",
+    "LibGltf":  "return pipelineLocation != null \u0026\u0026 LibGltf.MOD_ID.equals(pipelineLocation.getNamespace())",
+    "LibGltfClient":  "object LibGltfClient : ClientModInitializer",
+    "LightType":  "private fun lightType(value: String): LightType = when (value) {",
+    "LodPolicy":  "fun load(path: Path, lodPolicy: LodPolicy = LodPolicy.DEFAULT): GltfLoadResult",
+    "LodSelector":  "lodSelector = LodSelector(value)",
+    "LongLength":  127,
+    "MaterialFactorAnimationState":  "private val restMaterialFactor = MaterialFactorAnimationState(asset.materials.size)",
+    "MaterialOverride":  "val materialOverrides: Array\u003cMaterialOverride?\u003e = arrayOfNulls(handle.asset.materials.size)",
+    "MaterialUvAnimationState":  "private val restMaterialUv = MaterialUvAnimationState(asset.materials.size)",
+    "MaterialUvTarget":  "private fun materialUvTarget(target: JsonValue): MaterialUvTarget? {",
+    "MeshletDispatcher":  "private val gpuDriven = MeshletDispatcher()",
+    "MeshletStorage":  "MeshletStorage meshlets,",
+    "MeshLodBuilder":  "MeshLodBuilder.build(indices, positions, lodPolicy.triangleRatios)",
+    "MipmapFilterState":  "return MipmapFilterState.nearest() ? VK10.VK_SAMPLER_MIPMAP_MODE_NEAREST : original;",
+    "NativeImageDecoder":  "val image = asset.images.getOrNull(texture.imageIndex)?.let { NativeImageDecoder.decode(it.bytes) } ?: whiteImage()",
+    "OcclusionDepth":  "OcclusionDepth.INSTANCE.update();",
+    "PbrTextureManagerMixin":  "@Mixin(value = PBRTextureManager.class, remap = false)",
+    "PrimitiveMode":  "if (primitive.mode == PrimitiveMode.TRIANGLES) primitive.lodIndices[0].size.toLong() / 3L else 0L",
+    "Rank":  1,
+    "RenderConfig":  "if (!RenderConfig.INSTANCE.getMeshShader()) {",
+    "RenderPipelineBuilderMixin":  "@Mixin(RenderPipeline.Builder.class)",
+    "SheenMaterial":  "SheenMaterial(\nJsonFields.floats(it, \"sheenColorFactor\", floatArrayOf(0.0f, 0.0f, 0.0f)),\nparseBinding(JsonFields.value(it, \"sheenColorTexture\")),\nJsonFields.float(it, \"sheenRoughnessFactor\"),\nparseBinding(JsonFields.value(it, \"sheenRoughnessTexture\"))\n)",
+    "SpecularMaterial":  "SpecularMaterial(\nJsonFields.float(it, \"specularFactor\", 1.0f),\nparseBinding(JsonFields.value(it, \"specularTexture\")),\nJsonFields.floats(it, \"specularColorFactor\", floatArrayOf(1.0f, 1.0f, 1.0f)),\nparseBinding(JsonFields.value(it, \"specularColorTexture\"))\n)",
+    "SyncRoot":  [
+                     {
+                         "Name":  "AccessorDecoder",
+                         "Example":  "val decoder = AccessorDecoder(root, resolver)"
+                     },
+                     {
+                         "Name":  "AlphaMode",
+                         "Example":  "AlphaMode.OPAQUE,"
+                     },
+                     {
+                         "Name":  "AnimationChannel",
+                         "Example":  "val channels: Array\u003cAnimationChannel\u003e"
+                     },
+                     {
+                         "Name":  "AnimationClip",
+                         "Example":  "clip: AnimationClip,"
+                     },
+                     {
+                         "Name":  "AnimationComparison",
+                         "Example":  "val comparison: AnimationComparison,"
+                     },
+                     {
+                         "Name":  "AnimationCondition",
+                         "Example":  "vararg conditions: AnimationCondition"
+                     },
+                     {
+                         "Name":  "AnimationController",
+                         "Example":  "val animator: AnimationController = AnimationController(handle.asset, animation)"
+                     },
+                     {
+                         "Name":  "AnimationParameter",
+                         "Example":  "val parameter: AnimationParameter,"
+                     },
+                     {
+                         "Name":  "AnimationParameterType",
+                         "Example":  "AnimationParameterType.FLOAT -\u003e compare(floats[parameter.index], floatValue)"
+                     },
+                     {
+                         "Name":  "AnimationPath",
+                         "Example":  "val path: AnimationPath,"
+                     },
+                     {
+                         "Name":  "AnimationPlayer",
+                         "Example":  "val player: AnimationPlayer"
+                     },
+                     {
+                         "Name":  "AnimationPose",
+                         "Example":  "fun evaluate(deltaSeconds: Float): AnimationPose {"
+                     },
+                     {
+                         "Name":  "AnimationSegment",
+                         "Example":  "private var activeSegment: AnimationSegment? = null"
+                     },
+                     {
+                         "Name":  "AnimationState",
+                         "Example":  "val states: Array\u003cAnimationState\u003e,"
+                     },
+                     {
+                         "Name":  "AnimationStateMachine",
+                         "Example":  "var machine: AnimationStateMachine? = null"
+                     },
+                     {
+                         "Name":  "AnimationTransition",
+                         "Example":  "private fun selectTransition(machine: AnimationStateMachine): AnimationTransition? {"
+                     },
+                     {
+                         "Name":  "AnisotropyMaterial",
+                         "Example":  "AnisotropyMaterial(\nJsonFields.float(it, \"anisotropyStrength\"),\nJsonFields.float(it, \"anisotropyRotation\"),\nparseBinding(JsonFields.value(it, \"anisotropyTexture\"))\n)"
+                     },
+                     {
+                         "Name":  "CameraType",
+                         "Example":  "private fun cameraType(value: String): CameraType = when (value) {"
+                     },
+                     {
+                         "Name":  "ClearcoatMaterial",
+                         "Example":  "ClearcoatMaterial(\nJsonFields.float(it, \"clearcoatFactor\"),\nparseBinding(JsonFields.value(it, \"clearcoatTexture\")),\nJsonFields.float(it, \"clearcoatRoughnessFactor\"),\nparseBinding(JsonFields.value(it, \"clearcoatRoughnessTexture\")),\nparseBinding(JsonFields.value(it, \"clearcoatNormalTexture\")),\nJsonFields.float(JsonFields.value(it, \"clearcoatNormalTexture\"), \"scale\", 1.0f)\n)"
+                     },
+                     {
+                         "Name":  "FrontendGpuDeviceAccessor",
+                         "Example":  "val limit = ((device as FrontendGpuDeviceAccessor).libgltfBackend as? VertexAttributeLimitProvider)"
+                     },
+                     {
+                         "Name":  "FrontendRenderPassAccessor",
+                         "Example":  "val backend = (renderPass as FrontendRenderPassAccessor).libgltfBackend"
+                     },
+                     {
+                         "Name":  "GlbPayload",
+                         "Example":  "fun read(source: ByteBuffer): GlbPayload {"
+                     },
+                     {
+                         "Name":  "GlbReader",
+                         "Example":  "val payload = if (GlbReader.isGlb(source)) {"
+                     },
+                     {
+                         "Name":  "GlBufferAccessor",
+                         "Example":  "(slice.buffer() as GlBufferAccessor).`libgltf$handle`(),"
+                     },
+                     {
+                         "Name":  "GlGpuDriver",
+                         "Example":  "(driver is VulkanGpuDriver || driver is GlGpuDriver)"
+                     },
+                     {
+                         "Name":  "GlMeshPipeline",
+                         "Example":  "private val pipelines = Collections.synchronizedMap(IdentityHashMap\u003cRenderPipeline, GlMeshPipeline\u003e())"
+                     },
+                     {
+                         "Name":  "GlMeshPipelineCache",
+                         "Example":  "GlMeshPipelineCache cache,"
+                     },
+                     {
+                         "Name":  "GlSamplerAccessor",
+                         "Example":  "GL33C.glBindSampler(unit, (texture.sampler as GlSamplerAccessor).`libgltf$getId`())"
+                     },
+                     {
+                         "Name":  "GltfApiImpl",
+                         "Example":  "object GltfApiImpl : GltfApi {"
+                     },
+                     {
+                         "Name":  "GltfAsset",
+                         "Example":  "private val asset: GltfAsset,"
+                     },
+                     {
+                         "Name":  "GltfBlockEntityRenderer",
+                         "Example":  "): GltfBlockEntityRenderer\u003cT\u003e = GltfBlockEntityRenderer(provider)"
+                     },
+                     {
+                         "Name":  "GltfBlockEntityRenderProvider",
+                         "Example":  "private val provider: GltfBlockEntityRenderProvider\u003cT\u003e"
+                     },
+                     {
+                         "Name":  "GltfBlockEntityRenderState",
+                         "Example":  ") : BlockEntityRenderer\u003cT, GltfBlockEntityRenderState\u003e {"
+                     },
+                     {
+                         "Name":  "GltfBlockRenderer",
+                         "Example":  "fun block(instance: GltfInstance): GltfBlockRenderer = GltfBlockRenderer(instance)"
+                     },
+                     {
+                         "Name":  "GltfBufferResolver",
+                         "Example":  "private val resolver: GltfBufferResolver"
+                     },
+                     {
+                         "Name":  "GltfCamera",
+                         "Example":  "private fun parseCameras(root: JsonValue): Array\u003cGltfCamera\u003e {"
+                     },
+                     {
+                         "Name":  "GltfConfig",
+                         "Example":  "GltfConfig.load()"
+                     },
+                     {
+                         "Name":  "GltfDynamicTexture",
+                         "Example":  "private val albedo: GltfDynamicTexture,"
+                     },
+                     {
+                         "Name":  "GltfEntityRenderer",
+                         "Example":  "): GltfEntityRenderer\u003cT\u003e = GltfEntityRenderer(context, provider)"
+                     },
+                     {
+                         "Name":  "GltfEntityRenderProvider",
+                         "Example":  "private val provider: GltfEntityRenderProvider\u003cT\u003e"
+                     },
+                     {
+                         "Name":  "GltfEntityRenderState",
+                         "Example":  ") : EntityRenderer\u003cT, GltfEntityRenderState\u003e(context) {"
+                     },
+                     {
+                         "Name":  "GltfFrameState",
+                         "Example":  "LevelExtractionEvents.END_EXTRACTION.register { GltfFrameState.capture() }"
+                     },
+                     {
+                         "Name":  "GltfGeometryRenderer",
+                         "Example":  "internal val geometryRenderers: Array\u003cArray\u003cGltfGeometryRenderer\u003e\u003e = createRenderers()"
+                     },
+                     {
+                         "Name":  "GltfHandle",
+                         "Example":  "fun upload(asset: GltfAsset): GltfHandle"
+                     },
+                     {
+                         "Name":  "GltfImage",
+                         "Example":  "private fun parseImages(root: JsonValue, resolver: GltfBufferResolver): Array\u003cGltfImage\u003e {"
+                     },
+                     {
+                         "Name":  "GltfInstance",
+                         "Example":  "fun createInstance(handle: GltfHandle): GltfInstance"
+                     },
+                     {
+                         "Name":  "GltfInstanceId",
+                         "Example":  "fun register(instance: GltfInstance): GltfInstanceId"
+                     },
+                     {
+                         "Name":  "GltfItemInstanceProvider",
+                         "Example":  "fun item(instance: GltfInstance, provider: GltfItemInstanceProvider): GltfItemRenderer ="
+                     },
+                     {
+                         "Name":  "GltfItemRenderer",
+                         "Example":  "fun item(instance: GltfInstance): GltfItemRenderer = GltfItemRenderer(instance)"
+                     },
+                     {
+                         "Name":  "GltfLight",
+                         "Example":  "private fun parseLights(root: JsonValue): Array\u003cGltfLight\u003e {"
+                     },
+                     {
+                         "Name":  "GltfLoader",
+                         "Example":  "override fun load(path: Path, lodPolicy: LodPolicy): GltfLoadResult = GltfLoader.load(path, lodPolicy)"
+                     },
+                     {
+                         "Name":  "GltfLoadFailure",
+                         "Example":  "GltfLoadFailure(throwable.message ?: throwable.javaClass.simpleName, throwable)"
+                     },
+                     {
+                         "Name":  "GltfLoadResult",
+                         "Example":  "fun loadAsync(path: Path, lodPolicy: LodPolicy = LodPolicy.DEFAULT): CompletableFuture\u003cGltfLoadResult\u003e"
+                     },
+                     {
+                         "Name":  "GltfLoadSuccess",
+                         "Example":  "GltfLoadSuccess(parse(path, lodPolicy))"
+                     },
+                     {
+                         "Name":  "GltfMaterial",
+                         "Example":  "fun material(index: Int): GltfMaterial {"
+                     },
+                     {
+                         "Name":  "GltfMaterialTexture",
+                         "Example":  "val materialTextures = arrayOfNulls\u003cGltfMaterialTexture\u003e(asset.materials.size)"
+                     },
+                     {
+                         "Name":  "GltfMesh",
+                         "Example":  "): Array\u003cGltfMesh\u003e {"
+                     },
+                     {
+                         "Name":  "GltfNode",
+                         "Example":  "private fun parseNodes(root: JsonValue, decoder: AccessorDecoder): Array\u003cGltfNode\u003e {"
+                     },
+                     {
+                         "Name":  "GltfPrimitive",
+                         "Example":  "): GltfPrimitive {"
+                     },
+                     {
+                         "Name":  "GltfRenderAsset",
+                         "Example":  "fun renderType(resource: GltfRenderAsset, textures: GltfTextureSet): RenderType {"
+                     },
+                     {
+                         "Name":  "GltfRenderMode",
+                         "Example":  "var renderMode: GltfRenderMode = GltfRenderMode.AUTO"
+                     },
+                     {
+                         "Name":  "GltfRenderRegistry",
+                         "Example":  "override fun register(instance: GltfInstance): GltfInstanceId = GltfRenderRegistry.register(instance)"
+                     },
+                     {
+                         "Name":  "GltfRenderSystem",
+                         "Example":  "GltfRenderSystem.initialize()"
+                     },
+                     {
+                         "Name":  "GltfRenderTypes",
+                         "Example":  "val renderType = GltfRenderTypes.get(\nresource.id,\nmaterialIndex,\ntextureIndex,\nalphaCutoff,\nprimitive.mode,\nmaterial,\ntexture\n)"
+                     },
+                     {
+                         "Name":  "GltfSceneRenderer",
+                         "Example":  "GltfSceneRenderer.submit(instance, poseStack, submitNodeCollector, light, overlay, distanceSquared)"
+                     },
+                     {
+                         "Name":  "GltfSkin",
+                         "Example":  "private fun parseSkins(root: JsonValue, decoder: AccessorDecoder): Array\u003cGltfSkin\u003e {"
+                     },
+                     {
+                         "Name":  "GltfStats",
+                         "Example":  "val stats = GltfStats(\nresolvedNodes.size,\nmeshes.size,\nprimitiveCount,\ntriangleCount,\nmaterials.size,\ntextures.size,\nskins.size,\nmorphTargetCount\n)"
+                     },
+                     {
+                         "Name":  "GltfTexture",
+                         "Example":  "private fun parseTextures(root: JsonValue): Array\u003cGltfTexture\u003e {"
+                     },
+                     {
+                         "Name":  "GltfTextureFactory",
+                         "Example":  "textures = GltfTextureFactory.create(asset, id)"
+                     },
+                     {
+                         "Name":  "GltfTextureSet",
+                         "Example":  "textures: GltfTextureSet,"
+                     },
+                     {
+                         "Name":  "GltfWorldRenderer",
+                         "Example":  "LevelRenderEvents.COLLECT_SUBMITS.register(GltfWorldRenderer::submit)"
+                     },
+                     {
+                         "Name":  "GpuAnimationState",
+                         "Example":  "val animationState: GpuAnimationState = GpuAnimationState(handle.asset)"
+                     },
+                     {
+                         "Name":  "GpuBackend",
+                         "Example":  "? GpuBackend.INSTANCE.vertexAttributeLimit()"
+                     },
+                     {
+                         "Name":  "GpuBackendType",
+                         "Example":  "val gl = GpuBackend.capabilities().backend == GpuBackendType.OPENGL"
+                     },
+                     {
+                         "Name":  "GpuBatch",
+                         "Example":  "private val batches = ArrayList\u003cGpuBatch\u003e()"
+                     },
+                     {
+                         "Name":  "GpuBatchKey",
+                         "Example":  "private lateinit var batchKey: GpuBatchKey"
+                     },
+                     {
+                         "Name":  "GpuCapabilities",
+                         "Example":  "fun gpuCapabilities(): GpuCapabilities"
+                     },
+                     {
+                         "Name":  "GpuDriver",
+                         "Example":  "private var gpuDrivenDriver: GpuDriver? = null"
+                     },
+                     {
+                         "Name":  "GpuFeature",
+                         "Example":  "override fun featureType(): FeatureRendererType\u003cGpuSubmit\u003e = GpuFeature.TYPE"
+                     },
+                     {
+                         "Name":  "GpuFormats",
+                         "Example":  "GpuFormats.INSTANCE_STRIDE_GL"
+                     },
+                     {
+                         "Name":  "GpuMesh",
+                         "Example":  "private lateinit var primitive: GpuMesh"
+                     },
+                     {
+                         "Name":  "GpuPath",
+                         "Example":  "GpuPath.CPU"
+                     },
+                     {
+                         "Name":  "GpuResources",
+                         "Example":  "private var gpuResources: GpuResources? = null"
+                     },
+                     {
+                         "Name":  "GpuSubmit",
+                         "Example":  "internal val gpuSubmits: Array\u003cArray\u003cArray\u003cGpuSubmit\u003e\u003e\u003e = createGpuSubmits()"
+                     },
+                     {
+                         "Name":  "GpuSubmitRenderer",
+                         "Example":  "FeatureRendererRegistry.register(TYPE, ::GpuSubmitRenderer)"
+                     },
+                     {
+                         "Name":  "GpuVendor",
+                         "Example":  "GpuVendor.UNKNOWN,"
+                     },
+                     {
+                         "Name":  "Interpolation",
+                         "Example":  "val interpolation: Interpolation,"
+                     },
+                     {
+                         "Name":  "IridescenceMaterial",
+                         "Example":  "IridescenceMaterial(\nJsonFields.float(it, \"iridescenceFactor\"),\nparseBinding(JsonFields.value(it, \"iridescenceTexture\")),\nJsonFields.float(it, \"iridescenceIor\", 1.3f),\nJsonFields.float(it, \"iridescenceThicknessMinimum\", 100.0f),\nJsonFields.float(it, \"iridescenceThicknessMaximum\", 400.0f),\nparseBinding(JsonFields.value(it, \"iridescenceThicknessTexture\"))\n)"
+                     },
+                     {
+                         "Name":  "IrisCompat",
+                         "Example":  "!IrisCompat.shaderPackActive()"
+                     },
+                     {
+                         "Name":  "IrisInterop",
+                         "Example":  "fun shaderPackActive(): Boolean = loaded \u0026\u0026 IrisInterop.shaderPackActive()"
+                     },
+                     {
+                         "Name":  "IrisPbrHolder",
+                         "Example":  "holders[id] = IrisPbrHolder(normal, specular)"
+                     },
+                     {
+                         "Name":  "IrisPbrTextures",
+                         "Example":  "PBRTextureHolder holder = IrisPbrTextures.get(id);"
+                     },
+                     {
+                         "Name":  "JsonFields",
+                         "Example":  "val componentCount = componentCount(JsonFields.string(accessor, \"type\"))"
+                     },
+                     {
+                         "Name":  "JsonValue",
+                         "Example":  "private val root: JsonValue,"
+                     },
+                     {
+                         "Name":  "LabPbrTextureEncoder",
+                         "Example":  "LabPbrTextureEncoder.normal(asset, material),"
+                     },
+                     {
+                         "Name":  "LibGltf",
+                         "Example":  "return pipelineLocation != null \u0026\u0026 LibGltf.MOD_ID.equals(pipelineLocation.getNamespace())"
+                     },
+                     {
+                         "Name":  "LightType",
+                         "Example":  "private fun lightType(value: String): LightType = when (value) {"
+                     },
+                     {
+                         "Name":  "LodPolicy",
+                         "Example":  "fun load(path: Path, lodPolicy: LodPolicy = LodPolicy.DEFAULT): GltfLoadResult"
+                     },
+                     {
+                         "Name":  "LodSelector",
+                         "Example":  "lodSelector = LodSelector(value)"
+                     },
+                     {
+                         "Name":  "MaterialFactorAnimationState",
+                         "Example":  "private val restMaterialFactor = MaterialFactorAnimationState(asset.materials.size)"
+                     },
+                     {
+                         "Name":  "MaterialOverride",
+                         "Example":  "val materialOverrides: Array\u003cMaterialOverride?\u003e = arrayOfNulls(handle.asset.materials.size)"
+                     },
+                     {
+                         "Name":  "MaterialUvAnimationState",
+                         "Example":  "private val restMaterialUv = MaterialUvAnimationState(asset.materials.size)"
+                     },
+                     {
+                         "Name":  "MaterialUvTarget",
+                         "Example":  "private fun materialUvTarget(target: JsonValue): MaterialUvTarget? {"
+                     },
+                     {
+                         "Name":  "MeshletDispatcher",
+                         "Example":  "private val gpuDriven = MeshletDispatcher()"
+                     },
+                     {
+                         "Name":  "MeshletStorage",
+                         "Example":  "MeshletStorage meshlets,"
+                     },
+                     {
+                         "Name":  "MeshLodBuilder",
+                         "Example":  "MeshLodBuilder.build(indices, positions, lodPolicy.triangleRatios)"
+                     },
+                     {
+                         "Name":  "MipmapFilterState",
+                         "Example":  "return MipmapFilterState.nearest() ? VK10.VK_SAMPLER_MIPMAP_MODE_NEAREST : original;"
+                     },
+                     {
+                         "Name":  "NativeImageDecoder",
+                         "Example":  "val image = asset.images.getOrNull(texture.imageIndex)?.let { NativeImageDecoder.decode(it.bytes) } ?: whiteImage()"
+                     },
+                     {
+                         "Name":  "OcclusionDepth",
+                         "Example":  "OcclusionDepth.INSTANCE.update();"
+                     },
+                     {
+                         "Name":  "PrimitiveMode",
+                         "Example":  "if (primitive.mode == PrimitiveMode.TRIANGLES) primitive.lodIndices[0].size.toLong() / 3L else 0L"
+                     },
+                     {
+                         "Name":  "RenderConfig",
+                         "Example":  "if (!RenderConfig.INSTANCE.getMeshShader()) {"
+                     },
+                     {
+                         "Name":  "SheenMaterial",
+                         "Example":  "SheenMaterial(\nJsonFields.floats(it, \"sheenColorFactor\", floatArrayOf(0.0f, 0.0f, 0.0f)),\nparseBinding(JsonFields.value(it, \"sheenColorTexture\")),\nJsonFields.float(it, \"sheenRoughnessFactor\"),\nparseBinding(JsonFields.value(it, \"sheenRoughnessTexture\"))\n)"
+                     },
+                     {
+                         "Name":  "SpecularMaterial",
+                         "Example":  "SpecularMaterial(\nJsonFields.float(it, \"specularFactor\", 1.0f),\nparseBinding(JsonFields.value(it, \"specularTexture\")),\nJsonFields.floats(it, \"specularColorFactor\", floatArrayOf(1.0f, 1.0f, 1.0f)),\nparseBinding(JsonFields.value(it, \"specularColorTexture\"))\n)"
+                     },
+                     {
+                         "Name":  "TextureBinding",
+                         "Example":  "private fun parseBinding(value: JsonValue?): TextureBinding? {"
+                     },
+                     {
+                         "Name":  "TextureFilter",
+                         "Example":  "9728 -\u003e TextureFilter.NEAREST"
+                     },
+                     {
+                         "Name":  "TextureSampler",
+                         "Example":  "val sampler = if (samplerIndex \u003e= 0 \u0026\u0026 samplers != null) parseSampler(samplers[samplerIndex]) else TextureSampler.DEFAULT"
+                     },
+                     {
+                         "Name":  "TextureWrap",
+                         "Example":  "private fun wrap(value: Int): TextureWrap = when (value) {"
+                     },
+                     {
+                         "Name":  "VertexLayout",
+                         "Example":  "val vertices = ByteBuffer.allocate(vertexCount * VertexLayout.STRIDE).order(ByteOrder.nativeOrder())"
+                     },
+                     {
+                         "Name":  "VulkanBufferRing",
+                         "Example":  "private var commandRing: VulkanBufferRing? = null"
+                     },
+                     {
+                         "Name":  "VulkanCommandEncoderAccessor",
+                         "Example":  "val commandBuffer = (device.createCommandEncoder() as VulkanCommandEncoderAccessor).`libgltf$commandBuffer`()"
+                     },
+                     {
+                         "Name":  "VulkanComputePipeline",
+                         "Example":  "VulkanComputePipeline.STATS_SIZE"
+                     },
+                     {
+                         "Name":  "VulkanGpuDriver",
+                         "Example":  "gpuDriven = VulkanGpuDriver.create(RenderSystem.getDevice()) ?: GlGpuDriver.create()"
+                     },
+                     {
+                         "Name":  "VulkanMeshCache",
+                         "Example":  "VulkanMeshCache cache,"
+                     },
+                     {
+                         "Name":  "VulkanMeshPipelineCache",
+                         "Example":  "VulkanMeshPipelineCache(backend).takeIf { it.supported }"
+                     },
+                     {
+                         "Name":  "VulkanMeshRenderPass",
+                         "Example":  "public abstract class VulkanRenderPassIndirectMixin implements VulkanIndirectRenderPass, VulkanMeshRenderPass {"
+                     },
+                     {
+                         "Name":  "VulkanNvMeshPipelineCache",
+                         "Example":  "VulkanNvMeshPipelineCache(backend).takeIf { it.supported }"
+                     },
+                     {
+                         "Name":  "VulkanUsage",
+                         "Example":  "if ((usage \u0026 VulkanUsage.STORAGE) != 0) {"
+                     }
+                 ],
+    "TextureBinding":  "private fun parseBinding(value: JsonValue?): TextureBinding? {",
+    "TextureFilter":  "9728 -\u003e TextureFilter.NEAREST",
+    "TextureSampler":  "val sampler = if (samplerIndex \u003e= 0 \u0026\u0026 samplers != null) parseSampler(samplers[samplerIndex]) else TextureSampler.DEFAULT",
+    "TextureWrap":  "private fun wrap(value: Int): TextureWrap = when (value) {",
+    "VertexAttributeLimitProvider":  "public abstract class GlDeviceMixin implements VertexAttributeLimitProvider {",
+    "VertexLayout":  "val vertices = ByteBuffer.allocate(vertexCount * VertexLayout.STRIDE).order(ByteOrder.nativeOrder())",
+    "VulkanBackendMeshShaderMixin":  "@Mixin(VulkanBackend.class)",
+    "VulkanBufferRing":  "private var commandRing: VulkanBufferRing? = null",
+    "VulkanCommandEncoderAccessor":  "val commandBuffer = (device.createCommandEncoder() as VulkanCommandEncoderAccessor).`libgltf$commandBuffer`()",
+    "VulkanComputePipeline":  "VulkanComputePipeline.STATS_SIZE",
+    "VulkanConstMixin":  "@Mixin(VulkanConst.class)",
+    "VulkanDeviceMixin":  "@Mixin(VulkanDevice.class)",
+    "VulkanGpuDriver":  "gpuDriven = VulkanGpuDriver.create(RenderSystem.getDevice()) ?: GlGpuDriver.create()",
+    "VulkanGpuSamplerMixin":  "@Mixin(VulkanGpuSampler.class)",
+    "VulkanIndirectRenderPass":  "public abstract class VulkanRenderPassIndirectMixin implements VulkanIndirectRenderPass, VulkanMeshRenderPass {",
+    "VulkanMeshCache":  "VulkanMeshCache cache,",
+    "VulkanMeshPipelineCache":  "VulkanMeshPipelineCache(backend).takeIf { it.supported }",
+    "VulkanMeshRenderPass":  "public abstract class VulkanRenderPassIndirectMixin implements VulkanIndirectRenderPass, VulkanMeshRenderPass {",
+    "VulkanNvMeshPipelineCache":  "VulkanNvMeshPipelineCache(backend).takeIf { it.supported }",
+    "VulkanRenderPassIndirectMixin":  "@Mixin(VulkanRenderPass.class)",
+    "VulkanUsage":  "if ((usage \u0026 VulkanUsage.STORAGE) != 0) {"
+}

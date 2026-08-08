@@ -3,6 +3,20 @@ package com.micheanl.libgltf.animation
 import com.micheanl.libgltf.model.GltfAsset
 import kotlin.math.abs
 
+/**
+ * libgltf · AnimationController
+ *
+ * ```
+ * val animator: AnimationController = AnimationController(handle.asset, animation)
+ * ```
+ *
+ * 动画控制器：驱动播放与状态切换
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 class AnimationController(
     private val asset: GltfAsset,
     val player: AnimationPlayer

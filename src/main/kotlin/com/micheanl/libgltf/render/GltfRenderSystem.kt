@@ -2,8 +2,8 @@ package com.micheanl.libgltf.render
 
 import com.micheanl.libgltf.api.GltfHandle
 import com.micheanl.libgltf.model.GltfAsset
-import com.micheanl.libgltf.render.feature.GltfGpuFeature
-import com.micheanl.libgltf.render.gpu.GltfGpuBackend
+import com.micheanl.libgltf.render.feature.GpuFeature
+import com.micheanl.libgltf.render.gpu.GpuBackend
 import com.mojang.blaze3d.systems.RenderSystem
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionEvents
@@ -13,6 +13,20 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 
+/**
+ * libgltf · GltfRenderSystem
+ *
+ * ```
+ * GltfRenderSystem.initialize()
+ * ```
+ *
+ * 渲染资源生命周期管理
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 object GltfRenderSystem {
     private val initialized = AtomicBoolean()
     private val nextResourceId = AtomicLong(1L)
@@ -20,10 +34,11 @@ object GltfRenderSystem {
 
     fun initialize() {
         if (!initialized.compareAndSet(false, true)) return
-        GltfGpuBackend.refresh()
-        ClientLifecycleEvents.CLIENT_STARTED.register { _ -> GltfGpuBackend.refresh() }
+        GltfConfig.load()
+        GpuBackend.refresh()
+        ClientLifecycleEvents.CLIENT_STARTED.register { _ -> GpuBackend.refresh() }
         ClientLifecycleEvents.CLIENT_STOPPING.register { _ -> closeAll() }
-        GltfGpuFeature.initialize()
+        GpuFeature.initialize()
         LevelExtractionEvents.END_EXTRACTION.register { GltfFrameState.capture() }
         LevelRenderEvents.COLLECT_SUBMITS.register(GltfWorldRenderer::submit)
     }
@@ -38,7 +53,8 @@ object GltfRenderSystem {
         GltfRenderRegistry.removeByResource(resourceId)
         GltfRenderTypes.remove(resourceId)
         val resource = resources.remove(resourceId) ?: return
-        if (RenderSystem.isOnRenderThread()) resource.close() else Minecraft.getInstance().execute(resource::close)
+        val close = { RenderSystem.queueFencedTask(resource::close) }
+        if (RenderSystem.isOnRenderThread()) close() else Minecraft.getInstance().execute(close)
     }
 
     private fun closeAll() {

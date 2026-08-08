@@ -2,6 +2,20 @@ package com.micheanl.libgltf.animation
 
 import kotlin.math.floor
 
+/**
+ * libgltf · AnimationSegment
+ *
+ * ```
+ * private var activeSegment: AnimationSegment? = null
+ * ```
+ *
+ * 动画曲线段
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 data class AnimationSegment(
     val name: String,
     val sourceClipIndex: Int,

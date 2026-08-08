@@ -3,6 +3,20 @@ package com.micheanl.libgltf.asset
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
+/**
+ * libgltf · GlbReader
+ *
+ * ```
+ * val payload = if (GlbReader.isGlb(source)) {
+ * ```
+ *
+ * GLB 容器解析
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 object GlbReader {
     private const val MAGIC: Int = 0x46546C67
     private const val VERSION: Int = 2

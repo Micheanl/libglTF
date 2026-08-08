@@ -9,6 +9,20 @@ import net.minecraft.client.renderer.special.SpecialModelRenderer
 import net.minecraft.world.item.ItemStack
 import org.joml.Vector3fc
 
+/**
+ * libgltf · GltfItemRenderer
+ *
+ * ```
+ * fun item(instance: GltfInstance): GltfItemRenderer = GltfItemRenderer(instance)
+ * ```
+ *
+ * 物品 glTF 渲染器
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 class GltfItemRenderer(
     private val boundsInstance: GltfInstance,
     private val provider: GltfItemInstanceProvider = GltfItemInstanceProvider { boundsInstance }

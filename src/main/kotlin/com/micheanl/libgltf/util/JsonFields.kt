@@ -1,5 +1,17 @@
 package com.micheanl.libgltf.util
 
+/**
+ * libgltf · JsonFields
+ *
+ * ```
+ * val componentCount = componentCount(JsonFields.string(accessor, "type"))
+ * ```
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.booleanOrNull

@@ -3,15 +3,30 @@ package com.micheanl.libgltf.render.texture
 import com.micheanl.libgltf.material.TextureFilter
 import com.micheanl.libgltf.material.TextureSampler
 import com.micheanl.libgltf.material.TextureWrap
-import com.mojang.blaze3d.GpuFormat
+import com.mojang.renderpearl.api.GpuFormat
 import com.mojang.blaze3d.platform.NativeImage
 import com.mojang.blaze3d.systems.RenderSystem
-import com.mojang.blaze3d.textures.AddressMode
-import com.mojang.blaze3d.textures.FilterMode
-import com.mojang.blaze3d.textures.GpuTexture
+import com.mojang.renderpearl.api.textures.AddressMode
+import com.mojang.renderpearl.api.textures.FilterMode
+import com.mojang.renderpearl.api.textures.GpuTexture
+import com.mojang.logging.LogUtils
 import net.minecraft.client.renderer.texture.AbstractTexture
 import java.util.OptionalDouble
 import kotlin.math.max
+
+/**
+ * libgltf · GltfDynamicTexture
+ *
+ * ```
+ * private val albedo: GltfDynamicTexture,
+ * ```
+ *
+ * 动态更新的 GPU 纹理
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
 
 class GltfDynamicTexture(
     label: String,
@@ -55,7 +70,38 @@ class GltfDynamicTexture(
             )
         }
         val encoder = device.createCommandEncoder()
-        for (level in levels.indices) encoder.writeToTexture(gpuTexture, levels[level], level, 0, 0, 0)
+        for (level in levels.indices) {
+            val expectedWidth = gpuTexture.getWidth(level)
+            val expectedHeight = gpuTexture.getHeight(level)
+            val source = levels[level]
+            if (expectedWidth <= 0 || expectedHeight <= 0) {
+                LOGGER.warn(
+                    "libgltf texture {} mip {} has invalid GPU size {}x{}, skipping",
+                    label,
+                    level,
+                    expectedWidth,
+                    expectedHeight
+                )
+                continue
+            }
+            if (source.width == expectedWidth && source.height == expectedHeight) {
+                encoder.writeToTexture(gpuTexture, source, level, 0, 0, 0)
+            } else {
+                LOGGER.warn(
+                    "libgltf texture {} mip {} size {}x{} does not match GPU mip {}x{}, resizing",
+                    label,
+                    level,
+                    source.width,
+                    source.height,
+                    expectedWidth,
+                    expectedHeight
+                )
+                NativeImage(expectedWidth, expectedHeight, false).use { resized ->
+                    source.resizeSubRectTo(0, 0, source.width, source.height, resized)
+                    encoder.writeToTexture(gpuTexture, resized, level, 0, 0, 0)
+                }
+            }
+        }
     }
 
     override fun close() {
@@ -65,12 +111,14 @@ class GltfDynamicTexture(
     }
 
     private companion object {
+        val LOGGER = LogUtils.getLogger()
+
         fun createLevels(image: NativeImage, mipmaps: Boolean): Array<NativeImage> {
             if (!mipmaps) return arrayOf(image)
             var width = image.width
             var height = image.height
             var count = 1
-            while (width > 1 || height > 1) {
+            while (width > 1 && height > 1) {
                 width = max(1, width / 2)
                 height = max(1, height / 2)
                 count++

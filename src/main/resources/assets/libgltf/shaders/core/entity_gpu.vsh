@@ -1,43 +1,48 @@
 #version 330
+#extension GL_ARB_separate_shader_objects : require
 
-#moj_import <minecraft:light.glsl>
-#moj_import <minecraft:fog.glsl>
-#moj_import <minecraft:dynamictransforms.glsl>
-#moj_import <minecraft:projection.glsl>
-#moj_import <minecraft:sample_lightmap.glsl>
+#include <minecraft:light.glsl>
+#include <minecraft:fog.glsl>
+#include <minecraft:dynamictransforms.glsl>
+#include <minecraft:projection.glsl>
+#include <minecraft:sample_lightmap.glsl>
 
-in vec3 Position;
-in vec3 Normal;
-in vec4 Tangent;
-in vec2 UV0;
-in vec2 TexCoord1;
-in vec4 Color;
-in vec4 InstanceMatrix0;
-in vec4 InstanceMatrix1;
-in vec4 InstanceMatrix2;
-in vec4 InstanceMatrix3;
-in vec4 InstanceNormal0;
-in vec4 InstanceNormal1;
-in vec4 InstanceNormal2;
-in vec4 InstanceColor;
-in ivec2 InstanceLight;
-in ivec2 InstanceOverlay;
-in int PaletteOffset;
+layout(location = 0) in vec3 Position;
+layout(location = 1) in vec3 Normal;
+layout(location = 2) in vec4 Tangent;
+layout(location = 3) in vec2 UV0;
+layout(location = 4) in vec2 TexCoord1;
+layout(location = 5) in vec4 Color;
+layout(location = 6) in vec4 InstanceMatrix0;
+layout(location = 7) in vec4 InstanceMatrix1;
+layout(location = 8) in vec4 InstanceMatrix2;
+layout(location = 9) in vec4 InstanceMatrix3;
+layout(location = 10) in vec4 InstanceNormal0;
+layout(location = 11) in vec4 InstanceNormal1;
+layout(location = 12) in vec4 InstanceNormal2;
+layout(location = 13) in vec4 InstanceColor;
+layout(location = 14) in ivec2 InstanceLight;
+layout(location = 15) in ivec2 InstanceOverlay;
+layout(location = 16) in int PaletteOffset;
+layout(location = 17) in vec4 InstanceUvTransform0;
+layout(location = 18) in vec2 InstanceUvTransform1;
 #ifdef SKINNED
-in uvec4 Joints;
-in vec4 Weights;
+layout(location = 19) in uvec4 Joints;
+layout(location = 20) in vec4 Weights;
 uniform samplerBuffer JointMatrices;
 #endif
 
+#if !defined(OIT_ALPHA_ONLY)
 uniform sampler2D Sampler1;
 uniform sampler2D Sampler2;
+#endif
 
-out float sphericalVertexDistance;
-out float cylindricalVertexDistance;
-out vec4 vertexColor;
-out vec4 lightMapColor;
-out vec4 overlayColor;
-out vec2 texCoord0;
+layout(location = 0) out float sphericalVertexDistance;
+layout(location = 1) out float cylindricalVertexDistance;
+layout(location = 2) out vec4 vertexColor;
+layout(location = 3) out vec4 lightMapColor;
+layout(location = 4) out vec4 overlayColor;
+layout(location = 5) out vec2 texCoord0;
 
 #ifdef SKINNED
 mat4 jointMatrix(uint jointIndex) {
@@ -71,7 +76,10 @@ void main() {
     sphericalVertexDistance = fog_spherical_distance(worldPosition.xyz);
     cylindricalVertexDistance = fog_cylindrical_distance(worldPosition.xyz);
     vertexColor = minecraft_mix_light(Light0_Direction, Light1_Direction, worldNormal, Color * InstanceColor);
+#if !defined(OIT_ALPHA_ONLY)
     lightMapColor = sample_lightmap(Sampler2, InstanceLight);
     overlayColor = texelFetch(Sampler1, InstanceOverlay, 0);
-    texCoord0 = UV0;
+#endif
+    texCoord0 = InstanceUvTransform0.xy +
+        mat2(InstanceUvTransform0.z, InstanceUvTransform1.x, InstanceUvTransform0.w, InstanceUvTransform1.y) * UV0;
 }

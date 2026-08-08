@@ -1,25 +1,41 @@
 package com.micheanl.libgltf.mixin;
 
-import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenSettings;
-import com.mojang.blaze3d.systems.BackendCreationException;
-import com.mojang.blaze3d.vulkan.VulkanBackend;
-import com.mojang.blaze3d.vulkan.VulkanPhysicalDevice;
-import com.mojang.blaze3d.vulkan.init.VulkanFeature;
-import com.mojang.blaze3d.vulkan.init.VulkanPNextStruct;
-import java.util.Collection;
+import com.micheanl.libgltf.render.vulkan.RenderConfig;
+import com.mojang.renderpearl.api.device.GpuDebugOptions;
+import com.mojang.renderpearl.backend.vulkan.VulkanBackend;
+import com.mojang.renderpearl.backend.vulkan.VulkanFeatureSets;
+import com.mojang.renderpearl.backend.vulkan.init.FeatureSet;
+import com.mojang.renderpearl.backend.vulkan.init.VulkanFeature;
+import com.mojang.renderpearl.backend.vulkan.init.VulkanPNextStruct;
+import java.util.HashSet;
 import java.util.Set;
 import org.lwjgl.vulkan.EXTMeshShader;
-import org.lwjgl.vulkan.VkDevice;
-import org.lwjgl.vulkan.VkPhysicalDevice;
+import org.lwjgl.vulkan.NVMeshShader;
 import org.lwjgl.vulkan.VkPhysicalDeviceMeshShaderFeaturesEXT;
+import org.lwjgl.vulkan.VkPhysicalDeviceMeshShaderFeaturesNV;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(VulkanBackend.class)
+
+/**
+ * libgltf · VulkanBackendMeshShaderMixin
+ *
+ * ```
+ * @Mixin(VulkanBackend.class)
+ * ```
+ *
+ * 启用 Vulkan mesh shader 设备特性的 mixin
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 public abstract class VulkanBackendMeshShaderMixin {
     private static final VulkanPNextStruct LIBGLTF_MESH_FEATURES = new VulkanPNextStruct(
+            VkPhysicalDeviceMeshShaderFeaturesEXT.class,
             EXTMeshShader.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT,
             VkPhysicalDeviceMeshShaderFeaturesEXT.SIZEOF
     );
@@ -33,42 +49,48 @@ public abstract class VulkanBackendMeshShaderMixin {
             "meshShader",
             VkPhysicalDeviceMeshShaderFeaturesEXT.MESHSHADER
     );
-
-    @Shadow
-    private static boolean isFeatureSupported(VkPhysicalDevice device, VulkanFeature feature) {
-        throw new AssertionError();
-    }
-
-    @Shadow
-    private static VkDevice createDevice(
-            Collection<String> extensions,
-            VulkanPhysicalDevice physicalDevice,
-            Set<VulkanFeature> features
-    ) throws BackendCreationException {
-        throw new AssertionError();
-    }
+    private static final FeatureSet LIBGLTF_MESH_SHADER_FEATURESET = new FeatureSet(
+            "libgltf mesh shader",
+            Set.of(EXTMeshShader.VK_EXT_MESH_SHADER_EXTENSION_NAME),
+            Set.of(LIBGLTF_TASK_SHADER, LIBGLTF_MESH_SHADER)
+    );
+    private static final VulkanPNextStruct LIBGLTF_NV_MESH_FEATURES = new VulkanPNextStruct(
+            VkPhysicalDeviceMeshShaderFeaturesNV.class,
+            NVMeshShader.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV,
+            VkPhysicalDeviceMeshShaderFeaturesNV.SIZEOF
+    );
+    private static final VulkanFeature LIBGLTF_NV_TASK_SHADER = new VulkanFeature(
+            LIBGLTF_NV_MESH_FEATURES,
+            "taskShader",
+            VkPhysicalDeviceMeshShaderFeaturesNV.TASKSHADER
+    );
+    private static final VulkanFeature LIBGLTF_NV_MESH_SHADER = new VulkanFeature(
+            LIBGLTF_NV_MESH_FEATURES,
+            "meshShader",
+            VkPhysicalDeviceMeshShaderFeaturesNV.MESHSHADER
+    );
+    private static final FeatureSet LIBGLTF_NV_MESH_SHADER_FEATURESET = new FeatureSet(
+            "libgltf nv mesh shader",
+            Set.of(NVMeshShader.VK_NV_MESH_SHADER_EXTENSION_NAME),
+            Set.of(LIBGLTF_NV_TASK_SHADER, LIBGLTF_NV_MESH_SHADER)
+    );
 
     @Redirect(
             method = "createDevice",
             at = @At(
                     value = "INVOKE",
-                    target = "Lcom/mojang/blaze3d/vulkan/VulkanBackend;createDevice(Ljava/util/Collection;Lcom/mojang/blaze3d/vulkan/VulkanPhysicalDevice;Ljava/util/Set;)Lorg/lwjgl/vulkan/VkDevice;"
+                    target = "Lcom/mojang/renderpearl/backend/vulkan/VulkanFeatureSets;optionalFeatureSets()Ljava/util/Set;"
             ),
             require = 1
     )
-    private VkDevice libgltf$enableMeshShader(
-            Collection<String> extensions,
-            VulkanPhysicalDevice physicalDevice,
-            Set<VulkanFeature> features
-    ) throws BackendCreationException {
-        if (GltfGpuDrivenSettings.INSTANCE.getMeshShader()
-                && physicalDevice.hasDeviceExtension(EXTMeshShader.VK_EXT_MESH_SHADER_EXTENSION_NAME)
-                && isFeatureSupported(physicalDevice.vkPhysicalDevice(), LIBGLTF_TASK_SHADER)
-                && isFeatureSupported(physicalDevice.vkPhysicalDevice(), LIBGLTF_MESH_SHADER)) {
-            extensions.add(EXTMeshShader.VK_EXT_MESH_SHADER_EXTENSION_NAME);
-            features.add(LIBGLTF_TASK_SHADER);
-            features.add(LIBGLTF_MESH_SHADER);
+    private Set<FeatureSet> libgltf$enableMeshShader(long window, GpuDebugOptions debugOptions) {
+        Set<FeatureSet> original = VulkanFeatureSets.optionalFeatureSets();
+        if (!RenderConfig.INSTANCE.getMeshShader()) {
+            return original;
         }
-        return createDevice(extensions, physicalDevice, features);
+        Set<FeatureSet> featureSets = new HashSet<>(original);
+        featureSets.add(LIBGLTF_MESH_SHADER_FEATURESET);
+        featureSets.add(LIBGLTF_NV_MESH_SHADER_FEATURESET);
+        return featureSets;
     }
 }

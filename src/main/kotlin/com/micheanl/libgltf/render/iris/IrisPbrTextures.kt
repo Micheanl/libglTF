@@ -4,6 +4,20 @@ import net.irisshaders.iris.pbr.texture.PBRTextureHolder
 import net.minecraft.client.renderer.texture.AbstractTexture
 import java.util.concurrent.ConcurrentHashMap
 
+/**
+ * libgltf · IrisPbrTextures
+ *
+ * ```
+ * PBRTextureHolder holder = IrisPbrTextures.get(id);
+ * ```
+ *
+ * Iris PBR 纹理集合
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 object IrisPbrTextures {
     private val holders = ConcurrentHashMap<Int, PBRTextureHolder>()
 

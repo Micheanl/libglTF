@@ -16,6 +16,9 @@ struct Meshlet {
     uint indexCount;
     uint padding0;
     uint padding1;
+    vec4 cone;
+    vec4 coneApex;
+    vec4 positionBias;
 };
 
 layout(set = 0, binding = 1, std430) readonly buffer Meshlets {
@@ -55,7 +58,7 @@ layout(push_constant) uniform Parameters {
 } parameters;
 
 mat4 instanceMatrix(uint instanceIndex) {
-    uint offset = instanceIndex * 35;
+    uint offset = instanceIndex * 41;
     return mat4(
         uintBitsToFloat(instanceWords[offset]),
         uintBitsToFloat(instanceWords[offset + 1]),
@@ -100,6 +103,12 @@ void main() {
     if (!instanceVisible) return;
     Meshlet meshlet = meshlets[meshletIndex];
     if (parameters.meshletCulling != 0 && !visibleSphere(meshlet.sphere, transform)) return;
+    if (parameters.meshletCulling != 0) {
+        mat4 viewTransform = parameters.ModelViewMat * instanceMatrix(instanceIndex);
+        vec3 axisView = normalize(mat3(viewTransform) * meshlet.cone.xyz);
+        vec3 apexView = (viewTransform * vec4(meshlet.coneApex.xyz, 1.0)).xyz;
+        if (dot(axisView, apexView) > meshlet.cone.w * length(apexView)) return;
+    }
     uint commandIndex = atomicAdd(stats.drawCount, 1);
     atomicAdd(stats.visibleMeshlets, 1);
     commands[commandIndex].indexCount = meshlet.indexCount;

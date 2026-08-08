@@ -5,19 +5,43 @@ import com.micheanl.libgltf.api.GltfRenderMode
 import com.micheanl.libgltf.material.TextureWrap
 import com.micheanl.libgltf.model.GltfPrimitive
 import com.micheanl.libgltf.model.PrimitiveMode
-import com.micheanl.libgltf.render.gpu.GltfGpuBackend
+import com.micheanl.libgltf.render.cpu.GltfGeometryRenderer
+import com.micheanl.libgltf.render.feature.GpuSubmit
+import com.micheanl.libgltf.render.gpu.GpuBackend
 import com.micheanl.libgltf.render.iris.IrisCompat
 import com.mojang.blaze3d.vertex.PoseStack
 import java.util.function.Consumer
 import net.fabricmc.fabric.api.client.rendering.v1.SubmitRenderPhases
+import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector
-import net.minecraft.client.renderer.rendertype.RenderTypes
+import net.minecraft.client.renderer.state.level.CameraRenderState
 import net.minecraft.client.renderer.texture.OverlayTexture
+import net.minecraft.client.renderer.rendertype.RenderTypes
+import net.minecraft.world.phys.AABB
+import org.joml.Matrix4f
 import org.joml.Matrix4fc
 import org.joml.Vector3f
 import org.joml.Vector3fc
 
+/**
+ * libgltf · GltfSceneRenderer
+ *
+ * ```
+ * GltfSceneRenderer.submit(instance, poseStack, submitNodeCollector, light, overlay, distanceSquared)
+ * ```
+ *
+ * 场景实例收集与提交入口
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 object GltfSceneRenderer {
+    private val cullMatrix = Matrix4f()
+    private val cullPoint = Vector3f()
+    private val instanceMatrix = Matrix4f()
+
     fun submit(
         instance: GltfInstance,
         poseStack: PoseStack,
@@ -35,12 +59,15 @@ object GltfSceneRenderer {
         val textures = resource.textures()
         val gpuEnabled =
             instance.renderMode != GltfRenderMode.CPU &&
-                GltfGpuBackend.capabilities().instancing &&
+                GpuBackend.capabilities().instancing &&
                 !IrisCompat.shaderPackActive()
         val asset = instance.handle.asset
+        val camera = Minecraft.getInstance().gameRenderer.gameRenderState().levelRenderState.cameraRenderState
+        val frustumCulling = camera.isFrustumCaptured
         poseStack.pushPose()
         poseStack.mulPose(transform)
         for (nodeIndex in asset.topologicalOrder) {
+            if (!instance.sceneMask[nodeIndex]) continue
             val node = asset.nodes[nodeIndex]
             val meshIndex = node.meshIndex
             if (meshIndex < 0) continue
@@ -50,16 +77,42 @@ object GltfSceneRenderer {
             for (primitiveIndex in mesh.primitives.indices) {
                 val primitive = mesh.primitives[primitiveIndex]
                 val renderer = renderers[primitiveIndex]
+                if (
+                    frustumCulling &&
+                    !(node.skinIndex >= 0 && primitive.skin != null) &&
+                    primitive.morphTargetCount == 0 &&
+                    !nodeVisible(
+                        poseStack.last().pose(),
+                        instance.animation.pose.globalMatrices[nodeIndex],
+                        primitive.bounds,
+                        camera
+                    )
+                ) {
+                    continue
+                }
                 if (renderer.transparent() && !instance.lodSelector.transparent(distanceSquared)) continue
                 if (gpuEnabled && gpuCompatible(instance, nodeIndex, primitive)) {
                     val gpuResources = resource.gpu()
                     if (!gpuResources.failed(meshIndex, primitiveIndex)) {
-                        val submit = gpuSubmits[primitiveIndex]
-                        submit.configure(resource, textures, light, overlay, poseStack.last().pose())
-                        if (renderer.transparent()) {
-                            submitNodeCollector.submitCustom(SubmitRenderPhases.TRANSLUCENT_MODELS, submit)
+                        val instanceCount = node.instanceMatrices.size / 16
+                        if (instanceCount > 0) {
+                            for (instanceIndex in 0 until instanceCount) {
+                                instanceMatrix.set(node.instanceMatrices, instanceIndex * 16)
+                                val submit = gpuSubmits[primitiveIndex][instanceIndex]
+                                submit.configure(
+                                    resource,
+                                    textures,
+                                    light,
+                                    overlay,
+                                    poseStack.last().pose(),
+                                    instanceMatrix
+                                )
+                                submitInstance(submitNodeCollector, renderer, submit)
+                            }
                         } else {
-                            submitNodeCollector.submitCustom(SubmitRenderPhases.SOLID, submit)
+                            val submit = gpuSubmits[primitiveIndex][0]
+                            submit.configure(resource, textures, light, overlay, poseStack.last().pose())
+                            submitInstance(submitNodeCollector, renderer, submit)
                         }
                         continue
                     }
@@ -68,11 +121,75 @@ object GltfSceneRenderer {
                 renderer.overlay = overlay
                 poseStack.pushPose()
                 if (node.skinIndex < 0) poseStack.mulPose(instance.animation.pose.globalMatrices[nodeIndex])
-                submitNodeCollector.submitCustomGeometry(poseStack, renderer.renderType(resource, textures), renderer)
+                val instanceCount = node.instanceMatrices.size / 16
+                if (instanceCount > 0) {
+                    for (instanceIndex in 0 until instanceCount) {
+                        poseStack.pushPose()
+                        poseStack.mulPose(instanceMatrix.set(node.instanceMatrices, instanceIndex * 16))
+                        submitNodeCollector.submitCustomGeometry(poseStack, renderer.renderType(resource, textures), renderer)
+                        poseStack.popPose()
+                    }
+                } else {
+                    submitNodeCollector.submitCustomGeometry(poseStack, renderer.renderType(resource, textures), renderer)
+                }
                 poseStack.popPose()
             }
         }
         poseStack.popPose()
+    }
+
+    private fun nodeVisible(
+        relativePose: Matrix4fc,
+        nodeMatrix: Matrix4fc,
+        bounds: FloatArray,
+        camera: CameraRenderState
+    ): Boolean {
+        cullMatrix.set(relativePose).mul(nodeMatrix)
+        var minX = Float.POSITIVE_INFINITY
+        var minY = Float.POSITIVE_INFINITY
+        var minZ = Float.POSITIVE_INFINITY
+        var maxX = Float.NEGATIVE_INFINITY
+        var maxY = Float.NEGATIVE_INFINITY
+        var maxZ = Float.NEGATIVE_INFINITY
+        for (x in 0..1) {
+            for (y in 0..1) {
+                for (z in 0..1) {
+                    cullPoint.set(bounds[x * 3], bounds[y * 3 + 1], bounds[z * 3 + 2])
+                    cullMatrix.transformPosition(cullPoint)
+                    minX = minOf(minX, cullPoint.x)
+                    minY = minOf(minY, cullPoint.y)
+                    minZ = minOf(minZ, cullPoint.z)
+                    maxX = maxOf(maxX, cullPoint.x)
+                    maxY = maxOf(maxY, cullPoint.y)
+                    maxZ = maxOf(maxZ, cullPoint.z)
+                }
+            }
+        }
+        val cameraX = camera.pos.x
+        val cameraY = camera.pos.y
+        val cameraZ = camera.pos.z
+        return camera.cullFrustum.isVisible(
+            AABB(
+                minX + cameraX,
+                minY + cameraY,
+                minZ + cameraZ,
+                maxX + cameraX,
+                maxY + cameraY,
+                maxZ + cameraZ
+            )
+        )
+    }
+
+    private fun submitInstance(
+        submitNodeCollector: OrderedSubmitNodeCollector,
+        renderer: GltfGeometryRenderer,
+        submit: GpuSubmit
+    ) {
+        if (renderer.transparent()) {
+            submitNodeCollector.submitCustom(SubmitRenderPhases.TRANSLUCENT_MODELS, submit)
+        } else {
+            submitNodeCollector.submitCustom(SubmitRenderPhases.SOLID, submit)
+        }
     }
 
     fun submitGlint(
@@ -84,19 +201,46 @@ object GltfSceneRenderer {
         transform: Matrix4fc = instance.transform
     ) {
         if (!instance.visible || instance.handle.isClosed) return
+        val resource = GltfRenderSystem.resource(instance.handle.resourceId) ?: return
+        val textures = resource.textures()
         val asset = instance.handle.asset
         poseStack.pushPose()
         poseStack.mulPose(transform)
         for (nodeIndex in asset.topologicalOrder) {
+            if (!instance.sceneMask[nodeIndex]) continue
             val node = asset.nodes[nodeIndex]
             if (node.meshIndex < 0) continue
             val renderers = instance.geometryRenderers[nodeIndex]
-            for (renderer in renderers) {
+            val mesh = asset.meshes[node.meshIndex]
+            for (primitiveIndex in mesh.primitives.indices) {
+                val primitive = mesh.primitives[primitiveIndex]
+                val renderer = renderers[primitiveIndex]
                 renderer.light = light
                 renderer.overlay = overlay
                 poseStack.pushPose()
                 if (node.skinIndex < 0) poseStack.mulPose(instance.animation.pose.globalMatrices[nodeIndex])
-                submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.entityGlint(), renderer)
+                val sourceMaterialIndex = primitive.materialIndex.coerceIn(0, asset.materials.lastIndex)
+                val materialIndex = instance.resolvePrimitiveMaterial(sourceMaterialIndex, primitive.materialMappings)
+                val material = asset.materials[materialIndex]
+                val override = instance.materialOverrides[sourceMaterialIndex]
+                val texture = when {
+                    override?.baseColorIdentifier != null -> override.baseColorIdentifier
+                    override?.baseColorTextureIndex != null && override.baseColorTextureIndex >= 0 ->
+                        textures.identifier(override.baseColorTextureIndex)
+                    material.baseColorTexture != null -> textures.identifier(material.baseColorTexture.textureIndex)
+                    else -> textures.materialIdentifier(materialIndex)
+                }
+                val instanceCount = node.instanceMatrices.size / 16
+                if (instanceCount > 0) {
+                    for (instanceIndex in 0 until instanceCount) {
+                        poseStack.pushPose()
+                        poseStack.mulPose(instanceMatrix.set(node.instanceMatrices, instanceIndex * 16))
+                        submitNodeCollector.submitCustomGeometry(poseStack, GltfRenderTypes.glint(texture), renderer)
+                        poseStack.popPose()
+                    }
+                } else {
+                    submitNodeCollector.submitCustomGeometry(poseStack, GltfRenderTypes.glint(texture), renderer)
+                }
                 poseStack.popPose()
             }
         }
@@ -118,11 +262,12 @@ object GltfSceneRenderer {
 
     private fun gpuCompatible(instance: GltfInstance, nodeIndex: Int, primitive: GltfPrimitive): Boolean {
         if (primitive.mode != PrimitiveMode.TRIANGLES || primitive.morphTargetCount > 0) return false
+        if (GpuBackend.capabilities().backend == GpuBackendType.OPENGL && primitive.skin != null) return false
         val asset = instance.handle.asset
         val node = asset.nodes[nodeIndex]
         if (primitive.skin != null && node.skinIndex < 0) return false
         val sourceMaterialIndex = primitive.materialIndex.coerceIn(0, asset.materials.lastIndex)
-        val material = asset.materials[instance.resolveMaterial(sourceMaterialIndex)]
+        val material = asset.materials[instance.resolvePrimitiveMaterial(sourceMaterialIndex, primitive.materialMappings)]
         if (instance.materialOverrides[sourceMaterialIndex]?.baseColorIdentifier != null) return true
         val overrideTexture = instance.materialOverrides[sourceMaterialIndex]?.baseColorTextureIndex ?: -1
         val textureIndex = if (overrideTexture >= 0) overrideTexture else material.baseColorTexture?.textureIndex ?: -1

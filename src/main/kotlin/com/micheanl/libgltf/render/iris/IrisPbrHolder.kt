@@ -3,6 +3,20 @@ package com.micheanl.libgltf.render.iris
 import net.irisshaders.iris.pbr.texture.PBRTextureHolder
 import net.minecraft.client.renderer.texture.AbstractTexture
 
+/**
+ * libgltf · IrisPbrHolder
+ *
+ * ```
+ * holders[id] = IrisPbrHolder(normal, specular)
+ * ```
+ *
+ * Iris PBR 纹理持有
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 class IrisPbrHolder(
     private val normal: AbstractTexture,
     private val specular: AbstractTexture

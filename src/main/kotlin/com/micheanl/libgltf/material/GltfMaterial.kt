@@ -1,5 +1,19 @@
 package com.micheanl.libgltf.material
 
+/**
+ * libgltf · GltfMaterial
+ *
+ * ```
+ * fun material(index: Int): GltfMaterial {
+ * ```
+ *
+ * glTF 材质与扩展
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 data class GltfMaterial(
     val name: String,
     val baseColorFactor: FloatArray,
@@ -20,5 +34,15 @@ data class GltfMaterial(
     val unlit: Boolean,
     val specular: SpecularMaterial?,
     val clearcoat: ClearcoatMaterial?,
-    val sheen: SheenMaterial?
+    val sheen: SheenMaterial?,
+    val transmissionFactor: Float,
+    val transmissionTexture: TextureBinding?,
+    val thicknessFactor: Float,
+    val thicknessTexture: TextureBinding?,
+    val attenuationDistance: Float,
+    val attenuationColor: FloatArray,
+    val ior: Float,
+    val dispersion: Float,
+    val anisotropy: AnisotropyMaterial?,
+    val iridescence: IridescenceMaterial?
 )

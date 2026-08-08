@@ -4,15 +4,29 @@ import com.micheanl.libgltf.asset.GltfLoadResult
 import com.micheanl.libgltf.asset.GltfLoader
 import com.micheanl.libgltf.lod.LodPolicy
 import com.micheanl.libgltf.model.GltfAsset
-import com.micheanl.libgltf.render.GltfGpuCapabilities
+import com.micheanl.libgltf.render.GpuCapabilities
 import com.micheanl.libgltf.render.GltfRenderRegistry
 import com.micheanl.libgltf.render.GltfRenderSystem
 import com.micheanl.libgltf.render.GltfSceneRenderer
-import com.micheanl.libgltf.render.gpu.GltfGpuBackend
+import com.micheanl.libgltf.render.gpu.GpuBackend
 import com.mojang.blaze3d.vertex.PoseStack
 import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector
+
+/**
+ * libgltf · GltfApiImpl
+ *
+ * ```
+ * object GltfApiImpl : GltfApi {
+ * ```
+ *
+ * GltfApi 的默认实现
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
 
 object GltfApiImpl : GltfApi {
     override fun load(path: Path, lodPolicy: LodPolicy): GltfLoadResult = GltfLoader.load(path, lodPolicy)
@@ -30,7 +44,7 @@ object GltfApiImpl : GltfApi {
 
     override fun unregister(id: GltfInstanceId): Boolean = GltfRenderRegistry.unregister(id)
 
-    override fun gpuCapabilities(): GltfGpuCapabilities = GltfGpuBackend.capabilities()
+    override fun gpuCapabilities(): GpuCapabilities = GpuBackend.capabilities()
 
     override fun submit(
         instance: GltfInstance,

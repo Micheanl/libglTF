@@ -1,5 +1,19 @@
 package com.micheanl.libgltf.animation
 
+/**
+ * libgltf · AnimationTransition
+ *
+ * ```
+ * private fun selectTransition(machine: AnimationStateMachine): AnimationTransition? {
+ * ```
+ *
+ * 状态机状态转换
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 data class AnimationTransition(
     val fromState: Int,
     val toState: Int,

@@ -2,6 +2,20 @@ package com.micheanl.libgltf.animation
 
 import com.micheanl.libgltf.model.GltfAsset
 
+/**
+ * libgltf · AnimationStateMachineBuilder
+ *
+ * ```
+ * AnimationStateMachineBuilder(asset).floatParameter("speed")
+ * ```
+ *
+ * 动画状态机构建器
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 class AnimationStateMachineBuilder(private val asset: GltfAsset) {
     private val parameters = ArrayList<AnimationParameter>()
     private val states = ArrayList<AnimationState>()

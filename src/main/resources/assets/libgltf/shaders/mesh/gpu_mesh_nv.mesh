@@ -1,0 +1,88 @@
+#version 460
+#extension GL_NV_mesh_shader : require
+layout(local_size_x = MESH_WORKGROUP_SIZE, local_size_y = 1, local_size_z = 1) in;
+layout(triangles, max_vertices = 256, max_primitives = 256) out;
+layout(std140, binding = 0) uniform Projection { mat4 ProjMat; };
+layout(std140, binding = 1) uniform DynamicTransforms { mat4 ModelViewMat; mat4 TextureMat; vec4 ColorModulator; vec3 ModelOffset; };
+layout(std140, binding = 3) uniform Lighting { vec3 Light0_Direction; vec3 Light1_Direction; };
+layout(binding = 1) uniform sampler2D Sampler1;
+layout(binding = 2) uniform sampler2D Sampler2;
+layout(std140, binding = 5) uniform MeshParams { vec4 primitiveSphere; uint instanceCount; uint meshletCount; uint instanceCulling; uint meshletCulling; uint baseCandidate; };
+layout(std430, binding = 7) readonly buffer Instances { uint instanceWords[]; };
+struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint vertexCount; uint triangleCount; uint firstIndex; uint indexCount; uint padding0; uint padding1; vec4 cone; vec4 coneApex; vec4 positionBias; };
+layout(std430, binding = 8) readonly buffer Meshlets { Meshlet meshlets[]; };
+layout(std430, binding = 9) readonly buffer MeshletVertices { uint meshletVertices[]; };
+layout(std430, binding = 10) readonly buffer MeshletTriangles { uint meshletTriangleWords[]; };
+taskNV in TaskPayload { uint words[2]; } payload;
+layout(location = 0) out float sphericalVertexDistance[];
+layout(location = 1) out float cylindricalVertexDistance[];
+layout(location = 2) out vec4 vertexColor[];
+layout(location = 3) out vec4 lightMapColor[];
+layout(location = 4) out vec4 overlayColor[];
+layout(location = 5) out vec2 texCoord0[];
+mat4 instanceMatrix(uint o) {
+    return mat4(uintBitsToFloat(instanceWords[o]), uintBitsToFloat(instanceWords[o + 1]), uintBitsToFloat(instanceWords[o + 2]), uintBitsToFloat(instanceWords[o + 3]), uintBitsToFloat(instanceWords[o + 4]), uintBitsToFloat(instanceWords[o + 5]), uintBitsToFloat(instanceWords[o + 6]), uintBitsToFloat(instanceWords[o + 7]), uintBitsToFloat(instanceWords[o + 8]), uintBitsToFloat(instanceWords[o + 9]), uintBitsToFloat(instanceWords[o + 10]), uintBitsToFloat(instanceWords[o + 11]), uintBitsToFloat(instanceWords[o + 12]), uintBitsToFloat(instanceWords[o + 13]), uintBitsToFloat(instanceWords[o + 14]), uintBitsToFloat(instanceWords[o + 15]));
+}
+int signed16(uint value) { return int(value << 16) >> 16; }
+uint triangleByte(uint offset) { return meshletTriangleWords[offset >> 2] >> ((offset & 3) * 8) & 255; }
+vec2 signNotZero(vec2 value) { return vec2(value.x >= 0.0 ? 1.0 : -1.0, value.y >= 0.0 ? 1.0 : -1.0); }
+vec3 decodeOct(uint oct) {
+    vec2 encoded = vec2(float(int(oct << 24) >> 24), float(int(oct << 16) >> 24)) / 127.0;
+    vec3 decoded = vec3(encoded, 1.0 - abs(encoded.x) - abs(encoded.y));
+    if (decoded.z < 0.0) decoded.xy = (1.0 - abs(decoded.yx)) * signNotZero(decoded.xy);
+    return normalize(decoded);
+}
+vec4 mixLight(vec3 normal, vec4 color) {
+    vec2 light = max(vec2(0.0), vec2(dot(Light0_Direction, normal), dot(Light1_Direction, normal)));
+    float value = min(1.0, (light.x + light.y) * 0.6 + 0.4);
+    return vec4(color.rgb * value, color.a);
+}
+vec4 sampleLightmap(ivec2 uv) {
+    vec2 coord = clamp((vec2(uv) / 256.0) + 0.5 / 16.0, vec2(0.5 / 16.0), vec2(15.5 / 16.0));
+    return texture(Sampler2, coord);
+}
+void main() {
+    uint instanceIndex = min(payload.words[0], max(instanceCount, 1) - 1);
+    uint meshletIndex = min(payload.words[1], max(meshletCount, 1) - 1);
+    Meshlet meshlet = meshlets[meshletIndex];
+    if (gl_LocalInvocationIndex == 0) gl_PrimitiveCountNV = meshlet.triangleCount;
+    uint invocation = gl_LocalInvocationIndex;
+    uint io = instanceIndex * 48;
+    mat4 transform = instanceMatrix(io);
+    mat3 normalTransform = mat3(uintBitsToFloat(instanceWords[io + 16]), uintBitsToFloat(instanceWords[io + 17]), uintBitsToFloat(instanceWords[io + 18]), uintBitsToFloat(instanceWords[io + 20]), uintBitsToFloat(instanceWords[io + 21]), uintBitsToFloat(instanceWords[io + 22]), uintBitsToFloat(instanceWords[io + 24]), uintBitsToFloat(instanceWords[io + 25]), uintBitsToFloat(instanceWords[io + 26]));
+    vec4 instanceColor = vec4(uintBitsToFloat(instanceWords[io + 28]), uintBitsToFloat(instanceWords[io + 29]), uintBitsToFloat(instanceWords[io + 30]), uintBitsToFloat(instanceWords[io + 31]));
+    uint light = instanceWords[io + 32];
+    uint overlay = instanceWords[io + 33];
+    vec2 uvOffset = vec2(uintBitsToFloat(instanceWords[io + 36]), uintBitsToFloat(instanceWords[io + 37]));
+    mat2 uvTransform = mat2(uintBitsToFloat(instanceWords[io + 38]), uintBitsToFloat(instanceWords[io + 40]), uintBitsToFloat(instanceWords[io + 39]), uintBitsToFloat(instanceWords[io + 41]));
+    vec4 lightMapColorValue = sampleLightmap(ivec2(signed16(light), signed16(light >> 16)));
+    vec4 overlayColorValue = texelFetch(Sampler1, ivec2(signed16(overlay), signed16(overlay >> 16)), 0);
+    for (uint vertex = invocation; vertex < meshlet.vertexCount; vertex += gl_WorkGroupSize.x) {
+        uint vo = (meshlet.vertexOffset + vertex) * 4;
+        uint q0 = meshletVertices[vo];
+        uint q1 = meshletVertices[vo + 1];
+        uint q2 = meshletVertices[vo + 2];
+        vec3 position = meshlet.positionBias.xyz +
+            vec3(float(q0 & 0xFFFFu), float(q0 >> 16), float(q1 & 0xFFFFu)) * meshlet.positionBias.w;
+        vec3 normal = decodeOct(q1 >> 16);
+        vec2 uv = unpackHalf2x16(q2);
+        vec2 uv0 = uvOffset + uvTransform * uv;
+        vec4 color = unpackUnorm4x8(meshletVertices[vo + 3]);
+        vec4 worldPosition = transform * vec4(position, 1.0);
+        vec3 worldNormal = normalize(normalTransform * normal);
+        gl_MeshVerticesNV[vertex].gl_Position = ProjMat * ModelViewMat * worldPosition;
+        sphericalVertexDistance[vertex] = length(worldPosition.xyz);
+        cylindricalVertexDistance[vertex] = max(length(worldPosition.xz), abs(worldPosition.y));
+        vertexColor[vertex] = mixLight(worldNormal, color * instanceColor);
+        lightMapColor[vertex] = lightMapColorValue;
+        overlayColor[vertex] = overlayColorValue;
+        texCoord0[vertex] = uv0;
+    }
+    for (uint triangle = invocation; triangle < meshlet.triangleCount; triangle += gl_WorkGroupSize.x) {
+        uint offset = meshlet.triangleOffset + triangle * 3;
+        uint baseIndex = triangle * 3;
+        gl_PrimitiveIndicesNV[baseIndex] = triangleByte(offset);
+        gl_PrimitiveIndicesNV[baseIndex + 1] = triangleByte(offset + 1);
+        gl_PrimitiveIndicesNV[baseIndex + 2] = triangleByte(offset + 2);
+    }
+}

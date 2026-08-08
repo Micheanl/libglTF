@@ -5,6 +5,20 @@ import org.lwjgl.util.meshoptimizer.MeshOptimizer
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
 
+/**
+ * libgltf · MeshLodBuilder
+ *
+ * ```
+ * MeshLodBuilder.build(indices, positions, lodPolicy.triangleRatios)
+ * ```
+ *
+ * LOD 网格简化
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 object MeshLodBuilder {
     fun build(indices: IntArray, positions: FloatArray, ratios: FloatArray): Array<IntArray> {
         if (indices.size < 12 || ratios.size == 1) return arrayOf(indices)

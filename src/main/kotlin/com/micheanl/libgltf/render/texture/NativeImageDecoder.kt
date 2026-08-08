@@ -5,6 +5,20 @@ import org.lwjgl.stb.STBImage
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
 
+/**
+ * libgltf · NativeImageDecoder
+ *
+ * ```
+ * val image = asset.images.getOrNull(texture.imageIndex)?.let { NativeImageDecoder.decode(it.bytes) } ?: whiteImage()
+ * ```
+ *
+ * 原生图像解码
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 object NativeImageDecoder {
     fun decode(bytes: ByteArray): NativeImage? {
         if (bytes.isEmpty()) return null

@@ -1,13 +1,28 @@
 package com.micheanl.libgltf.mixin;
 
 import com.micheanl.libgltf.render.texture.MipmapFilterState;
-import com.mojang.blaze3d.vulkan.VulkanGpuSampler;
+import com.mojang.renderpearl.backend.vulkan.VulkanGpuSampler;
 import org.lwjgl.vulkan.VK10;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @Mixin(VulkanGpuSampler.class)
+
+/**
+ * libgltf · VulkanGpuSamplerMixin
+ *
+ * ```
+ * @Mixin(VulkanGpuSampler.class)
+ * ```
+ *
+ * 控制 Vulkan 采样器 mipmap 模式的 mixin
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 public abstract class VulkanGpuSamplerMixin {
     @ModifyArg(
             method = "<init>",

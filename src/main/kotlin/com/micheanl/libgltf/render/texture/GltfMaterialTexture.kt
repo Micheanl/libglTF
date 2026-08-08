@@ -3,6 +3,20 @@ package com.micheanl.libgltf.render.texture
 import com.micheanl.libgltf.render.iris.IrisCompat
 import net.minecraft.resources.Identifier
 
+/**
+ * libgltf · GltfMaterialTexture
+ *
+ * ```
+ * val materialTextures = arrayOfNulls<GltfMaterialTexture>(asset.materials.size)
+ * ```
+ *
+ * 材质贴图的 GPU 纹理
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 class GltfMaterialTexture(
     val identifier: Identifier,
     private val albedo: GltfDynamicTexture,

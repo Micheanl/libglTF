@@ -12,6 +12,20 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.level.block.entity.BlockEntity
 
+/**
+ * libgltf · GltfRenderers
+ *
+ * ```
+ * GltfRenderers.item(instance)
+ * ```
+ *
+ * 集成渲染器注册
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 object GltfRenderers {
     @JvmStatic
     fun item(instance: GltfInstance): GltfItemRenderer = GltfItemRenderer(instance)

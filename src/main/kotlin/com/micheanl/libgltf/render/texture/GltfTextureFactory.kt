@@ -10,6 +10,20 @@ import com.mojang.blaze3d.platform.NativeImage
 import net.minecraft.client.Minecraft
 import net.minecraft.resources.Identifier
 
+/**
+ * libgltf · GltfTextureFactory
+ *
+ * ```
+ * textures = GltfTextureFactory.create(asset, id)
+ * ```
+ *
+ * 纹理创建
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 object GltfTextureFactory {
     fun create(asset: GltfAsset, resourceId: Long): GltfTextureSet {
         val manager = Minecraft.getInstance().textureManager

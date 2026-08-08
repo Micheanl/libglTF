@@ -13,15 +13,32 @@ import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.CompactVectorArray
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
+import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.SubmitNodeCollector
 import net.minecraft.client.renderer.rendertype.RenderType
 import net.minecraft.client.renderer.texture.OverlayTexture
+import kotlin.math.cos
 import kotlin.math.floor
+import kotlin.math.sin
 import kotlin.math.sqrt
 
 private const val DEFORMED_VERTEX_STRIDE: Int = 6
 private val EMPTY_DEFORMED_VERTICES: FloatArray = FloatArray(0)
 private val EMPTY_DEFORMED_REVISIONS: LongArray = LongArray(0)
+
+/**
+ * libgltf · GltfGeometryRenderer
+ *
+ * ```
+ * internal val geometryRenderers: Array<Array<GltfGeometryRenderer>> = createRenderers()
+ * ```
+ *
+ * CPU 渲染器
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
 
 class GltfGeometryRenderer(
     private val instance: GltfInstance,
@@ -47,14 +64,24 @@ class GltfGeometryRenderer(
     private var cachedResourceId: Long = Long.MIN_VALUE
     private var cachedMaterialRevision: Long = -1L
     private var cachedRenderType: RenderType? = null
+    private val staticVertices: FloatArray? = if (primitive.morphTargetCount == 0 && primitive.skin == null) {
+        val vertices = primitive.vertices
+        FloatArray(primitive.vertexCount * VertexLayout.STRIDE / Float.SIZE_BYTES).also { array ->
+            for (index in array.indices) array[index] = vertices.getFloat(index * Float.SIZE_BYTES)
+        }
+    } else {
+        null
+    }
 
-    fun transparent(): Boolean = asset.materials[instance.resolveMaterial(sourceMaterialIndex)].alphaMode == AlphaMode.BLEND
+    fun transparent(): Boolean =
+        asset.materials[instance.resolvePrimitiveMaterial(sourceMaterialIndex, primitive.materialMappings)]
+            .alphaMode == AlphaMode.BLEND
 
     fun renderType(resource: GltfRenderAsset, textures: GltfTextureSet): RenderType {
         val revision = instance.materialRevision
         val cached = cachedRenderType
         if (cached != null && cachedResourceId == resource.id && cachedMaterialRevision == revision) return cached
-        val materialIndex = instance.resolveMaterial(sourceMaterialIndex)
+        val materialIndex = instance.resolvePrimitiveMaterial(sourceMaterialIndex, primitive.materialMappings)
         val material = asset.materials[materialIndex]
         val override = instance.materialOverrides[sourceMaterialIndex]
         val overrideIdentifier = override?.baseColorIdentifier
@@ -88,10 +115,12 @@ class GltfGeometryRenderer(
 
     override fun render(pose: PoseStack.Pose, buffer: VertexConsumer) {
         val node = asset.nodes[nodeIndex]
-        val materialIndex = instance.resolveMaterial(sourceMaterialIndex)
+        val materialIndex = instance.resolvePrimitiveMaterial(sourceMaterialIndex, primitive.materialMappings)
         val material = asset.materials[materialIndex]
         val override = instance.materialOverrides[sourceMaterialIndex]
-        val factor = override?.baseColorFactor ?: material.baseColorFactor
+        val materialFactor = instance.animation.pose.materialFactor
+        val factor = override?.baseColorFactor
+            ?: if (materialFactor.animated[materialIndex]) materialFactor.baseColorFactor else material.baseColorFactor
         val redFactor = if (factor.isNotEmpty()) factor[0] else 1.0f
         val greenFactor = if (factor.size > 1) factor[1] else 1.0f
         val blueFactor = if (factor.size > 2) factor[2] else 1.0f
@@ -111,7 +140,11 @@ class GltfGeometryRenderer(
         val vertices = primitive.vertices
         val lod = instance.lodLevel.coerceAtMost(primitive.lodIndices.lastIndex)
         val indices = primitive.lodIndices[lod]
-        val triangleOrder = if (material.alphaMode == AlphaMode.BLEND && primitive.mode == PrimitiveMode.TRIANGLES) {
+        val triangleOrder = if (
+            material.alphaMode == AlphaMode.BLEND &&
+            primitive.mode == PrimitiveMode.TRIANGLES &&
+            !Minecraft.getInstance().gameRenderer.useImprovedTransparency()
+        ) {
             sortTriangles(pose, indices, revision, morphWeights, morphWeightOffset, palette)
         } else {
             null
@@ -131,12 +164,15 @@ class GltfGeometryRenderer(
             val ny: Float
             val nz: Float
             if (deformedVertices.isEmpty()) {
-                px = vertices.getFloat(base + VertexLayout.POSITION)
-                py = vertices.getFloat(base + VertexLayout.POSITION + 4)
-                pz = vertices.getFloat(base + VertexLayout.POSITION + 8)
-                nx = vertices.getFloat(base + VertexLayout.NORMAL)
-                ny = vertices.getFloat(base + VertexLayout.NORMAL + 4)
-                nz = vertices.getFloat(base + VertexLayout.NORMAL + 8)
+                val static = requireNotNull(staticVertices)
+                val position = (base + VertexLayout.POSITION) / Float.SIZE_BYTES
+                val normal = (base + VertexLayout.NORMAL) / Float.SIZE_BYTES
+                px = static[position]
+                py = static[position + 1]
+                pz = static[position + 2]
+                nx = static[normal]
+                ny = static[normal + 1]
+                nz = static[normal + 2]
             } else {
                 if (deformedRevisions[vertex] != revision) {
                     updateDeformedVertex(vertex, revision, morphWeights, morphWeightOffset, palette)
@@ -157,10 +193,19 @@ class GltfGeometryRenderer(
             var u = vertices.getFloat(uvOffset)
             var v = vertices.getFloat(uvOffset + 4)
             if (binding != null) {
-                val scaledU = u * binding.scaleX
-                val scaledV = v * binding.scaleY
-                u = scaledU * binding.cosine - scaledV * binding.sine + binding.offsetX
-                v = scaledU * binding.sine + scaledV * binding.cosine + binding.offsetY
+                val animatedUv = instance.animation.pose.materialUv
+                val animated = animatedUv.animated[materialIndex]
+                val offsetX = if (animated) animatedUv.offsetX[materialIndex] else binding.offsetX
+                val offsetY = if (animated) animatedUv.offsetY[materialIndex] else binding.offsetY
+                val scaleX = if (animated) animatedUv.scaleX[materialIndex] else binding.scaleX
+                val scaleY = if (animated) animatedUv.scaleY[materialIndex] else binding.scaleY
+                val rotation = if (animated) animatedUv.rotation[materialIndex] else binding.rotation
+                val cosine = cos(rotation)
+                val sine = sin(rotation)
+                val scaledU = u * scaleX
+                val scaledV = v * scaleY
+                u = scaledU * cosine - scaledV * sine + offsetX
+                v = scaledU * sine + scaledV * cosine + offsetY
                 if (mirroredS) u = mirrored(u)
                 if (mirroredT) v = mirrored(v)
             }
@@ -200,10 +245,11 @@ class GltfGeometryRenderer(
                     updateDeformedVertex(vertex, revision, morphWeights, morphWeightOffset, palette)
                 }
                 if (deformedVertices.isEmpty()) {
-                    val vertexOffset = vertex * VertexLayout.STRIDE + VertexLayout.POSITION
-                    centerX += vertices.getFloat(vertexOffset)
-                    centerY += vertices.getFloat(vertexOffset + 4)
-                    centerZ += vertices.getFloat(vertexOffset + 8)
+                    val static = requireNotNull(staticVertices)
+                    val vertexOffset = (vertex * VertexLayout.STRIDE + VertexLayout.POSITION) / Float.SIZE_BYTES
+                    centerX += static[vertexOffset]
+                    centerY += static[vertexOffset + 1]
+                    centerZ += static[vertexOffset + 2]
                 } else {
                     val vertexOffset = vertex * DEFORMED_VERTEX_STRIDE
                     centerX += deformedVertices[vertexOffset]
@@ -248,6 +294,16 @@ class GltfGeometryRenderer(
                 px += primitive.morphPositions[offset] * weight
                 py += primitive.morphPositions[offset + 1] * weight
                 pz += primitive.morphPositions[offset + 2] * weight
+                nx += primitive.morphNormals[offset] * weight
+                ny += primitive.morphNormals[offset + 1] * weight
+                nz += primitive.morphNormals[offset + 2] * weight
+            }
+            if (palette == null) {
+                val inverseLength =
+                    1.0f / sqrt(nx * nx + ny * ny + nz * nz).coerceAtLeast(1.0e-12f)
+                nx *= inverseLength
+                ny *= inverseLength
+                nz *= inverseLength
             }
         }
         val skin = primitive.skin

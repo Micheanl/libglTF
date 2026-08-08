@@ -1,5 +1,19 @@
 package com.micheanl.libgltf.lod
 
+/**
+ * libgltf · LodPolicy
+ *
+ * ```
+ * fun load(path: Path, lodPolicy: LodPolicy = LodPolicy.DEFAULT): GltfLoadResult
+ * ```
+ *
+ * LOD 策略配置
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 data class LodPolicy(
     val renderDistance: Float,
     val animationDistance: Float,

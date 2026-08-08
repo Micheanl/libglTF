@@ -9,6 +9,20 @@ import net.minecraft.client.renderer.state.level.CameraRenderState
 import net.minecraft.client.renderer.texture.OverlayTexture
 import net.minecraft.world.entity.Entity
 
+/**
+ * libgltf · GltfEntityRenderer
+ *
+ * ```
+ * ): GltfEntityRenderer<T> = GltfEntityRenderer(context, provider)
+ * ```
+ *
+ * 实体 glTF 渲染器
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 class GltfEntityRenderer<T : Entity>(
     context: EntityRendererProvider.Context,
     private val provider: GltfEntityRenderProvider<T>

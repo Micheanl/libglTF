@@ -1,14 +1,30 @@
 package com.micheanl.libgltf.render.vulkan
 
-import com.micheanl.libgltf.render.gpu.GltfMeshletLod
-import com.mojang.blaze3d.buffers.GpuBuffer
+import com.micheanl.libgltf.render.gpu.MeshletStorage
+import com.mojang.renderpearl.api.pipeline.RenderPipeline
+import com.mojang.renderpearl.api.buffers.GpuBuffer
+
+/**
+ * libgltf · VulkanMeshRenderPass
+ *
+ * ```
+ * public abstract class VulkanRenderPassIndirectMixin implements VulkanIndirectRenderPass, VulkanMeshRenderPass {
+ * ```
+ *
+ * Vulkan mesh 绘制接入
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
 
 interface VulkanMeshRenderPass {
     fun drawMeshTasks(
-        cache: GltfVulkanMeshPipelineCache,
+        cache: VulkanMeshCache,
+        renderPipeline: RenderPipeline,
         geometry: GpuBuffer,
         instances: GpuBuffer,
-        meshlets: GltfMeshletLod,
+        meshlets: MeshletStorage,
         sphere: FloatArray,
         instanceCount: Int,
         instanceCulling: Boolean,
