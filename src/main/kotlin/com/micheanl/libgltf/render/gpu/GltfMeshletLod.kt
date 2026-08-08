@@ -57,7 +57,7 @@ class GltfMeshletLod private constructor(
                 val meshletCount = MeshOptimizer.meshopt_buildMeshlets(
                     meshlets, meshletVertices, meshletTriangles, indices, positions,
                     vertexCount.toLong(), POSITION_STRIDE.toLong(), MAX_VERTICES.toLong(),
-                    MAX_TRIANGLES.toLong(), 0.0f
+                    MAX_TRIANGLES.toLong(), CONE_WEIGHT
                 ).toInt()
                 var meshletIndexCount = 0
                 var usedVertices = 0
@@ -84,6 +84,12 @@ class GltfMeshletLod private constructor(
                         val triangleOffset = meshlet.triangle_offset()
                         val triangleCount = meshlet.triangle_count()
                         val triangleIndexCount = triangleCount * 3
+                        MeshOptimizer.meshopt_optimizeMeshlet(
+                            meshletVertices.duplicate().position(vertexOffset)
+                                .limit(vertexOffset + meshlet.vertex_count()).slice(),
+                            meshletTriangles.duplicate().position(triangleOffset)
+                                .limit(triangleOffset + triangleIndexCount).slice()
+                        )
                         for (triangleIndex in 0 until triangleIndexCount) {
                             val localIndex = meshletTriangles[triangleOffset + triangleIndex].toInt() and 0xFF
                             putIndex(packedIndices, indexType, meshletVertices[vertexOffset + localIndex])
@@ -304,6 +310,7 @@ class GltfMeshletLod private constructor(
 
         private const val MAX_VERTICES = 256
         private const val MAX_TRIANGLES = 256
+        private const val CONE_WEIGHT = 0.25f
         private const val POSITION_STRIDE = 12
         private const val METADATA_STRIDE = 80
     }
