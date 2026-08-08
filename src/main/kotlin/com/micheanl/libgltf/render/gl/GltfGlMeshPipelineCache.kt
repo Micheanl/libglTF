@@ -1,6 +1,6 @@
 package com.micheanl.libgltf.render.gl
 
-import com.micheanl.libgltf.render.gpu.GltfMeshletLod
+import com.micheanl.libgltf.render.gpu.GltfMeshletStorage
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
 import com.mojang.logging.LogUtils
 import com.mojang.renderpearl.api.buffers.GpuBuffer
@@ -73,7 +73,7 @@ class GltfGlMeshPipelineCache : AutoCloseable {
         preparedRenderType: PreparedRenderType,
         geometry: GpuBuffer,
         instances: GpuBuffer,
-        meshlets: GltfMeshletLod,
+        meshlets: GltfMeshletStorage,
         sphere: FloatArray,
         instanceCount: Int,
         instanceCulling: Boolean,

@@ -1,6 +1,6 @@
 package com.micheanl.libgltf.render.vulkan
 
-import com.micheanl.libgltf.render.gpu.GltfMeshletLod
+import com.micheanl.libgltf.render.gpu.GltfMeshletStorage
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
 import com.micheanl.libgltf.render.gpu.GltfOcclusionDepth
 import com.mojang.blaze3d.systems.RenderSystem
@@ -78,7 +78,7 @@ class GltfVulkanMeshPipelineCache(
         hasDepth: Boolean,
         geometry: GpuBuffer,
         instances: GpuBuffer,
-        meshlets: GltfMeshletLod,
+        meshlets: GltfMeshletStorage,
         sphere: FloatArray,
         instanceCount: Int,
         instanceCulling: Boolean,
@@ -110,7 +110,7 @@ class GltfVulkanMeshPipelineCache(
             instanceCulling,
             meshletCulling,
             maxMeshGroups,
-            GltfGpuDrivenSettings.meshGroupLimit
+            GltfRenderConfig.meshGroupLimit
         )
         return true
     }
@@ -165,7 +165,7 @@ private class GltfVulkanMeshPipeline(
         hasDepth: Boolean,
         geometry: GpuBuffer,
         instances: GpuBuffer,
-        meshlets: GltfMeshletLod,
+        meshlets: GltfMeshletStorage,
         sphere: FloatArray,
         instanceCount: Int,
         instanceCulling: Boolean,
@@ -344,7 +344,7 @@ private class GltfVulkanMeshPipeline(
                     ?.let { put("COEFF1_BINDING", it) }
             }
             require(bindings.values.none { it < 0 })
-            val occlusionCulling = GltfGpuDrivenSettings.occlusionCulling
+            val occlusionCulling = GltfRenderConfig.occlusionCulling
             val macros = bindings.mapValues { it.value.toString() }
             val meshModule = compileModule(
                 device,

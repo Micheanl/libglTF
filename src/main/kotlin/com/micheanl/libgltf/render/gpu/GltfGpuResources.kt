@@ -2,7 +2,7 @@ package com.micheanl.libgltf.render.gpu
 
 import com.micheanl.libgltf.model.GltfAsset
 import com.micheanl.libgltf.render.GltfGpuBackendType
-import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenSettings
+import com.micheanl.libgltf.render.vulkan.GltfRenderConfig
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.logging.LogUtils
 
@@ -10,23 +10,23 @@ class GltfGpuResources(
     private val resourceId: Long,
     private val asset: GltfAsset
 ) : AutoCloseable {
-    private val primitives: Array<Array<GltfGpuPrimitive?>> = Array(asset.meshes.size) { meshIndex ->
+    private val primitives: Array<Array<GltfGpuMesh?>> = Array(asset.meshes.size) { meshIndex ->
         arrayOfNulls(asset.meshes[meshIndex].primitives.size)
     }
     private val failed: Array<BooleanArray> = Array(asset.meshes.size) { meshIndex ->
         BooleanArray(asset.meshes[meshIndex].primitives.size)
     }
 
-    fun primitive(meshIndex: Int, primitiveIndex: Int): GltfGpuPrimitive? {
+    fun primitive(meshIndex: Int, primitiveIndex: Int): GltfGpuMesh? {
         if (failed[meshIndex][primitiveIndex]) return null
         var primitive = primitives[meshIndex][primitiveIndex]
         if (primitive == null) {
             try {
-                primitive = GltfGpuPrimitive.create(
+                primitive = GltfGpuMesh.create(
                     RenderSystem.getDevice(),
                     "libgltf $resourceId mesh $meshIndex primitive $primitiveIndex",
                     asset.meshes[meshIndex].primitives[primitiveIndex],
-                    GltfGpuDrivenSettings.enabled && GltfGpuBackend.meshletBuilding()
+                    GltfRenderConfig.enabled && GltfGpuBackend.meshletBuilding()
                 )
                 primitives[meshIndex][primitiveIndex] = primitive
             } catch (error: RuntimeException) {

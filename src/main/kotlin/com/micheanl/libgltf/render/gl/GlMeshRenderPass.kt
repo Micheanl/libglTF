@@ -1,6 +1,6 @@
 package com.micheanl.libgltf.render.gl
 
-import com.micheanl.libgltf.render.gpu.GltfMeshletLod
+import com.micheanl.libgltf.render.gpu.GltfMeshletStorage
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.pipeline.RenderPipeline
 import net.minecraft.client.renderer.rendertype.PreparedRenderType
@@ -12,7 +12,7 @@ interface GlMeshRenderPass {
         preparedRenderType: PreparedRenderType,
         geometry: GpuBuffer,
         instances: GpuBuffer,
-        meshlets: GltfMeshletLod,
+        meshlets: GltfMeshletStorage,
         sphere: FloatArray,
         instanceCount: Int,
         instanceCulling: Boolean,

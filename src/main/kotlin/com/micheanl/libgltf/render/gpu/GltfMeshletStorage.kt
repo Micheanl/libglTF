@@ -14,7 +14,7 @@ import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
 
-class GltfMeshletLod private constructor(
+class GltfMeshletStorage private constructor(
     val indexBuffer: GpuBuffer,
     val metadataBuffer: GpuBuffer,
     val vertexBuffer: GpuBuffer,
@@ -42,7 +42,7 @@ class GltfMeshletLod private constructor(
             maxVertices: Int,
             maxTriangles: Int,
             bounds: FloatArray
-        ): GltfMeshletLod {
+        ): GltfMeshletStorage {
             val indexCount = indices.remaining()
             val maxMeshlets = MeshOptimizer.meshopt_buildMeshletsBound(
                 indexCount.toLong(), maxVertices.toLong(), maxTriangles.toLong()
@@ -218,7 +218,7 @@ class GltfMeshletLod private constructor(
                 vertexData.position(usedVertices * COMPACT_VERTEX_WORDS * Int.SIZE_BYTES).flip()
                 triangleData.flip()
                 wholeMetadata.flip()
-                return GltfMeshletLod(
+                return GltfMeshletStorage(
                     device.createBuffer({ "$label meshlet indices" }, GpuBuffer.USAGE_INDEX, packedIndices),
                     device.createBuffer({ "$label meshlet metadata" }, GltfVulkanUsage.STORAGE, metadata),
                     device.createBuffer({ "$label meshlet vertices" }, GltfVulkanUsage.STORAGE, vertexData),

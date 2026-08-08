@@ -2,7 +2,7 @@ package com.micheanl.libgltf.render.gl
 
 import com.micheanl.libgltf.mixin.GlBufferAccessor
 import com.micheanl.libgltf.mixin.GlSamplerAccessor
-import com.micheanl.libgltf.render.gpu.GltfMeshletLod
+import com.micheanl.libgltf.render.gpu.GltfMeshletStorage
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice
@@ -33,7 +33,7 @@ class GltfGlMeshPipeline private constructor(
         preparedRenderType: PreparedRenderType,
         geometry: GpuBuffer,
         instances: GpuBuffer,
-        meshlets: GltfMeshletLod,
+        meshlets: GltfMeshletStorage,
         sphere: FloatArray,
         instanceCount: Int,
         instanceCulling: Boolean,

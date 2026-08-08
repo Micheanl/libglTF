@@ -8,7 +8,7 @@ import com.micheanl.libgltf.render.gpu.GltfOcclusionDepth
 import com.mojang.renderpearl.api.device.GpuDevice
 import com.mojang.renderpearl.backend.vulkan.VulkanDevice
 
-class GltfVulkanGpuDriven private constructor(
+class GltfVulkanGpuDriver private constructor(
     val pipeline: GltfVulkanComputePipeline,
     val meshPipelines: GltfVulkanMeshCache?
 ) : GltfGpuDriver {
@@ -21,9 +21,9 @@ class GltfVulkanGpuDriven private constructor(
     }
 
     companion object {
-        fun create(device: GpuDevice): GltfVulkanGpuDriven? {
+        fun create(device: GpuDevice): GltfVulkanGpuDriver? {
             val capabilities = GltfGpuBackend.capabilities()
-            if (!GltfGpuDrivenSettings.enabled ||
+            if (!GltfRenderConfig.enabled ||
                 capabilities.backend != GltfGpuBackendType.VULKAN ||
                 !capabilities.drawIndirect ||
                 !capabilities.multiDrawIndirect ||
@@ -33,7 +33,7 @@ class GltfVulkanGpuDriven private constructor(
             val profile = GltfGpuBackend.vendorProfile()
             val mesh = if (
                 profile.preferMeshShader &&
-                GltfGpuDrivenSettings.meshShaderEnabled()
+                GltfRenderConfig.meshShaderEnabled()
             ) {
                 if (capabilities.meshShaderNvActive) {
                     GltfVulkanNvMeshPipelineCache(backend).takeIf { it.supported }
@@ -46,7 +46,7 @@ class GltfVulkanGpuDriven private constructor(
                 null
             }
             GltfOcclusionDepth.ensureCreated()
-            return GltfVulkanGpuDriven(GltfVulkanComputePipeline.create(backend), mesh)
+            return GltfVulkanGpuDriver(GltfVulkanComputePipeline.create(backend), mesh)
         }
     }
 }

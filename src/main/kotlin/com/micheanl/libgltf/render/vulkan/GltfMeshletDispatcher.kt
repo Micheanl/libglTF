@@ -2,11 +2,11 @@ package com.micheanl.libgltf.render.vulkan
 
 import com.micheanl.libgltf.mixin.FrontendRenderPassAccessor
 import com.micheanl.libgltf.render.gl.GlMeshRenderPass
-import com.micheanl.libgltf.render.gl.GltfGlGpuDriven
+import com.micheanl.libgltf.render.gl.GltfGlGpuDriver
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
 import com.micheanl.libgltf.render.gpu.GltfGpuDriver
-import com.micheanl.libgltf.render.gpu.GltfGpuPrimitive
-import com.micheanl.libgltf.render.gpu.GltfMeshletLod
+import com.micheanl.libgltf.render.gpu.GltfGpuMesh
+import com.micheanl.libgltf.render.gpu.GltfMeshletStorage
 import com.mojang.renderpearl.api.pipeline.RenderPipeline
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.commands.RenderPass
@@ -14,7 +14,7 @@ import com.mojang.blaze3d.systems.RenderSystem
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.rendertype.PreparedRenderType
 
-class GltfGpuDrivenBatch : AutoCloseable {
+class GltfMeshletDispatcher : AutoCloseable {
     private var commandRing: GltfVulkanBufferRing? = null
     private var statsRing: GltfVulkanBufferRing? = null
     private var commandCapacity = 0
@@ -22,13 +22,13 @@ class GltfGpuDrivenBatch : AutoCloseable {
     private var meshletCount = 0
     private var useMeshlets = false
     private var metadata: GpuBuffer? = null
-    private var meshlets: GltfMeshletLod? = null
+    private var meshlets: GltfMeshletStorage? = null
     private var indexBuffer: GpuBuffer? = null
     private var active = false
     private var meshletCulling = false
 
     fun prepare(
-        primitive: GltfGpuPrimitive,
+        primitive: GltfGpuMesh,
         lod: Int,
         instanceCount: Int,
         skinned: Boolean,
@@ -38,7 +38,7 @@ class GltfGpuDrivenBatch : AutoCloseable {
     ): Boolean {
         val meshletLod = primitive.meshlets?.getOrNull(lod)
         val meshOit = Minecraft.getInstance().gameRenderer.useImprovedTransparency() &&
-            (driver is GltfVulkanGpuDriven || driver is GltfGlGpuDriven)
+            (driver is GltfVulkanGpuDriver || driver is GltfGlGpuDriver)
         if (skinned || (transparent && !meshOit) || meshletLod == null) {
             active = false
             return false
@@ -46,10 +46,10 @@ class GltfGpuDrivenBatch : AutoCloseable {
         meshlets = meshletLod
         val profile = GltfGpuBackend.vendorProfile()
         useMeshlets = profile.enableMeshletCulling && meshletLod.meshletCount > 1
-        meshletCulling = useMeshlets && GltfGpuDrivenSettings.meshletCulling
+        meshletCulling = useMeshlets && GltfRenderConfig.meshletCulling
         meshletCount = if (meshletCulling) meshletLod.meshletCount else 1
         val workloadMeshletCount = if (meshShader) meshletLod.meshletCount else meshletCount
-        if (!GltfGpuDrivenSettings.profitable(instanceCount, workloadMeshletCount)) {
+        if (!GltfRenderConfig.profitable(instanceCount, workloadMeshletCount)) {
             active = false
             return false
         }
@@ -61,9 +61,9 @@ class GltfGpuDrivenBatch : AutoCloseable {
         return true
     }
 
-    fun dispatch(driver: GltfGpuDriver, primitive: GltfGpuPrimitive, instances: GpuBuffer, instanceCount: Int): Boolean {
+    fun dispatch(driver: GltfGpuDriver, primitive: GltfGpuMesh, instances: GpuBuffer, instanceCount: Int): Boolean {
         if (!active) return false
-        if (driver !is GltfVulkanGpuDriven) return false
+        if (driver !is GltfVulkanGpuDriver) return false
         val projection = RenderSystem.getProjectionMatrixBuffer() ?: return false
         driver.pipeline.dispatch(
             instances,
@@ -75,7 +75,7 @@ class GltfGpuDrivenBatch : AutoCloseable {
             primitive.boundsSphere,
             instanceCount,
             meshletCount,
-            GltfGpuBackend.vendorProfile().enableInstanceCulling && GltfGpuDrivenSettings.instanceCulling,
+            GltfGpuBackend.vendorProfile().enableInstanceCulling && GltfRenderConfig.instanceCulling,
             meshletCulling
         )
         return true
@@ -88,17 +88,17 @@ class GltfGpuDrivenBatch : AutoCloseable {
     fun drawMesh(
         renderPass: RenderPass,
         driver: GltfGpuDriver,
-        primitive: GltfGpuPrimitive,
+        primitive: GltfGpuMesh,
         instances: GpuBuffer,
         instanceCount: Int,
         renderPipeline: RenderPipeline,
         preparedRenderType: PreparedRenderType
     ): Boolean {
         if (!active) return false
-        val instanceCulling = GltfGpuBackend.vendorProfile().enableInstanceCulling && GltfGpuDrivenSettings.instanceCulling
+        val instanceCulling = GltfGpuBackend.vendorProfile().enableInstanceCulling && GltfRenderConfig.instanceCulling
         val backend = (renderPass as FrontendRenderPassAccessor).libgltfBackend
         return when (driver) {
-            is GltfVulkanGpuDriven -> (backend as? VulkanMeshRenderPass)?.drawMeshTasks(
+            is GltfVulkanGpuDriver -> (backend as? VulkanMeshRenderPass)?.drawMeshTasks(
                 driver.meshPipelines ?: return false,
                 renderPipeline,
                 primitive.vertexBuffer,
@@ -109,7 +109,7 @@ class GltfGpuDrivenBatch : AutoCloseable {
                 instanceCulling,
                 meshletCulling
             ) == true
-            is GltfGlGpuDriven -> (backend as? GlMeshRenderPass)?.drawMeshTasks(
+            is GltfGlGpuDriver -> (backend as? GlMeshRenderPass)?.drawMeshTasks(
                 driver.meshPipelines ?: return false,
                 renderPipeline,
                 preparedRenderType,

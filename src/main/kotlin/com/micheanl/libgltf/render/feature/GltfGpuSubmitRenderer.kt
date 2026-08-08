@@ -1,9 +1,9 @@
 package com.micheanl.libgltf.render.feature
 
-import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenSettings
-import com.micheanl.libgltf.render.vulkan.GltfVulkanGpuDriven
+import com.micheanl.libgltf.render.vulkan.GltfRenderConfig
+import com.micheanl.libgltf.render.vulkan.GltfVulkanGpuDriver
 import com.micheanl.libgltf.render.gpu.GltfOcclusionDepth
-import com.micheanl.libgltf.render.gl.GltfGlGpuDriven
+import com.micheanl.libgltf.render.gl.GltfGlGpuDriver
 import com.micheanl.libgltf.render.gpu.GltfGpuDriver
 import com.mojang.renderpearl.api.commands.RenderPass
 import com.mojang.blaze3d.systems.RenderSystem
@@ -12,8 +12,8 @@ import net.minecraft.client.renderer.feature.FeatureFrameContext
 import net.minecraft.client.renderer.feature.FeatureRenderer
 import net.minecraft.client.renderer.oit.OitStage
 
-class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
-    private val batches = ArrayList<GltfPreparedGpuBatch>()
+class GltfGpuSubmitRenderer : FeatureRenderer<GltfGpuSubmit> {
+    private val batches = ArrayList<GltfGpuBatch>()
     private var groupStarts = IntArray(INITIAL_GROUP_CAPACITY)
     private var groupCounts = IntArray(INITIAL_GROUP_CAPACITY)
     private var preparedBatchCount = 0
@@ -25,7 +25,7 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
             gpuDriven = null
             gpuDrivenAttempted = true
             try {
-                gpuDriven = GltfVulkanGpuDriven.create(RenderSystem.getDevice()) ?: GltfGlGpuDriven.create()
+                gpuDriven = GltfVulkanGpuDriver.create(RenderSystem.getDevice()) ?: GltfGlGpuDriver.create()
                 activeMesh = gpuDriven?.meshSupported == true
             } catch (error: RuntimeException) {
                 activeMesh = false
@@ -93,7 +93,7 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
         val batch = if (preparedBatchCount < batches.size) {
             batches[preparedBatchCount]
         } else {
-            GltfPreparedGpuBatch().also(batches::add)
+            GltfGpuBatch().also(batches::add)
         }
         batch.prepare(submits, fromIndex, toIndex, gpuDriven)
         preparedBatchCount++

@@ -1,6 +1,6 @@
 package com.micheanl.libgltf.render.vulkan
 
-import com.micheanl.libgltf.render.gpu.GltfMeshletLod
+import com.micheanl.libgltf.render.gpu.GltfMeshletStorage
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.pipeline.RenderPipeline
 import com.mojang.renderpearl.backend.vulkan.VulkanRenderPipeline
@@ -18,7 +18,7 @@ interface GltfVulkanMeshCache : AutoCloseable {
         hasDepth: Boolean,
         geometry: GpuBuffer,
         instances: GpuBuffer,
-        meshlets: GltfMeshletLod,
+        meshlets: GltfMeshletStorage,
         sphere: FloatArray,
         instanceCount: Int,
         instanceCulling: Boolean,

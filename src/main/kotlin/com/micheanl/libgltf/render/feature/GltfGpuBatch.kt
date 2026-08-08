@@ -5,10 +5,10 @@ import com.micheanl.libgltf.render.GltfGpuBackendType
 import com.micheanl.libgltf.render.gpu.GltfGpuDriver
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
 import com.micheanl.libgltf.render.gpu.GltfGpuFormats
-import com.micheanl.libgltf.render.gpu.GltfGpuPrimitive
-import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenBatch
-import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenSettings
-import com.micheanl.libgltf.render.vulkan.GltfVulkanGpuDriven
+import com.micheanl.libgltf.render.gpu.GltfGpuMesh
+import com.micheanl.libgltf.render.vulkan.GltfMeshletDispatcher
+import com.micheanl.libgltf.render.vulkan.GltfRenderConfig
+import com.micheanl.libgltf.render.vulkan.GltfVulkanGpuDriver
 import com.micheanl.libgltf.render.vulkan.GltfVulkanUsage
 import com.mojang.renderpearl.api.commands.RenderPass
 import com.mojang.renderpearl.api.pipeline.IndexType
@@ -23,11 +23,11 @@ import net.minecraft.client.renderer.rendertype.PreparedRenderType
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-class GltfPreparedGpuBatch : AutoCloseable {
+class GltfGpuBatch : AutoCloseable {
     private var instanceBuffer: MappableRingBuffer? = null
     private var paletteBuffer: MappableRingBuffer? = null
     private var sortedIndexBuffer: MappableRingBuffer? = null
-    private val gpuDriven = GltfGpuDrivenBatch()
+    private val gpuDriven = GltfMeshletDispatcher()
     private var gpuDrivenDriver: GltfGpuDriver? = null
     private var storageInstances = false
     private var instanceCapacity = 0
@@ -36,7 +36,7 @@ class GltfPreparedGpuBatch : AutoCloseable {
     private var sortingCenters: CompactVectorArray? = null
     private val sortingPosition = FloatArray(3)
     private lateinit var preparedRenderType: PreparedRenderType
-    private lateinit var primitive: GltfGpuPrimitive
+    private lateinit var primitive: GltfGpuMesh
     private var lod = 0
     private var instanceCount = 0
     private var skinned = false

@@ -1,6 +1,6 @@
 package com.micheanl.libgltf.mixin;
 
-import com.micheanl.libgltf.render.gpu.GltfMeshletLod;
+import com.micheanl.libgltf.render.gpu.GltfMeshletStorage;
 import com.micheanl.libgltf.render.vulkan.GltfVulkanMeshCache;
 import com.micheanl.libgltf.render.vulkan.VulkanIndirectRenderPass;
 import com.micheanl.libgltf.render.vulkan.VulkanMeshRenderPass;
@@ -59,7 +59,7 @@ public abstract class VulkanRenderPassIndirectMixin implements VulkanIndirectRen
             RenderPipeline renderPipeline,
             GpuBuffer geometry,
             GpuBuffer instances,
-            GltfMeshletLod meshlets,
+            GltfMeshletStorage meshlets,
             float[] sphere,
             int instanceCount,
             boolean instanceCulling,

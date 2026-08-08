@@ -14,7 +14,7 @@ import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
 
-class GltfGpuPrimitive private constructor(
+class GltfGpuMesh private constructor(
     val vertexBuffer: GpuBuffer,
     val skinBuffer: GpuBuffer?,
     val indexBuffers: Array<GpuBuffer>,
@@ -25,17 +25,17 @@ class GltfGpuPrimitive private constructor(
     val sortingPositions: FloatArray?,
     val sortingSkin: ShortArray?,
     val boundsSphere: FloatArray,
-    val meshlets: Array<GltfMeshletLod>?
+    val meshlets: Array<GltfMeshletStorage>?
 ) : AutoCloseable {
     override fun close() {
         vertexBuffer.close()
         skinBuffer?.close()
         for (buffer in indexBuffers) buffer.close()
-        meshlets?.forEach(GltfMeshletLod::close)
+        meshlets?.forEach(GltfMeshletStorage::close)
     }
 
     companion object {
-        fun create(device: GpuDevice, label: String, primitive: GltfPrimitive, buildMeshlets: Boolean): GltfGpuPrimitive {
+        fun create(device: GpuDevice, label: String, primitive: GltfPrimitive, buildMeshlets: Boolean): GltfGpuMesh {
             val sourceVertices = directCopy(primitive.vertices)
             val sourceSkin = primitive.skin?.let(::directCopy)
             val positions = extractPositions(sourceVertices, primitive.vertexCount)
@@ -108,7 +108,7 @@ class GltfGpuPrimitive private constructor(
                 val meshlets = if (buildMeshlets && primitive.mode == PrimitiveMode.TRIANGLES) {
                     val gl = GltfGpuBackend.capabilities().backend == GltfGpuBackendType.OPENGL
                     Array(optimized.size) { level ->
-                        GltfMeshletLod.create(
+                        GltfMeshletStorage.create(
                             device,
                             "$label lod $level",
                             optimized[level],
@@ -124,7 +124,7 @@ class GltfGpuPrimitive private constructor(
                 } else {
                     null
                 }
-                return GltfGpuPrimitive(
+                return GltfGpuMesh(
                     vertexBuffer,
                     skinBuffer,
                     indexBuffers,

@@ -1,6 +1,6 @@
 package com.micheanl.libgltf.render.vulkan
 
-import com.micheanl.libgltf.render.gpu.GltfMeshletLod
+import com.micheanl.libgltf.render.gpu.GltfMeshletStorage
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
 import com.micheanl.libgltf.render.gpu.GltfOcclusionDepth
 import com.mojang.blaze3d.systems.RenderSystem
@@ -66,7 +66,7 @@ class GltfVulkanNvMeshPipelineCache(
         hasDepth: Boolean,
         geometry: GpuBuffer,
         instances: GpuBuffer,
-        meshlets: GltfMeshletLod,
+        meshlets: GltfMeshletStorage,
         sphere: FloatArray,
         instanceCount: Int,
         instanceCulling: Boolean,
@@ -97,7 +97,7 @@ class GltfVulkanNvMeshPipelineCache(
             instanceCulling,
             meshletCulling,
             maxTaskGroups,
-            GltfGpuDrivenSettings.meshGroupLimit
+            GltfRenderConfig.meshGroupLimit
         )
         return true
     }
@@ -154,7 +154,7 @@ private class GltfVulkanNvMeshPipeline(
         hasDepth: Boolean,
         geometry: GpuBuffer,
         instances: GpuBuffer,
-        meshlets: GltfMeshletLod,
+        meshlets: GltfMeshletStorage,
         sphere: FloatArray,
         instanceCount: Int,
         instanceCulling: Boolean,
@@ -211,7 +211,7 @@ private class GltfVulkanNvMeshPipeline(
             val candidateCount = instanceCount.toLong() * meshlets.meshletCount
             val chunkGroups = if (meshGroupLimit > 0) minOf(maxTaskGroups, meshGroupLimit) else maxTaskGroups
             var baseCandidate = 0L
-            val meshBatch = GltfGpuDrivenSettings.meshBatchSize.coerceIn(1, 4)
+            val meshBatch = GltfRenderConfig.meshBatchSize.coerceIn(1, 4)
             while (baseCandidate < candidateCount) {
                 val remaining = candidateCount - baseCandidate
                 val groups = minOf(chunkGroups.toLong(), (remaining + meshBatch - 1) / meshBatch).toInt()
@@ -340,7 +340,7 @@ private class GltfVulkanNvMeshPipeline(
                     ?.let { put("COEFF1_BINDING", it) }
             }
             require(bindings.values.none { it < 0 })
-            val occlusionCulling = GltfGpuDrivenSettings.occlusionCulling
+            val occlusionCulling = GltfRenderConfig.occlusionCulling
             val macros = bindings.mapValues { it.value.toString() }
             val meshMacros = macros + ("MESH_WORKGROUP_SIZE" to meshWorkgroupSize.toString()) +
                 (if (renderPipeline.getShaderDefines().flags().contains("OIT_ALPHA_ONLY")) mapOf("OIT_ALPHA_ONLY" to "") else emptyMap()) +

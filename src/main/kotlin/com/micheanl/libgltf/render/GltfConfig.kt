@@ -1,6 +1,6 @@
 package com.micheanl.libgltf.render
 
-import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenSettings
+import com.micheanl.libgltf.render.vulkan.GltfRenderConfig
 import net.fabricmc.loader.api.FabricLoader
 import java.nio.file.Files
 import java.nio.file.Path
@@ -15,7 +15,7 @@ object GltfConfig {
         }
         val properties = Properties()
         Files.newInputStream(file).use { properties.load(it) }
-        GltfGpuDrivenSettings.applyConfig(properties)
+        GltfRenderConfig.applyConfig(properties)
     }
 
     private fun writeDefault(file: Path) {

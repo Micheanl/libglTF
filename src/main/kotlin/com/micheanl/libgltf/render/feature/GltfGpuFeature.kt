@@ -7,6 +7,6 @@ object GltfGpuFeature {
     val TYPE: FeatureRendererType<GltfGpuSubmit> = FeatureRendererType.create("libgltf_gpu")
 
     fun initialize() {
-        FeatureRendererRegistry.register(TYPE, ::GltfGpuFeatureRenderer)
+        FeatureRendererRegistry.register(TYPE, ::GltfGpuSubmitRenderer)
     }
 }

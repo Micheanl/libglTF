@@ -2,7 +2,7 @@ package com.micheanl.libgltf.render.vulkan
 
 import java.util.Properties
 
-object GltfGpuDrivenSettings {
+object GltfRenderConfig {
     val enabled: Boolean = booleanProperty("libgltf.vulkan.gpuDriven", true)
     val meshShader: Boolean = booleanProperty("libgltf.vulkan.meshShader", true)
     @Volatile

@@ -1,6 +1,6 @@
 package com.micheanl.libgltf.render.gpu
 
-import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenSettings
+import com.micheanl.libgltf.render.vulkan.GltfRenderConfig
 import com.micheanl.libgltf.render.GltfGpuBackendType
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.pipeline.TextureTarget
@@ -53,5 +53,5 @@ object GltfOcclusionDepth : AutoCloseable {
     }
 
     private fun active(): Boolean =
-        GltfGpuDrivenSettings.occlusionCulling && GltfGpuBackend.capabilities().backend == GltfGpuBackendType.VULKAN
+        GltfRenderConfig.occlusionCulling && GltfGpuBackend.capabilities().backend == GltfGpuBackendType.VULKAN
 }

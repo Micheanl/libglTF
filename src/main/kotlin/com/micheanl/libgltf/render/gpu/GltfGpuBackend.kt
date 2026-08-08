@@ -4,7 +4,7 @@ import com.micheanl.libgltf.mixin.FrontendGpuDeviceAccessor
 import com.micheanl.libgltf.render.GltfGpuBackendType
 import com.micheanl.libgltf.render.GltfGpuCapabilities
 import com.micheanl.libgltf.render.GltfGpuPath
-import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenSettings
+import com.micheanl.libgltf.render.vulkan.GltfRenderConfig
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.renderpearl.api.vertex.VertexFormat
 import com.mojang.renderpearl.api.device.DeviceInfo
