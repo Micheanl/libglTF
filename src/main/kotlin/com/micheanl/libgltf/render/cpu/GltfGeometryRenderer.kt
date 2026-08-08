@@ -61,7 +61,7 @@ class GltfGeometryRenderer(
 
     fun transparent(): Boolean =
         asset.materials[instance.resolvePrimitiveMaterial(sourceMaterialIndex, primitive.materialMappings)]
-            .effectiveAlphaMode == AlphaMode.BLEND
+            .alphaMode == AlphaMode.BLEND
 
     fun renderType(resource: GltfRenderAsset, textures: GltfTextureSet): RenderType {
         val revision = instance.materialRevision

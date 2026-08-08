@@ -31,10 +31,4 @@ data class GltfMaterial(
     val dispersion: Float,
     val anisotropy: AnisotropyMaterial?,
     val iridescence: IridescenceMaterial?
-) {
-    val hasTransmission: Boolean
-        get() = transmissionFactor > 0.0f || transmissionTexture != null
-
-    val effectiveAlphaMode: AlphaMode
-        get() = if (alphaMode == AlphaMode.OPAQUE && hasTransmission) AlphaMode.BLEND else alphaMode
-}
+)
