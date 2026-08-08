@@ -158,6 +158,11 @@ object GltfDebugCommands {
                                     .then(ClientCommands.literal("off").executes { meshFlat(it.source, false) })
                             )
                             .then(
+                                ClientCommands.literal("counters")
+                                    .then(ClientCommands.literal("on").executes { meshCounters(it.source, true) })
+                                    .then(ClientCommands.literal("off").executes { meshCounters(it.source, false) })
+                            )
+                            .then(
                                 ClientCommands.literal("limit")
                                     .then(
                                         ClientCommands.argument("groups", IntegerArgumentType.integer(0))
@@ -249,6 +254,7 @@ object GltfDebugCommands {
         lines += "libgltf mesh=${if (GltfGpuFeatureRenderer.activeMesh) "on" else "off"}($meshMode) " +
             "minimal=${if (GltfGpuDrivenSettings.debugMeshMinimal) "on" else "off"} " +
             "flat=${if (GltfGpuDrivenSettings.debugMeshFlat) "on" else "off"} " +
+            "counters=${if (GltfGpuDrivenSettings.debugMeshCounters) "on" else "off"} " +
             "limit=${GltfGpuDrivenSettings.meshGroupLimit} " +
             "cull=${if (GltfGpuDrivenSettings.instanceCulling && GltfGpuDrivenSettings.meshletCulling) "on" else "off"} " +
             "oit=${if (oit) "on" else "off"}"
@@ -479,6 +485,15 @@ object GltfDebugCommands {
             GltfGpuFeatureRenderer.recreate()
         }
         source.sendFeedback(Component.literal("Mesh flat debug set to $value"))
+        return 0
+    }
+
+    private fun meshCounters(source: FabricClientCommandSource, value: Boolean): Int {
+        Minecraft.getInstance().execute {
+            GltfGpuDrivenSettings.debugMeshCounters = value
+            GltfGpuFeatureRenderer.recreate()
+        }
+        source.sendFeedback(Component.literal("Mesh debug counters set to $value"))
         return 0
     }
 

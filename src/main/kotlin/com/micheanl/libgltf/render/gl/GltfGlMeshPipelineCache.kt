@@ -61,8 +61,8 @@ class GltfGlMeshPipelineCache : AutoCloseable {
             maxDrawCount
         }
         supported = (extSupported || nvSupported) &&
-            query(outputVerticesTarget) >= 128 &&
-            query(outputPrimitivesTarget) >= 248 &&
+            query(outputVerticesTarget) >= 256 &&
+            query(outputPrimitivesTarget) >= 256 &&
             query(taskInvocationTarget) >= 32 &&
             meshWorkgroupSize >= 32 &&
             maxTaskGroups > 0

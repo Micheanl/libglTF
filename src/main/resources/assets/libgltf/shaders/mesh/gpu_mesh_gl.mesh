@@ -1,7 +1,7 @@
 #version 460
 #extension GL_EXT_mesh_shader : require
 layout(local_size_x = MESH_WORKGROUP_SIZE, local_size_y = 1, local_size_z = 1) in;
-layout(triangles, max_vertices = 128, max_primitives = 248) out;
+layout(triangles, max_vertices = 256, max_primitives = 256) out;
 layout(std140, binding = 0) uniform Projection { mat4 ProjMat; };
 layout(std140, binding = 1) uniform DynamicTransforms { mat4 ModelViewMat; mat4 TextureMat; vec4 ColorModulator; vec3 ModelOffset; };
 layout(std140, binding = 3) uniform Lighting { vec3 Light0_Direction; vec3 Light1_Direction; };

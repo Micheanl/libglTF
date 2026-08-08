@@ -57,8 +57,8 @@ class GltfVulkanMeshPipelineCache(
             } else {
                 mesh.maxMeshWorkGroupInvocations()
             }
-            supported = mesh.maxMeshOutputVertices() >= 128 &&
-                mesh.maxMeshOutputPrimitives() >= 248 &&
+            supported = mesh.maxMeshOutputVertices() >= 256 &&
+                mesh.maxMeshOutputPrimitives() >= 256 &&
                 mesh.maxMeshWorkGroupInvocations() >= 64 &&
                 mesh.maxMeshWorkGroupSize(0) >= 64 &&
                 mesh.maxMeshWorkGroupCount(0) >= 32 &&
@@ -289,12 +289,15 @@ private class GltfVulkanMeshPipeline(
             }
             require(bindings.values.none { it < 0 })
             val macros = bindings.mapValues { it.value.toString() }
-            val debugMacros = if (debugMinimal) macros + ("MESH_DEBUG_MINIMAL" to "") else macros
+            val debugMacros = macros +
+                (if (GltfGpuDrivenSettings.debugMeshCounters) mapOf("MESH_DEBUG_COUNTERS" to "") else emptyMap()) +
+                (if (debugMinimal) mapOf("MESH_DEBUG_MINIMAL" to "") else emptyMap())
             val meshModule = compileModule(
                 device,
                 MESH_SHADER,
                 Shaderc.shaderc_mesh_shader,
-                debugMacros + ("MESH_WORKGROUP_SIZE" to meshWorkgroupSize.toString())
+                debugMacros + ("MESH_WORKGROUP_SIZE" to meshWorkgroupSize.toString()) +
+                    (if (renderPipeline.getShaderDefines().flags().contains("OIT_ALPHA_ONLY")) mapOf("OIT_ALPHA_ONLY" to "") else emptyMap())
             )
             try {
                 val fragmentModule = compileFragment(device, renderPipeline, bindings)
