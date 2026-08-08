@@ -37,8 +37,8 @@ class GltfGpuDrivenBatch : AutoCloseable {
         driver: GltfGpuDriver?
     ): Boolean {
         val meshletLod = primitive.meshlets?.getOrNull(lod)
-        val meshOit = driver is GltfVulkanGpuDriven &&
-            Minecraft.getInstance().gameRenderer.useImprovedTransparency()
+        val meshOit = Minecraft.getInstance().gameRenderer.useImprovedTransparency() &&
+            (driver is GltfVulkanGpuDriven || driver is GltfGlGpuDriven)
         if (skinned || (transparent && !meshOit) || meshletLod == null) {
             active = false
             return false

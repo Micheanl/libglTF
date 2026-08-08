@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.rendertype.PreparedRenderType
 import org.lwjgl.opengl.EXTMeshShader
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL33C
+import org.lwjgl.opengl.NVMeshShader
 import java.util.Collections
 import java.util.IdentityHashMap
 
@@ -14,21 +15,32 @@ class GltfGlMeshPipelineCache : AutoCloseable {
     private val pipelines = Collections.synchronizedMap(IdentityHashMap<RenderPipeline, GltfGlMeshPipeline>())
     private val failed = Collections.newSetFromMap(IdentityHashMap<RenderPipeline, Boolean>())
     private val maxDrawCount: Int
+    private val useNv: Boolean
     val supported: Boolean
 
     init {
         val caps = GL.getCapabilities()
-        val extensionSupported = caps.GL_EXT_mesh_shader
-        maxDrawCount = if (extensionSupported) {
-            queryIndexed(EXTMeshShader.GL_MAX_TASK_WORK_GROUP_COUNT_EXT, 0)
+        val extSupported = caps.GL_EXT_mesh_shader
+        val nvSupported = caps.GL_NV_mesh_shader
+        useNv = !extSupported && nvSupported
+        val outputVerticesTarget = if (useNv) NVMeshShader.GL_MAX_MESH_OUTPUT_VERTICES_NV else EXTMeshShader.GL_MAX_MESH_OUTPUT_VERTICES_EXT
+        val outputPrimitivesTarget = if (useNv) NVMeshShader.GL_MAX_MESH_OUTPUT_PRIMITIVES_NV else EXTMeshShader.GL_MAX_MESH_OUTPUT_PRIMITIVES_EXT
+        val taskInvocationTarget = if (useNv) NVMeshShader.GL_MAX_TASK_WORK_GROUP_INVOCATIONS_NV else EXTMeshShader.GL_MAX_TASK_WORK_GROUP_INVOCATIONS_EXT
+        val meshInvocationTarget = if (useNv) NVMeshShader.GL_MAX_MESH_WORK_GROUP_INVOCATIONS_NV else EXTMeshShader.GL_MAX_MESH_WORK_GROUP_INVOCATIONS_EXT
+        maxDrawCount = if (extSupported || nvSupported) {
+            if (useNv) {
+                query(NVMeshShader.GL_MAX_DRAW_MESH_TASKS_COUNT_NV)
+            } else {
+                queryIndexed(EXTMeshShader.GL_MAX_TASK_WORK_GROUP_COUNT_EXT, 0)
+            }
         } else {
             0
         }
-        supported = extensionSupported &&
-            query(EXTMeshShader.GL_MAX_MESH_OUTPUT_VERTICES_EXT) >= 64 &&
-            query(EXTMeshShader.GL_MAX_MESH_OUTPUT_PRIMITIVES_EXT) >= 124 &&
-            query(EXTMeshShader.GL_MAX_TASK_WORK_GROUP_INVOCATIONS_EXT) >= 32 &&
-            query(EXTMeshShader.GL_MAX_MESH_WORK_GROUP_INVOCATIONS_EXT) >= 64 &&
+        supported = (extSupported || nvSupported) &&
+            query(outputVerticesTarget) >= 64 &&
+            query(outputPrimitivesTarget) >= 124 &&
+            query(taskInvocationTarget) >= 32 &&
+            query(meshInvocationTarget) >= 64 &&
             maxDrawCount > 0
     }
 
@@ -45,7 +57,7 @@ class GltfGlMeshPipelineCache : AutoCloseable {
     ): Boolean {
         if (!supported || failed.contains(renderPipeline)) return false
         val pipeline = pipelines[renderPipeline] ?: try {
-            GltfGlMeshPipeline.create(renderPipeline).also { pipelines[renderPipeline] = it }
+            GltfGlMeshPipeline.create(renderPipeline, useNv).also { pipelines[renderPipeline] = it }
         } catch (_: RuntimeException) {
             failed.add(renderPipeline)
             return false

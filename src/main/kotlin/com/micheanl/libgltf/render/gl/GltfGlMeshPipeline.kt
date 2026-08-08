@@ -7,16 +7,25 @@ import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice
 import com.mojang.renderpearl.api.pipeline.RenderPipeline
+import com.mojang.renderpearl.api.textures.FilterMode
+import com.mojang.renderpearl.api.textures.GpuSampler
+import com.mojang.renderpearl.api.textures.GpuTextureView
 import com.mojang.renderpearl.backend.opengl.GlTexture
+import net.minecraft.client.renderer.LevelRenderer
+import net.minecraft.client.renderer.rendertype.OutputTarget
 import net.minecraft.client.renderer.rendertype.PreparedRenderType
 import org.lwjgl.opengl.EXTMeshShader
 import org.lwjgl.opengl.GL33C
 import org.lwjgl.opengl.GL43C
+import org.lwjgl.opengl.NVMeshShader
 import org.lwjgl.system.MemoryStack
 
 class GltfGlMeshPipeline private constructor(
     private val programId: Int,
-    private val paramsUbo: Int
+    private val paramsUbo: Int,
+    private val useNv: Boolean,
+    private val transmittance: Boolean,
+    private val accumulate: Boolean
 ) : AutoCloseable {
     fun draw(
         preparedRenderType: PreparedRenderType,
@@ -40,6 +49,7 @@ class GltfGlMeshPipeline private constructor(
         bindSsbo(BINDING_MESHLET_VERTICES, meshlets.vertexBuffer)
         bindSsbo(BINDING_MESHLET_TRIANGLES, meshlets.triangleBuffer)
         bindTextures(preparedRenderType)
+        bindOitSamplers()
         val candidateCount = instanceCount.toLong() * meshlets.meshletCount
         var baseCandidate = 0L
         while (baseCandidate < candidateCount) {
@@ -48,7 +58,11 @@ class GltfGlMeshPipeline private constructor(
                 (candidateCount - baseCandidate + TASK_WORKGROUP - 1) / TASK_WORKGROUP
             ).toInt()
             writeParams(sphere, instanceCount, meshlets.meshletCount, instanceCulling, meshletCulling, baseCandidate.toInt())
-            EXTMeshShader.glDrawMeshTasksEXT(0, groups, 1)
+            if (useNv) {
+                NVMeshShader.glDrawMeshTasksNV(0, groups)
+            } else {
+                EXTMeshShader.glDrawMeshTasksEXT(0, groups, 1)
+            }
             baseCandidate += groups.toLong() * TASK_WORKGROUP
         }
         GL33C.glUseProgram(0)
@@ -91,6 +105,27 @@ class GltfGlMeshPipeline private constructor(
         }
     }
 
+    private fun bindOitSamplers() {
+        if (!transmittance && !accumulate) return
+        val nearest = RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST)
+        if (transmittance || accumulate) {
+            val depthBounds = OutputTarget.DEPTH_BOUNDS_TARGET.getRenderTarget().getColorTextureView()
+            if (depthBounds != null) bindSampler(3, depthBounds, nearest)
+        }
+        if (accumulate) {
+            for (index in 0 until LevelRenderer.OIT_TRANSMITTANCE_TARGET_COUNT) {
+                val coeff = OutputTarget.TRANSMITTANCE_TARGETS[index].getRenderTarget().getColorTextureView()
+                if (coeff != null) bindSampler(4 + index, coeff, nearest)
+            }
+        }
+    }
+
+    private fun bindSampler(unit: Int, view: GpuTextureView, sampler: GpuSampler) {
+        GL33C.glActiveTexture(GL33C.GL_TEXTURE0 + unit)
+        GL33C.glBindTexture(GL33C.GL_TEXTURE_2D, (view.texture() as GlTexture).glId())
+        GL33C.glBindSampler(unit, (sampler as GlSamplerAccessor).`libgltf$getId`())
+    }
+
     private fun writeParams(
         sphere: FloatArray,
         instanceCount: Int,
@@ -115,16 +150,34 @@ class GltfGlMeshPipeline private constructor(
     }
 
     companion object {
-        fun create(renderPipeline: RenderPipeline): GltfGlMeshPipeline {
-            val task = compile(EXTMeshShader.GL_TASK_SHADER_EXT, shader("/assets/libgltf/shaders/mesh/gpu_mesh_gl.task"))
+        fun create(renderPipeline: RenderPipeline, useNv: Boolean): GltfGlMeshPipeline {
+            val taskType = if (useNv) NVMeshShader.GL_TASK_SHADER_NV else EXTMeshShader.GL_TASK_SHADER_EXT
+            val meshType = if (useNv) NVMeshShader.GL_MESH_SHADER_NV else EXTMeshShader.GL_MESH_SHADER_EXT
+            val meshPath = if (useNv) "/assets/libgltf/shaders/mesh/gpu_mesh_nv.mesh" else "/assets/libgltf/shaders/mesh/gpu_mesh_gl.mesh"
+            val taskPath = if (useNv) "/assets/libgltf/shaders/mesh/gpu_mesh_nv.task" else "/assets/libgltf/shaders/mesh/gpu_mesh_gl.task"
+            val task = compile(taskType, shader(taskPath))
             try {
-                val mesh = compile(EXTMeshShader.GL_MESH_SHADER_EXT, shader("/assets/libgltf/shaders/mesh/gpu_mesh_gl.mesh"))
+                val mesh = compile(meshType, shader(meshPath))
                 try {
-                    val fragment = compile(GL33C.GL_FRAGMENT_SHADER, shader("/assets/libgltf/shaders/core/entity_gl.fsh"))
+                    val defines = renderPipeline.getShaderDefines()
+                    val oit = defines.flags().contains("OIT")
+                    val fragmentPath = if (oit) {
+                        "/assets/libgltf/shaders/core/entity_gl_oit.fsh"
+                    } else {
+                        "/assets/libgltf/shaders/core/entity_gl.fsh"
+                    }
+                    val fragmentSource = withDefines(shader(fragmentPath), renderPipeline)
+                    val fragment = compile(GL33C.GL_FRAGMENT_SHADER, fragmentSource)
                     try {
                         val program = link(task, mesh, fragment)
                         setup(program)
-                        return GltfGlMeshPipeline(program, GL33C.glGenBuffers())
+                        return GltfGlMeshPipeline(
+                            program,
+                            GL33C.glGenBuffers(),
+                            useNv,
+                            oit && defines.flags().contains("OIT_TRANSMITTANCE"),
+                            oit && defines.flags().contains("OIT_ACCUMULATE")
+                        )
                     } catch (error: RuntimeException) {
                         GL33C.glDeleteShader(fragment)
                         throw error
@@ -143,6 +196,18 @@ class GltfGlMeshPipeline private constructor(
             requireNotNull(GltfGlMeshPipeline::class.java.getResourceAsStream(path))
                 .bufferedReader()
                 .use { it.readText() }
+
+        private fun withDefines(source: String, renderPipeline: RenderPipeline): String {
+            val builder = StringBuilder()
+            val defines = renderPipeline.getShaderDefines()
+            for ((key, value) in defines.values()) builder.append("#define $key $value\n")
+            for (flag in defines.flags()) builder.append("#define $flag\n")
+            if (RenderSystem.getDevice().deviceInfo.isZZeroToOne()) {
+                builder.append("#define RENDERPEARL_DEPTH_IS_ZERO_TO_ONE\n")
+            }
+            val versionEnd = source.indexOf('\n') + 1
+            return source.substring(0, versionEnd) + builder.toString() + source.substring(versionEnd)
+        }
 
         private fun compile(type: Int, source: String): Int {
             val shader = GL33C.glCreateShader(type)

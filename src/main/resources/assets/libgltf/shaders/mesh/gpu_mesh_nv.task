@@ -1,0 +1,46 @@
+#version 460
+#extension GL_NV_mesh_shader : require
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+layout(std140, binding = 0) uniform Projection { mat4 ProjMat; };
+layout(std140, binding = 1) uniform DynamicTransforms { mat4 ModelViewMat; mat4 TextureMat; vec4 ColorModulator; vec3 ModelOffset; };
+layout(std430, binding = 7) readonly buffer Instances { uint instanceWords[]; };
+struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint vertexCount; uint triangleCount; uint firstIndex; uint indexCount; uint padding0; uint padding1; };
+layout(std430, binding = 8) readonly buffer Meshlets { Meshlet meshlets[]; };
+layout(std140, binding = 5) uniform MeshParams { vec4 primitiveSphere; uint instanceCount; uint meshletCount; uint instanceCulling; uint meshletCulling; uint baseCandidate; };
+struct TaskPayload { uint instanceIndices[32]; uint meshletIndices[32]; };
+taskNV out TaskPayload { uint instanceIndices[32]; uint meshletIndices[32]; } payload;
+shared uint visibleCount;
+mat4 instanceMatrix(uint instanceIndex) {
+    uint o = instanceIndex * 35;
+    return mat4(uintBitsToFloat(instanceWords[o]), uintBitsToFloat(instanceWords[o + 1]), uintBitsToFloat(instanceWords[o + 2]), uintBitsToFloat(instanceWords[o + 3]), uintBitsToFloat(instanceWords[o + 4]), uintBitsToFloat(instanceWords[o + 5]), uintBitsToFloat(instanceWords[o + 6]), uintBitsToFloat(instanceWords[o + 7]), uintBitsToFloat(instanceWords[o + 8]), uintBitsToFloat(instanceWords[o + 9]), uintBitsToFloat(instanceWords[o + 10]), uintBitsToFloat(instanceWords[o + 11]), uintBitsToFloat(instanceWords[o + 12]), uintBitsToFloat(instanceWords[o + 13]), uintBitsToFloat(instanceWords[o + 14]), uintBitsToFloat(instanceWords[o + 15]));
+}
+bool visibleSphere(vec4 sphere, mat4 transform) {
+    vec4 r0 = vec4(transform[0][0], transform[1][0], transform[2][0], transform[3][0]);
+    vec4 r1 = vec4(transform[0][1], transform[1][1], transform[2][1], transform[3][1]);
+    vec4 r2 = vec4(transform[0][2], transform[1][2], transform[2][2], transform[3][2]);
+    vec4 r3 = vec4(transform[0][3], transform[1][3], transform[2][3], transform[3][3]);
+    vec4 c = vec4(sphere.xyz, 1.0);
+    vec4 planes[6] = vec4[6](r3 + r0, r3 - r0, r3 + r1, r3 - r1, r3 + r2, r3 - r2);
+    for (uint i = 0; i < 6; i++) if (dot(planes[i], c) < -sphere.w * length(planes[i].xyz)) return false;
+    return true;
+}
+void main() {
+    if (gl_LocalInvocationIndex == 0) visibleCount = 0;
+    barrier();
+    uint candidate = baseCandidate + gl_WorkGroupID.x * 32 + gl_LocalInvocationIndex;
+    uint candidateCount = instanceCount * meshletCount;
+    if (candidate < candidateCount) {
+        uint instanceIndex = candidate / meshletCount;
+        uint meshletIndex = candidate - instanceIndex * meshletCount;
+        mat4 transform = ProjMat * ModelViewMat * instanceMatrix(instanceIndex);
+        bool instanceVisible = instanceCulling == 0 || visibleSphere(primitiveSphere, transform);
+        bool meshletVisible = meshletCulling == 0 || visibleSphere(meshlets[meshletIndex].sphere, transform);
+        if (instanceVisible && meshletVisible) {
+            uint slot = atomicAdd(visibleCount, 1);
+            payload.instanceIndices[slot] = instanceIndex;
+            payload.meshletIndices[slot] = meshletIndex;
+        }
+    }
+    barrier();
+    EmitMeshTasksNV(visibleCount, 1, 1);
+}
