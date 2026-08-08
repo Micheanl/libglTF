@@ -82,7 +82,7 @@ class GltfGpuDrivenBatch : AutoCloseable {
         return true
     }
 
-    fun meshReady(driver: GltfGpuDriver): Boolean = active && driver.meshSupported
+    fun meshReady(driver: GltfGpuDriver): Boolean = active && meshletCulling && driver.meshSupported
 
     fun currentMeshletCount(): Int = meshletCount
 

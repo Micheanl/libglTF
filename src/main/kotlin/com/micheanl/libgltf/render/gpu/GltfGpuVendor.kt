@@ -29,7 +29,7 @@ object GltfGpuVendors {
                 true,
                 true,
                 65535,
-                128
+                64
             )
             GltfGpuVendor.AMD -> GltfGpuVendorProfile(
                 vendor,
@@ -37,7 +37,7 @@ object GltfGpuVendors {
                 true,
                 true,
                 65535,
-                128
+                64
             )
             GltfGpuVendor.INTEL -> GltfGpuVendorProfile(
                 vendor,
@@ -61,7 +61,7 @@ object GltfGpuVendors {
                 true,
                 true,
                 65535,
-                128
+                64
             )
         }
     }

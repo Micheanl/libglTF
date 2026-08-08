@@ -3,18 +3,18 @@
 layout(local_size_x = MESH_WORKGROUP_SIZE, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = 64, max_primitives = 124) out;
 layout(set = 0, binding = PROJECTION_BINDING, std140) uniform Projection { mat4 ProjMat; };
-layout(set = 0, binding = DYNAMIC_TRANSFORMS_BINDING, std140) uniform DynamicTransforms { mat4 ModelViewMat; vec4 ColorModulator; vec3 ModelOffset; mat4 TextureMat; };
+layout(set = 0, binding = DYNAMIC_TRANSFORMS_BINDING, std140) uniform DynamicTransforms { mat4 ModelViewMat; mat4 TextureMat; vec4 ColorModulator; vec3 ModelOffset; };
 layout(set = 0, binding = LIGHTING_BINDING, std140) uniform Lighting { vec3 Light0_Direction; vec3 Light1_Direction; };
 layout(set = 0, binding = SAMPLER1_BINDING) uniform sampler2D Sampler1;
 layout(set = 0, binding = SAMPLER2_BINDING) uniform sampler2D Sampler2;
+layout(push_constant) uniform Parameters { vec4 primitiveSphere; uint instanceCount; uint meshletCount; uint instanceCulling; uint meshletCulling; uint baseCandidate; } parameters;
 layout(set = 1, binding = GEOMETRY_BINDING, std430) readonly buffer Geometry { uint geometryWords[]; };
 layout(set = 1, binding = INSTANCES_BINDING, std430) readonly buffer Instances { uint instanceWords[]; };
 struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint vertexCount; uint triangleCount; uint firstIndex; uint indexCount; uint padding0; uint padding1; };
 layout(set = 1, binding = MESHLETS_BINDING, std430) readonly buffer Meshlets { Meshlet meshlets[]; };
 layout(set = 1, binding = MESHLET_VERTICES_BINDING, std430) readonly buffer MeshletVertices { uint meshletVertices[]; };
 layout(set = 1, binding = MESHLET_TRIANGLES_BINDING, std430) readonly buffer MeshletTriangles { uint meshletTriangleWords[]; };
-struct TaskPayload { uint instanceIndices[32]; uint meshletIndices[32]; };
-taskPayloadSharedEXT TaskPayload payload;
+taskPayloadSharedEXT uint payload[64];
 layout(location = 0) out float sphericalVertexDistance[];
 layout(location = 1) out float cylindricalVertexDistance[];
 layout(location = 2) out vec4 vertexColor[];
@@ -37,8 +37,9 @@ vec4 sampleLightmap(ivec2 uv) {
 }
 void main() {
     uint payloadIndex = gl_WorkGroupID.x;
-    uint instanceIndex = payload.instanceIndices[payloadIndex];
-    Meshlet meshlet = meshlets[payload.meshletIndices[payloadIndex]];
+    uint instanceIndex = min(payload[payloadIndex * 2], max(parameters.instanceCount, 1) - 1);
+    uint meshletIndex = min(payload[payloadIndex * 2 + 1], max(parameters.meshletCount, 1) - 1);
+    Meshlet meshlet = meshlets[meshletIndex];
     SetMeshOutputsEXT(meshlet.vertexCount, meshlet.triangleCount);
     uint invocation = gl_LocalInvocationIndex;
     uint io = instanceIndex * 41;

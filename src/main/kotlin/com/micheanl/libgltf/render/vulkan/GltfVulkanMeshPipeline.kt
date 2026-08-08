@@ -321,7 +321,10 @@ private class GltfVulkanMeshPipeline(
                 val storageSetLayout = pointer[0]
                 try {
                     val range = VkPushConstantRange.calloc(1, stack)
-                        .stageFlags(EXTMeshShader.VK_SHADER_STAGE_TASK_BIT_EXT)
+                        .stageFlags(
+                            EXTMeshShader.VK_SHADER_STAGE_TASK_BIT_EXT or
+                                EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT
+                        )
                         .offset(0)
                         .size(PUSH_CONSTANT_SIZE)
                     val layoutInfo = VkPipelineLayoutCreateInfo.calloc(stack).`sType$Default`()

@@ -102,6 +102,6 @@ object GltfGpuBackend {
         true,
         true,
         65535,
-        128
+        64
     )
 }
