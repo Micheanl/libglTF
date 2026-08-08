@@ -11,7 +11,6 @@ import com.mojang.blaze3d.vertex.PoseStack
 import java.util.function.Consumer
 import net.fabricmc.fabric.api.client.rendering.v1.SubmitRenderPhases
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector
-import net.minecraft.client.renderer.rendertype.RenderTypes
 import net.minecraft.client.renderer.texture.OverlayTexture
 import org.joml.Matrix4fc
 import org.joml.Vector3f
@@ -111,7 +110,7 @@ object GltfSceneRenderer {
                     material.baseColorTexture != null -> textures.identifier(material.baseColorTexture.textureIndex)
                     else -> textures.materialIdentifier(materialIndex)
                 }
-                submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.entitySolidGlint(texture), renderer)
+                submitNodeCollector.submitCustomGeometry(poseStack, GltfRenderTypes.glint(texture), renderer)
                 poseStack.popPose()
             }
         }

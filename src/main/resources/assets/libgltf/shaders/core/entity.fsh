@@ -4,6 +4,12 @@
 #include <minecraft:dynamictransforms.glsl>
 #include <minecraft:oit.glsl>
 
+#ifdef GLINT
+#include <minecraft:globals.glsl>
+uniform sampler2D GlintSampler;
+in vec2 texCoordGlint;
+#endif
+
 #ifdef SAMPLER0_BINDING
 layout(binding = SAMPLER0_BINDING) uniform sampler2D Sampler0;
 #else
@@ -23,6 +29,9 @@ out vec4 fragColor;
 
 void main() {
     vec4 color = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;
+#ifdef GLINT
+    color.a = max(color.a, GlintAlpha);
+#endif
 #ifdef ALPHA_CUTOUT
     if (color.a < ALPHA_CUTOUT) {
         discard;
@@ -37,6 +46,10 @@ void main() {
 #else
     color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
     color.rgb *= lightMapColor.rgb;
+#ifdef GLINT
+    vec4 glintColor = GlintAlpha * texture(GlintSampler, texCoordGlint);
+    color.rgb += glintColor.rgb * glintColor.rgb;
+#endif
 #ifdef OIT_ACCUMULATE
     color = sampleColorForAccumulation(color);
     vec4 fogColor = vec4(FogColor.rgb * color.a, FogColor.a);

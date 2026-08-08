@@ -7,12 +7,16 @@ import com.micheanl.libgltf.render.GltfGpuPath
 import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenSettings
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.renderpearl.api.vertex.VertexFormat
+import com.mojang.renderpearl.api.device.DeviceInfo
 import com.mojang.renderpearl.backend.vulkan.VulkanDevice
 import org.lwjgl.opengl.GL
 
 object GltfGpuBackend {
     @Volatile
     private var vertexAttributeLimit = VertexFormat.MAX_VERTEX_ELEMENTS
+
+    @Volatile
+    private var cachedInfo: DeviceInfo? = null
 
     @Volatile
     private var capabilities = GltfGpuCapabilities(
@@ -33,6 +37,7 @@ object GltfGpuBackend {
     fun refresh() {
         val device = RenderSystem.tryGetDevice() ?: return
         val info = device.deviceInfo
+        cachedInfo = info
         val backend = when (info.backendName()) {
             "OpenGL" -> GltfGpuBackendType.OPENGL
             "Vulkan" -> GltfGpuBackendType.VULKAN
@@ -76,4 +81,6 @@ object GltfGpuBackend {
     fun vertexAttributeLimit(): Int = vertexAttributeLimit
 
     fun capabilities(): GltfGpuCapabilities = capabilities
+
+    fun deviceInfo(): DeviceInfo? = cachedInfo
 }

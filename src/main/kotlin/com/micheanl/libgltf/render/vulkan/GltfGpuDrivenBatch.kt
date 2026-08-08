@@ -64,6 +64,8 @@ class GltfGpuDrivenBatch : AutoCloseable {
 
     fun meshReady(driver: GltfVulkanGpuDriven): Boolean = active && driver.meshPipelines?.supported == true
 
+    fun currentMeshletCount(): Int = meshletCount
+
     fun drawMesh(
         renderPass: RenderPass,
         driver: GltfVulkanGpuDriven,
@@ -87,25 +89,6 @@ class GltfGpuDrivenBatch : AutoCloseable {
         )
     }
 
-    fun captureMesh(nanos: Long, instanceCount: Int, triangleCount: Int, lod: Int) {
-        if (!active || !GltfGpuDrivenSettings.benchmark) return
-        val candidates = instanceCount * requireNotNull(meshlets).meshletCount
-        GltfGpuDrivenBenchmark.record(
-            nanos,
-            instanceCount,
-            instanceCount,
-            0,
-            0,
-            0,
-            1,
-            triangleCount,
-            lod,
-            "task_mesh",
-            false,
-            false,
-            (candidates + 31) / 32
-        )
-    }
     fun indexBuffer(): GpuBuffer = requireNotNull(indexBuffer)
 
     fun draw(renderPass: RenderPass): Boolean {
@@ -119,10 +102,17 @@ class GltfGpuDrivenBatch : AutoCloseable {
         return true
     }
 
-    fun capture(nanos: Long, instanceCount: Int, triangleCount: Int, lod: Int) {
+    fun capture(queryStart: Int, instanceCount: Int, triangleCount: Int, lod: Int) {
         if (!active || !GltfGpuDrivenSettings.benchmark) return
         if (benchmark == null) benchmark = GltfVulkanBenchmarkReadback()
-        requireNotNull(benchmark).capture(requireNotNull(statsRing).buffer(), nanos, instanceCount, meshletCount, triangleCount, lod)
+        requireNotNull(benchmark).capture(
+            requireNotNull(statsRing).buffer(),
+            queryStart,
+            instanceCount,
+            meshletCount,
+            triangleCount,
+            lod
+        )
     }
 
     fun rotate() {

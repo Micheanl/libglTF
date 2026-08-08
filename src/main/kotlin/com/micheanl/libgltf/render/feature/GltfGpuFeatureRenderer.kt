@@ -1,5 +1,6 @@
 package com.micheanl.libgltf.render.feature
 
+import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenBenchmark
 import com.micheanl.libgltf.render.vulkan.GltfVulkanGpuDriven
 import com.mojang.renderpearl.api.commands.RenderPass
 import com.mojang.blaze3d.systems.RenderSystem
@@ -36,7 +37,7 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
         if (strictlyOrdered) {
             for (index in submits.indices) prepareBatch(submits, index, index + 1)
         } else {
-            prepareBatches(submits)
+            prepareBatch(submits, 0, submits.size)
         }
         groupStarts[preparedGroupCount] = start
         groupCounts[preparedGroupCount] = preparedBatchCount - start
@@ -56,26 +57,16 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
         for (index in start until end) batches[index].execute(stage, renderPass)
     }
 
+    override fun finishExecute(context: FeatureFrameContext) {
+        GltfGpuDrivenBenchmark.resolve()
+    }
+
     override fun close() {
         for (batch in batches) batch.close()
         batches.clear()
         gpuDriven?.close()
         gpuDriven = null
-    }
-
-    private fun prepareBatches(submits: List<GltfGpuSubmit>) {
-        if (submits.isEmpty()) return
-        var fromIndex = 0
-        var key = submits[0].batchKey()
-        for (index in 1 until submits.size) {
-            val nextKey = submits[index].batchKey()
-            if (nextKey != key) {
-                prepareBatch(submits, fromIndex, index)
-                fromIndex = index
-                key = nextKey
-            }
-        }
-        prepareBatch(submits, fromIndex, submits.size)
+        GltfGpuDrivenBenchmark.close()
     }
 
     private fun prepareBatch(submits: List<GltfGpuSubmit>, fromIndex: Int, toIndex: Int) {

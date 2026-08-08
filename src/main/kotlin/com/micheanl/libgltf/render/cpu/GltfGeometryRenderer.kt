@@ -48,6 +48,14 @@ class GltfGeometryRenderer(
     private var cachedResourceId: Long = Long.MIN_VALUE
     private var cachedMaterialRevision: Long = -1L
     private var cachedRenderType: RenderType? = null
+    private val staticVertices: FloatArray? = if (primitive.morphTargetCount == 0 && primitive.skin == null) {
+        val vertices = primitive.vertices
+        FloatArray(primitive.vertexCount * VertexLayout.STRIDE / Float.SIZE_BYTES).also { array ->
+            for (index in array.indices) array[index] = vertices.getFloat(index * Float.SIZE_BYTES)
+        }
+    } else {
+        null
+    }
 
     fun transparent(): Boolean = asset.materials[instance.resolveMaterial(sourceMaterialIndex)].alphaMode == AlphaMode.BLEND
 
@@ -136,12 +144,15 @@ class GltfGeometryRenderer(
             val ny: Float
             val nz: Float
             if (deformedVertices.isEmpty()) {
-                px = vertices.getFloat(base + VertexLayout.POSITION)
-                py = vertices.getFloat(base + VertexLayout.POSITION + 4)
-                pz = vertices.getFloat(base + VertexLayout.POSITION + 8)
-                nx = vertices.getFloat(base + VertexLayout.NORMAL)
-                ny = vertices.getFloat(base + VertexLayout.NORMAL + 4)
-                nz = vertices.getFloat(base + VertexLayout.NORMAL + 8)
+                val static = requireNotNull(staticVertices)
+                val position = (base + VertexLayout.POSITION) / Float.SIZE_BYTES
+                val normal = (base + VertexLayout.NORMAL) / Float.SIZE_BYTES
+                px = static[position]
+                py = static[position + 1]
+                pz = static[position + 2]
+                nx = static[normal]
+                ny = static[normal + 1]
+                nz = static[normal + 2]
             } else {
                 if (deformedRevisions[vertex] != revision) {
                     updateDeformedVertex(vertex, revision, morphWeights, morphWeightOffset, palette)
@@ -205,10 +216,11 @@ class GltfGeometryRenderer(
                     updateDeformedVertex(vertex, revision, morphWeights, morphWeightOffset, palette)
                 }
                 if (deformedVertices.isEmpty()) {
-                    val vertexOffset = vertex * VertexLayout.STRIDE + VertexLayout.POSITION
-                    centerX += vertices.getFloat(vertexOffset)
-                    centerY += vertices.getFloat(vertexOffset + 4)
-                    centerZ += vertices.getFloat(vertexOffset + 8)
+                    val static = requireNotNull(staticVertices)
+                    val vertexOffset = (vertex * VertexLayout.STRIDE + VertexLayout.POSITION) / Float.SIZE_BYTES
+                    centerX += static[vertexOffset]
+                    centerY += static[vertexOffset + 1]
+                    centerZ += static[vertexOffset + 2]
                 } else {
                     val vertexOffset = vertex * DEFORMED_VERTEX_STRIDE
                     centerX += deformedVertices[vertexOffset]

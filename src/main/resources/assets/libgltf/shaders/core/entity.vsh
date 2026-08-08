@@ -24,6 +24,9 @@ out vec4 vertexColor;
 out vec4 lightMapColor;
 out vec4 overlayColor;
 out vec2 texCoord0;
+#ifdef GLINT
+out vec2 texCoordGlint;
+#endif
 
 void main() {
     gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
@@ -35,4 +38,7 @@ void main() {
     overlayColor = texelFetch(Sampler1, UV1, 0);
 #endif
     texCoord0 = UV0;
+#ifdef GLINT
+    texCoordGlint = (TextureMat * vec4(UV0, 0.0, 1.0)).xy;
+#endif
 }

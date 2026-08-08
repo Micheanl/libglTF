@@ -38,7 +38,8 @@ object GltfRenderSystem {
         GltfRenderRegistry.removeByResource(resourceId)
         GltfRenderTypes.remove(resourceId)
         val resource = resources.remove(resourceId) ?: return
-        if (RenderSystem.isOnRenderThread()) resource.close() else Minecraft.getInstance().execute(resource::close)
+        val close = { RenderSystem.queueFencedTask(resource::close) }
+        if (RenderSystem.isOnRenderThread()) close() else Minecraft.getInstance().execute(close)
     }
 
     private fun closeAll() {

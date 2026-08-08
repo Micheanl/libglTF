@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.client.renderer.oit.OitPipelineSet
 import net.minecraft.client.renderer.rendertype.RenderSetup
 import net.minecraft.client.renderer.rendertype.RenderType
+import net.minecraft.client.renderer.rendertype.TextureTransform
 import net.minecraft.resources.Identifier
 import java.util.concurrent.ConcurrentHashMap
 
@@ -29,6 +30,11 @@ private val JOINT_MATRICES_LAYOUT = BindGroupLayout.builder()
 object GltfRenderTypes {
     private val resources = ConcurrentHashMap<Long, ConcurrentHashMap<Long, RenderType>>()
     private val gpuResources = ConcurrentHashMap<Long, ConcurrentHashMap<Long, RenderType>>()
+    private val glintResources = ConcurrentHashMap<Identifier, RenderType>()
+
+    fun glint(texture: Identifier): RenderType = glintResources.computeIfAbsent(texture) {
+        createGlint(it)
+    }
 
     fun get(
         resourceId: Long,
@@ -66,6 +72,27 @@ object GltfRenderTypes {
     fun remove(resourceId: Long) {
         resources.remove(resourceId)
         gpuResources.remove(resourceId)
+        glintResources.clear()
+    }
+
+    private fun createGlint(texture: Identifier): RenderType {
+        val pipeline = RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET, RenderPipelines.GLINT_SNIPPET)
+            .withLocation(LibGltf.id("pipeline/glint_${texture.namespace}_${texture.path.replace('/', '_')}"))
+            .withVertexShader(LibGltf.id("core/entity"))
+            .withFragmentShader(LibGltf.id("core/entity"))
+            .withBindGroupLayout(BindGroupLayouts.SAMPLER1)
+            .withVertexBinding(0, DefaultVertexFormat.ENTITY)
+            .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
+            .withCull(false)
+            .withColorTargetState(ColorTargetState.DEFAULT)
+            .build()
+        val setup = RenderSetup.builder(pipeline)
+            .withTexture("Sampler0", texture)
+            .setTextureTransform(TextureTransform.ENTITY_GLINT_TEXTURING)
+            .useLightmap()
+            .useOverlay()
+            .createRenderSetup()
+        return RenderType.create("libgltf_glint_${texture.namespace}_${texture.path.replace('/', '_')}", setup)
     }
 
     private fun create(

@@ -14,7 +14,7 @@ class GltfVulkanBenchmarkReadback : AutoCloseable {
         )
     }
     private val fences = arrayOfNulls<GpuFence>(BUFFER_COUNT)
-    private val recordNanos = LongArray(BUFFER_COUNT)
+    private val queryStarts = IntArray(BUFFER_COUNT)
     private val instances = IntArray(BUFFER_COUNT)
     private val meshlets = IntArray(BUFFER_COUNT)
     private val triangles = IntArray(BUFFER_COUNT)
@@ -23,7 +23,7 @@ class GltfVulkanBenchmarkReadback : AutoCloseable {
 
     fun capture(
         stats: GpuBuffer,
-        nanos: Long,
+        queryStart: Int,
         instanceCount: Int,
         meshletCount: Int,
         triangleCount: Int,
@@ -37,19 +37,11 @@ class GltfVulkanBenchmarkReadback : AutoCloseable {
                 val drawCount = data.getInt(0)
                 val visibleInstances = data.getInt(4)
                 val visibleMeshlets = data.getInt(8)
-                GltfGpuDrivenBenchmark.record(
-                    recordNanos[current],
-                    instances[current],
+                GltfGpuDrivenBenchmark.attachIndirectStats(
+                    queryStarts[current],
                     visibleInstances,
-                    instances[current] - visibleInstances,
                     visibleMeshlets,
-                    instances[current] * meshlets[current] - visibleMeshlets,
-                    drawCount,
-                    triangles[current],
-                    lods[current],
-                    if (meshlets[current] > 1) "meshlet" else "indirect",
-                    false,
-                    false
+                    drawCount
                 )
             }
             fence.close()
@@ -58,7 +50,7 @@ class GltfVulkanBenchmarkReadback : AutoCloseable {
         val encoder = RenderSystem.getDevice().createCommandEncoder()
         encoder.copyToBuffer(stats.slice(), buffers[current].slice())
         fences[current] = encoder.createFence()
-        recordNanos[current] = nanos
+        queryStarts[current] = queryStart
         instances[current] = instanceCount
         meshlets[current] = meshletCount
         triangles[current] = triangleCount
