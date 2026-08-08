@@ -50,8 +50,8 @@ void main() {
     SetMeshOutputsEXT(3, 1);
     if (invocation < 3) {
         float x = float(gl_WorkGroupID.x & 31) * 0.06 - 0.9;
-        vec2 local[3] = vec2[3](vec2(x - 0.03, -0.03), vec2(x + 0.03, -0.03), vec2(x, 0.03));
-        gl_MeshVerticesEXT[invocation].gl_Position = vec4(local[invocation], 0.0, 1.0);
+        vec2 local[3] = vec2[3](vec2(x - 0.03, -0.03), vec2(x, 0.03), vec2(x + 0.03, -0.03));
+        gl_MeshVerticesEXT[invocation].gl_Position = vec4(local[invocation], 0.5, 1.0);
         sphericalVertexDistance[invocation] = 1.0;
         cylindricalVertexDistance[invocation] = 1.0;
         vertexColor[invocation] = vec4(1.0);

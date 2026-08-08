@@ -187,8 +187,15 @@ object GltfDebugCommands {
                     is GltfLoadSuccess -> {
                         val player = source.player
                         val newHandle = GltfApiImpl.upload(result.asset)
+                        val yaw = Math.toRadians(player.getYRot().toDouble())
+                        val forwardX = (-Math.sin(yaw)).toFloat()
+                        val forwardZ = Math.cos(yaw).toFloat()
                         val newInstance = GltfApiImpl.createInstance(newHandle)
-                            .setPosition(player.x.toFloat(), player.y.toFloat() + 1.0f, player.z.toFloat())
+                            .setPosition(
+                                player.x.toFloat() + forwardX * SPAWN_DISTANCE,
+                                player.y.toFloat() + 1.0f,
+                                player.z.toFloat() + forwardZ * SPAWN_DISTANCE
+                            )
                         if (result.asset.animations.isNotEmpty()) {
                             newInstance.animator.play(newInstance.animator.segment(0))
                         }
@@ -465,4 +472,6 @@ object GltfDebugCommands {
         source.sendFeedback(Component.literal("Mesh group limit set to $groups"))
         return 0
     }
+
+    private const val SPAWN_DISTANCE = 5.0f
 }
