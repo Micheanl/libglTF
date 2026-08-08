@@ -17,6 +17,7 @@ import com.mojang.brigadier.arguments.StringArgumentType
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.components.debug.DebugScreenEntries
 import net.minecraft.client.gui.components.debug.DebugScreenEntryStatus
@@ -33,7 +34,9 @@ object GltfDebugCommands {
 
     fun initialize() {
         val entryId = DebugScreenEntries.register(LibGltf.id("debug"), GltfDebugEntry())
-        Minecraft.getInstance().debugEntries.setStatus(entryId, DebugScreenEntryStatus.IN_OVERLAY)
+        ClientLifecycleEvents.CLIENT_STARTED.register {
+            Minecraft.getInstance().debugEntries.setStatus(entryId, DebugScreenEntryStatus.IN_OVERLAY)
+        }
         ClientCommandRegistrationCallback.EVENT.register { dispatcher, _ ->
             dispatcher.register(
                 ClientCommands.literal("libgltf_debug")
