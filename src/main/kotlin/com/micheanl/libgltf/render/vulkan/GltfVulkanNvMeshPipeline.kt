@@ -49,8 +49,8 @@ class GltfVulkanNvMeshPipelineCache(
                 maxTaskGroups,
                 maxPushDescriptors
             )
-            supported = mesh.maxMeshOutputVertices() >= 64 &&
-                mesh.maxMeshOutputPrimitives() >= 124 &&
+            supported = mesh.maxMeshOutputVertices() >= 128 &&
+                mesh.maxMeshOutputPrimitives() >= 248 &&
                 mesh.maxMeshWorkGroupInvocations() >= NV_WORKGROUP_SIZE &&
                 meshWorkgroupSize >= NV_WORKGROUP_SIZE &&
                 maxTaskGroups > 0

@@ -57,8 +57,8 @@ class GltfVulkanMeshPipelineCache(
             } else {
                 mesh.maxMeshWorkGroupInvocations()
             }
-            supported = mesh.maxMeshOutputVertices() >= 64 &&
-                mesh.maxMeshOutputPrimitives() >= 124 &&
+            supported = mesh.maxMeshOutputVertices() >= 128 &&
+                mesh.maxMeshOutputPrimitives() >= 248 &&
                 mesh.maxMeshWorkGroupInvocations() >= 64 &&
                 mesh.maxMeshWorkGroupSize(0) >= 64 &&
                 mesh.maxMeshWorkGroupCount(0) >= 32 &&
