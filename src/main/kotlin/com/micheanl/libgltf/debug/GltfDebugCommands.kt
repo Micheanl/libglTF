@@ -142,6 +142,11 @@ object GltfDebugCommands {
                             .then(ClientCommands.literal("on").executes { mesh(it.source, true) })
                             .then(ClientCommands.literal("off").executes { mesh(it.source, false) })
                             .then(ClientCommands.literal("auto").executes { meshAuto(it.source) })
+                            .then(
+                                ClientCommands.literal("minimal")
+                                    .then(ClientCommands.literal("on").executes { meshMinimal(it.source, true) })
+                                    .then(ClientCommands.literal("off").executes { meshMinimal(it.source, false) })
+                            )
                     )
             )
         }
@@ -213,6 +218,7 @@ object GltfDebugCommands {
             null -> "auto"
         }
         lines += "libgltf mesh=${if (GltfGpuFeatureRenderer.activeMesh) "on" else "off"}($meshMode) " +
+            "minimal=${if (GltfGpuDrivenSettings.debugMeshMinimal) "on" else "off"} " +
             "oit=${if (oit) "on" else "off"}"
         lines += "libgltf gpu=${GltfSceneRenderer.lastGpuSubmits} " +
             "cpu=${GltfSceneRenderer.lastCpuSubmits} " +
@@ -416,6 +422,15 @@ object GltfDebugCommands {
     private fun meshAuto(source: FabricClientCommandSource): Int {
         Minecraft.getInstance().execute { GltfGpuFeatureRenderer.resetMeshShader() }
         source.sendFeedback(Component.literal("Mesh shader set to auto"))
+        return 0
+    }
+
+    private fun meshMinimal(source: FabricClientCommandSource, value: Boolean): Int {
+        Minecraft.getInstance().execute {
+            GltfGpuDrivenSettings.debugMeshMinimal = value
+            GltfGpuFeatureRenderer.resetMeshShader()
+        }
+        source.sendFeedback(Component.literal("Mesh minimal debug set to $value"))
         return 0
     }
 }

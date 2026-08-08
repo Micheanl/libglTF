@@ -36,8 +36,13 @@ class GltfVulkanGpuDriven private constructor(
                 GltfGpuDrivenSettings.meshShaderEnabled() &&
                 backend.vkDevice().capabilities.VK_EXT_mesh_shader
             ) {
-                GltfVulkanMeshPipelineCache(backend).also {
-                    LOGGER.info("libgltf Vulkan mesh shader enabled vendor={} supported={}", profile.vendor, it.supported)
+                GltfVulkanMeshPipelineCache(backend, GltfGpuDrivenSettings.debugMeshMinimal).also {
+                    LOGGER.info(
+                        "libgltf Vulkan mesh shader enabled vendor={} supported={} debugMinimal={}",
+                        profile.vendor,
+                        it.supported,
+                        GltfGpuDrivenSettings.debugMeshMinimal
+                    )
                 }.takeIf { it.supported }
             } else {
                 LOGGER.info(

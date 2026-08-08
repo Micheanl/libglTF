@@ -11,6 +11,9 @@ object GltfGpuDrivenSettings {
     @Volatile
     var meshShaderOverride: Boolean? = null
 
+    @Volatile
+    var debugMeshMinimal: Boolean = booleanProperty("libgltf.vulkan.meshShader.debugMinimal", false)
+
     fun meshShaderEnabled(): Boolean = meshShaderOverride ?: meshShader
 
     fun profitable(instanceCount: Int, meshletCount: Int): Boolean = force ||

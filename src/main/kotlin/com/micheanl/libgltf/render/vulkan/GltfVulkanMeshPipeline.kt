@@ -19,7 +19,10 @@ import org.lwjgl.vulkan.*
 import java.util.Collections
 import java.util.IdentityHashMap
 
-class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoCloseable {
+class GltfVulkanMeshPipelineCache(
+    private val device: VulkanDevice,
+    private val debugMinimal: Boolean
+) : AutoCloseable {
     private val pipelines = Collections.synchronizedMap(IdentityHashMap<RenderPipeline, GltfVulkanMeshPipeline>())
     private val failed = Collections.newSetFromMap(IdentityHashMap<RenderPipeline, Boolean>())
     private val maxTaskGroups: Int
@@ -91,7 +94,14 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
     ): Boolean {
         if (!supported || failed.contains(renderPipeline)) return false
         val pipeline = pipelines[renderPipeline] ?: try {
-            GltfVulkanMeshPipeline.create(device, original, renderPipeline, maxPushDescriptors, meshWorkgroupSize)
+            GltfVulkanMeshPipeline.create(
+                device,
+                original,
+                renderPipeline,
+                maxPushDescriptors,
+                meshWorkgroupSize,
+                debugMinimal
+            )
                 .also { pipelines[renderPipeline] = it }
         } catch (error: RuntimeException) {
             LOGGER.error("libgltf Vulkan mesh pipeline creation failed for {}", renderPipeline.getLocation(), error)
@@ -115,7 +125,14 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
 
     private fun pipeline(renderPipeline: RenderPipeline, original: VulkanRenderPipeline): GltfVulkanMeshPipeline? =
         pipelines[renderPipeline] ?: try {
-            GltfVulkanMeshPipeline.create(device, original, renderPipeline, maxPushDescriptors, meshWorkgroupSize).also { pipelines[renderPipeline] = it }
+            GltfVulkanMeshPipeline.create(
+                device,
+                original,
+                renderPipeline,
+                maxPushDescriptors,
+                meshWorkgroupSize,
+                debugMinimal
+            ).also { pipelines[renderPipeline] = it }
         } catch (error: RuntimeException) {
             LOGGER.error("libgltf Vulkan mesh pipeline creation failed for {}", renderPipeline.getLocation(), error)
             failed.add(renderPipeline)
@@ -240,7 +257,8 @@ private class GltfVulkanMeshPipeline(
             original: VulkanRenderPipeline,
             renderPipeline: RenderPipeline,
             maxPushDescriptors: Int,
-            meshWorkgroupSize: Int
+            meshWorkgroupSize: Int,
+            debugMinimal: Boolean
         ): GltfVulkanMeshPipeline {
             val uniforms = original.uniforms()
             if (uniforms.size > maxPushDescriptors) {
@@ -277,13 +295,14 @@ private class GltfVulkanMeshPipeline(
             }
             require(bindings.values.none { it < 0 })
             val macros = bindings.mapValues { it.value.toString() }
-            val taskModule = compileModule(device, TASK_SHADER, Shaderc.shaderc_task_shader, macros)
+            val debugMacros = if (debugMinimal) macros + ("MESH_DEBUG_MINIMAL" to "") else macros
+            val taskModule = compileModule(device, TASK_SHADER, Shaderc.shaderc_task_shader, debugMacros)
             try {
                 val meshModule = compileModule(
                     device,
                     MESH_SHADER,
                     Shaderc.shaderc_mesh_shader,
-                    macros + ("MESH_WORKGROUP_SIZE" to meshWorkgroupSize.toString())
+                    debugMacros + ("MESH_WORKGROUP_SIZE" to meshWorkgroupSize.toString())
                 )
                 try {
                     val fragmentModule = compileFragment(device, renderPipeline, bindings)
