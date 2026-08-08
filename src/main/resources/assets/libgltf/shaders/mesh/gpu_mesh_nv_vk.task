@@ -8,6 +8,9 @@ struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint verte
 layout(set = 1, binding = MESHLETS_BINDING, std430) readonly buffer Meshlets { Meshlet meshlets[]; };
 layout(push_constant) uniform Parameters { vec4 primitiveSphere; uint instanceCount; uint meshletCount; uint instanceCulling; uint meshletCulling; uint baseCandidate; } parameters;
 taskNV out TaskPayload { uint words[2]; } payload;
+#ifdef MESH_DEBUG_COUNTERS
+layout(set = 1, binding = COUNTERS_BINDING, std430) buffer DebugCounters { uint counters[]; };
+#endif
 mat4 instanceMatrix(uint instanceIndex) {
     uint o = instanceIndex * 41;
     return mat4(uintBitsToFloat(instanceWords[o]), uintBitsToFloat(instanceWords[o + 1]), uintBitsToFloat(instanceWords[o + 2]), uintBitsToFloat(instanceWords[o + 3]), uintBitsToFloat(instanceWords[o + 4]), uintBitsToFloat(instanceWords[o + 5]), uintBitsToFloat(instanceWords[o + 6]), uintBitsToFloat(instanceWords[o + 7]), uintBitsToFloat(instanceWords[o + 8]), uintBitsToFloat(instanceWords[o + 9]), uintBitsToFloat(instanceWords[o + 10]), uintBitsToFloat(instanceWords[o + 11]), uintBitsToFloat(instanceWords[o + 12]), uintBitsToFloat(instanceWords[o + 13]), uintBitsToFloat(instanceWords[o + 14]), uintBitsToFloat(instanceWords[o + 15]));
@@ -23,10 +26,16 @@ bool visibleSphere(vec4 sphere, mat4 transform) {
     return true;
 }
 void main() {
+#ifdef MESH_DEBUG_COUNTERS
+    atomicAdd(counters[0], 1u);
+#endif
 #ifdef MESH_DEBUG_MINIMAL
     gl_TaskCountNV = 1;
     payload.words[0] = 0;
     payload.words[1] = 0;
+#ifdef MESH_DEBUG_COUNTERS
+    atomicAdd(counters[1], 1u);
+#endif
     return;
 #endif
     uint candidate = parameters.baseCandidate + gl_WorkGroupID.x;
@@ -47,4 +56,7 @@ void main() {
     payload.words[0] = instanceIndex;
     payload.words[1] = meshletIndex;
     gl_TaskCountNV = 1;
+#ifdef MESH_DEBUG_COUNTERS
+    atomicAdd(counters[1], 1u);
+#endif
 }

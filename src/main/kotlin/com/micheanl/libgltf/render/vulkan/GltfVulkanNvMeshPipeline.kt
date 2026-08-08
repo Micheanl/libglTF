@@ -25,6 +25,7 @@ class GltfVulkanNvMeshPipelineCache(
 ) : GltfVulkanMeshCache {
     private val pipelines = Collections.synchronizedMap(IdentityHashMap<RenderPipeline, GltfVulkanNvMeshPipeline>())
     private val failed = Collections.newSetFromMap(IdentityHashMap<RenderPipeline, Boolean>())
+    private val counters = GltfVulkanMeshCounters()
     private val maxTaskGroups: Int
     private val maxPushDescriptors: Int
     private val meshWorkgroupSize: Int
@@ -100,7 +101,8 @@ class GltfVulkanNvMeshPipelineCache(
             instanceCulling,
             meshletCulling,
             maxTaskGroups,
-            GltfGpuDrivenSettings.meshGroupLimit
+            GltfGpuDrivenSettings.meshGroupLimit,
+            counters
         )
         return true
     }
@@ -125,6 +127,7 @@ class GltfVulkanNvMeshPipelineCache(
         pipelines.values.forEach(GltfVulkanNvMeshPipeline::close)
         pipelines.clear()
         failed.clear()
+        counters.close()
     }
 
     companion object {
@@ -161,7 +164,8 @@ private class GltfVulkanNvMeshPipeline(
         instanceCulling: Boolean,
         meshletCulling: Boolean,
         maxTaskGroups: Int,
-        meshGroupLimit: Int
+        meshGroupLimit: Int,
+        counters: GltfVulkanMeshCounters
     ) {
         VK10.vkCmdBindPipeline(
             commandBuffer,
@@ -169,7 +173,14 @@ private class GltfVulkanNvMeshPipeline(
             if (hasDepth || withoutDepthPipeline == 0L) withDepthPipeline else withoutDepthPipeline
         )
         MemoryStack.stackPush().use { stack ->
-            val buffers = arrayOf(geometry, instances, meshlets.metadataBuffer, meshlets.vertexBuffer, meshlets.triangleBuffer)
+            val buffers = arrayOf(
+                geometry,
+                instances,
+                meshlets.metadataBuffer,
+                meshlets.vertexBuffer,
+                meshlets.triangleBuffer,
+                counters.buffer()
+            )
             val infos = VkDescriptorBufferInfo.calloc(buffers.size, stack)
             val writes = VkWriteDescriptorSet.calloc(buffers.size, stack)
             for (index in buffers.indices) {
@@ -218,6 +229,7 @@ private class GltfVulkanNvMeshPipeline(
                 NVMeshShader.vkCmdDrawMeshTasksNV(commandBuffer, 0, groups)
                 baseCandidate += groups
             }
+            counters.read()
         }
     }
 
@@ -264,6 +276,7 @@ private class GltfVulkanNvMeshPipeline(
                 put("MESHLETS_BINDING", 2)
                 put("MESHLET_VERTICES_BINDING", 3)
                 put("MESHLET_TRIANGLES_BINDING", 4)
+                put("COUNTERS_BINDING", 5)
                 uniforms.indexOfFirst { it.name() == "DepthBoundsSampler" }
                     .takeIf { it >= 0 }
                     ?.let { put("DEPTH_BOUNDS_BINDING", it) }
@@ -276,7 +289,8 @@ private class GltfVulkanNvMeshPipeline(
             }
             require(bindings.values.none { it < 0 })
             val macros = bindings.mapValues { it.value.toString() }
-            val debugMacros = if (debugMinimal) macros + ("MESH_DEBUG_MINIMAL" to "") else macros
+            val debugMacros = macros + ("MESH_DEBUG_COUNTERS" to "") +
+                (if (debugMinimal) mapOf("MESH_DEBUG_MINIMAL" to "") else emptyMap())
             val taskModule = compileModule(device, TASK_SHADER, Shaderc.shaderc_task_shader, debugMacros)
             try {
                 val meshModule = compileModule(
@@ -562,7 +576,7 @@ private class GltfVulkanNvMeshPipeline(
         private const val TASK_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh_nv_vk.task"
         private const val MESH_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh_nv_vk.mesh"
         private const val FRAGMENT_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh.fsh"
-        private const val STORAGE_BUFFER_COUNT = 5
+        private const val STORAGE_BUFFER_COUNT = 6
         private const val PUSH_CONSTANT_SIZE = 36
         private val LOGGER = LogUtils.getLogger()
     }

@@ -15,6 +15,9 @@ layout(set = 1, binding = MESHLETS_BINDING, std430) readonly buffer Meshlets { M
 layout(set = 1, binding = MESHLET_VERTICES_BINDING, std430) readonly buffer MeshletVertices { uint meshletVertices[]; };
 layout(set = 1, binding = MESHLET_TRIANGLES_BINDING, std430) readonly buffer MeshletTriangles { uint meshletTriangleWords[]; };
 taskNV in TaskPayload { uint words[2]; } payload;
+#ifdef MESH_DEBUG_COUNTERS
+layout(set = 1, binding = COUNTERS_BINDING, std430) buffer DebugCounters { uint counters[]; };
+#endif
 layout(location = 0) out float sphericalVertexDistance[];
 layout(location = 1) out float cylindricalVertexDistance[];
 layout(location = 2) out vec4 vertexColor[];
@@ -37,6 +40,9 @@ vec4 sampleLightmap(ivec2 uv) {
 }
 void main() {
     uint invocation = gl_LocalInvocationIndex;
+#ifdef MESH_DEBUG_COUNTERS
+    if (invocation == 0) atomicAdd(counters[2], 1u);
+#endif
 #ifdef MESH_DEBUG_MINIMAL
     if (invocation == 0) gl_PrimitiveCountNV = 1;
     if (invocation < 3) {
@@ -55,6 +61,9 @@ void main() {
         gl_PrimitiveIndicesNV[1] = 1;
         gl_PrimitiveIndicesNV[2] = 2;
     }
+#ifdef MESH_DEBUG_COUNTERS
+    if (invocation == 0) atomicAdd(counters[3], 1u);
+#endif
 #else
     uint instanceIndex = min(payload.words[0], max(parameters.instanceCount, 1) - 1);
     uint meshletIndex = min(payload.words[1], max(parameters.meshletCount, 1) - 1);
@@ -92,5 +101,8 @@ void main() {
         gl_PrimitiveIndicesNV[baseIndex + 1] = triangleByte(offset + 1);
         gl_PrimitiveIndicesNV[baseIndex + 2] = triangleByte(offset + 2);
     }
+#ifdef MESH_DEBUG_COUNTERS
+    if (invocation == 0) atomicAdd(counters[3], meshlet.triangleCount);
+#endif
 #endif
 }
