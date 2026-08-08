@@ -9,6 +9,7 @@ import com.micheanl.libgltf.asset.GltfLoadFailure
 import com.micheanl.libgltf.asset.GltfLoadSuccess
 import com.micheanl.libgltf.LibGltf
 import com.micheanl.libgltf.render.GltfRenderRegistry
+import com.micheanl.libgltf.render.GltfSceneRenderer
 import com.micheanl.libgltf.render.feature.GltfGpuFeatureRenderer
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
 import com.mojang.brigadier.arguments.FloatArgumentType
@@ -157,6 +158,10 @@ object GltfDebugCommands {
         lines += "libgltf backend=${capabilities.backend} vendor=${profile.vendor} path=${capabilities.path}"
         lines += "libgltf mesh=${if (GltfGpuFeatureRenderer.activeMesh) "on" else "off"} " +
             "oit=${if (oit) "on" else "off"}"
+        lines += "libgltf gpu=${GltfSceneRenderer.lastGpuSubmits} " +
+            "cpu=${GltfSceneRenderer.lastCpuSubmits} " +
+            "batches=${GltfGpuFeatureRenderer.lastFrameBatches} " +
+            "drawnInstances=${GltfGpuFeatureRenderer.lastFrameInstances}"
         if (loadedName.isEmpty()) {
             lines += "libgltf model=none"
         } else {

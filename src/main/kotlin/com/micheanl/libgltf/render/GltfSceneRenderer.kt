@@ -17,6 +17,17 @@ import org.joml.Vector3f
 import org.joml.Vector3fc
 
 object GltfSceneRenderer {
+    @Volatile
+    var lastGpuSubmits: Int = 0
+
+    @Volatile
+    var lastCpuSubmits: Int = 0
+
+    fun resetFrameCounters() {
+        lastGpuSubmits = 0
+        lastCpuSubmits = 0
+    }
+
     fun submit(
         instance: GltfInstance,
         poseStack: PoseStack,
@@ -55,6 +66,7 @@ object GltfSceneRenderer {
                     if (!gpuResources.failed(meshIndex, primitiveIndex)) {
                         val submit = gpuSubmits[primitiveIndex]
                         submit.configure(resource, textures, light, overlay, poseStack.last().pose())
+                        lastGpuSubmits++
                         if (renderer.transparent()) {
                             submitNodeCollector.submitCustom(SubmitRenderPhases.TRANSLUCENT_MODELS, submit)
                         } else {
@@ -98,6 +110,7 @@ object GltfSceneRenderer {
                 val renderer = renderers[primitiveIndex]
                 renderer.light = light
                 renderer.overlay = overlay
+                lastCpuSubmits++
                 poseStack.pushPose()
                 if (node.skinIndex < 0) poseStack.mulPose(instance.animation.pose.globalMatrices[nodeIndex])
                 val materialIndex = primitive.materialIndex.coerceIn(0, asset.materials.lastIndex)

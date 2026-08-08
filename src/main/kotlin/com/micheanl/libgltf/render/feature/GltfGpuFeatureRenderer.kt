@@ -17,6 +17,7 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
     private var groupCounts = IntArray(INITIAL_GROUP_CAPACITY)
     private var preparedBatchCount = 0
     private var preparedGroupCount = 0
+    private var frameInstances = 0
     private var gpuDriven: GltfGpuDriver? = null
     private var gpuDrivenAttempted = false
 
@@ -33,9 +34,11 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
         }
         preparedBatchCount = 0
         preparedGroupCount = 0
+        frameInstances = 0
     }
 
     override fun prepareGroup(context: FeatureFrameContext, submits: List<GltfGpuSubmit>, strictlyOrdered: Boolean) {
+        frameInstances += submits.size
         ensureGroupCapacity(preparedGroupCount + 1)
         val start = preparedBatchCount
         if (strictlyOrdered) {
@@ -62,6 +65,8 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
     }
 
     override fun finishExecute(context: FeatureFrameContext) {
+        lastFrameBatches = preparedBatchCount
+        lastFrameInstances = frameInstances
         for (index in 0 until preparedBatchCount) batches[index].finishFrame()
         GltfGpuDrivenBenchmark.resolve()
     }
@@ -96,6 +101,14 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
         @JvmField
         @Volatile
         var activeMesh: Boolean = false
+
+        @JvmField
+        @Volatile
+        var lastFrameBatches: Int = 0
+
+        @JvmField
+        @Volatile
+        var lastFrameInstances: Int = 0
         val LOGGER = LogUtils.getLogger()
     }
 }
