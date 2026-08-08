@@ -24,10 +24,20 @@ jobs:
           distribution: "microsoft"
       - name: make gradle wrapper executable
         run: chmod +x ./gradlew
-      - name: build and publish to maven
+      - name: build
+        run: ./gradlew build
+      - name: publish to github packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew build publish
+        run: ./gradlew publishAllPublicationsToGitHubPackagesRepository
+      - name: publish to maven central
+        if: ${{ secrets.OSSRH_USERNAME != '' && secrets.OSSRH_PASSWORD != '' && secrets.GPG_PRIVATE_KEY != '' && secrets.GPG_PASSPHRASE != '' }}
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GPG_PRIVATE_KEY }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.GPG_PASSPHRASE }}
+        run: ./gradlew publishAllPublicationsToSonatypeCentralRepository
       - name: create github release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2

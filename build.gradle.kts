@@ -8,6 +8,7 @@ plugins {
     id("net.fabricmc.fabric-loom")
     id("org.jetbrains.kotlin.jvm")
     `maven-publish`
+    signing
 }
 
 val minecraftVersion = providers.gradleProperty("minecraft_version").get()
@@ -19,6 +20,17 @@ val serializationVersion = providers.gradleProperty("serialization_version").get
 val modVersion = providers.gradleProperty("mod_version").get()
 val mavenGroup = providers.gradleProperty("maven_group").get()
 val archivesBaseName = providers.gradleProperty("archives_base_name").get()
+
+val ossrhUsername = providers.gradleProperty("ossrhUsername")
+    .orElse(providers.environmentVariable("OSSRH_USERNAME"))
+val ossrhPassword = providers.gradleProperty("ossrhPassword")
+    .orElse(providers.environmentVariable("OSSRH_PASSWORD"))
+val signingKey = providers.gradleProperty("signingKey")
+    .orElse(providers.environmentVariable("ORG_GRADLE_PROJECT_signingKey"))
+    .orElse(providers.environmentVariable("GPG_PRIVATE_KEY"))
+val signingPassword = providers.gradleProperty("signingPassword")
+    .orElse(providers.environmentVariable("ORG_GRADLE_PROJECT_signingPassword"))
+    .orElse(providers.environmentVariable("GPG_PASSPHRASE"))
 
 version = modVersion
 group = mavenGroup
@@ -138,6 +150,23 @@ afterEvaluate {
                     username = (project.findProperty("gpr.user") as String?) ?: System.getenv("GITHUB_ACTOR").orEmpty()
                     password = (project.findProperty("gpr.key") as String?) ?: System.getenv("GITHUB_TOKEN").orEmpty()
                 }
+            }
+            maven {
+                name = "SonatypeCentral"
+                val centralUrl = providers.gradleProperty("centralDeployUrl")
+                    .orElse(providers.environmentVariable("CENTRAL_DEPLOY_URL"))
+                    .getOrElse("https://central.sonatype.com/repository/maven-releases/")
+                url = uri(centralUrl)
+                credentials {
+                    username = ossrhUsername.getOrNull()
+                    password = ossrhPassword.getOrNull()
+                }
+            }
+        }
+        if (signingKey.isPresent && signingPassword.isPresent) {
+            signing {
+                useInMemoryPgpKeys(signingKey.get(), signingPassword.get())
+                sign(publishing.publications["mavenJava"])
             }
         }
     }
