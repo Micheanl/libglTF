@@ -1,5 +1,19 @@
 package com.micheanl.libgltf.render
 
+import com.micheanl.libgltf.api.GltfHandle
+import com.micheanl.libgltf.model.GltfAsset
+import com.micheanl.libgltf.render.feature.GpuFeature
+import com.micheanl.libgltf.render.gpu.GpuBackend
+import com.mojang.blaze3d.systems.RenderSystem
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionEvents
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents
+import net.minecraft.client.Minecraft
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
+
+
 /**
  * libgltf · GltfRenderSystem
  *
@@ -13,20 +27,6 @@ package com.micheanl.libgltf.render
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.api.GltfHandle
-import com.micheanl.libgltf.model.GltfAsset
-import com.micheanl.libgltf.render.feature.GpuFeature
-import com.micheanl.libgltf.render.gpu.GpuBackend
-import com.mojang.blaze3d.systems.RenderSystem
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionEvents
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents
-import net.minecraft.client.Minecraft
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicLong
 
 object GltfRenderSystem {
     private val initialized = AtomicBoolean()

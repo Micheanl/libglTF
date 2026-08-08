@@ -17,7 +17,6 @@ package com.micheanl.libgltf.material
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 data class SpecularMaterial(
     val factor: Float,
     val texture: TextureBinding?,

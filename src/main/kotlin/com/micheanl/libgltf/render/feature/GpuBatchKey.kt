@@ -1,5 +1,8 @@
 package com.micheanl.libgltf.render.feature
 
+import net.minecraft.client.renderer.rendertype.RenderType
+
+
 /**
  * libgltf · GpuBatchKey
  *
@@ -20,9 +23,6 @@ package com.micheanl.libgltf.render.feature
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import net.minecraft.client.renderer.rendertype.RenderType
 
 data class GpuBatchKey(
     val resourceId: Long,

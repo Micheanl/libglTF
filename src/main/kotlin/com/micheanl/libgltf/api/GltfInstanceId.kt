@@ -14,5 +14,4 @@ package com.micheanl.libgltf.api
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 data class GltfInstanceId(val value: Long)

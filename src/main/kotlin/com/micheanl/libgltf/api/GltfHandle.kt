@@ -1,5 +1,10 @@
 package com.micheanl.libgltf.api
 
+import com.micheanl.libgltf.model.GltfAsset
+import com.micheanl.libgltf.render.GltfRenderSystem
+import java.util.concurrent.atomic.AtomicBoolean
+
+
 /**
  * libgltf · GltfHandle
  *
@@ -13,11 +18,6 @@ package com.micheanl.libgltf.api
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.model.GltfAsset
-import com.micheanl.libgltf.render.GltfRenderSystem
-import java.util.concurrent.atomic.AtomicBoolean
 
 class GltfHandle internal constructor(
     val asset: GltfAsset,

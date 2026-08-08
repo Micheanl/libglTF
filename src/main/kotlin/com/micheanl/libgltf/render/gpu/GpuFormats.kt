@@ -1,5 +1,9 @@
 package com.micheanl.libgltf.render.gpu
 
+import com.mojang.renderpearl.api.GpuFormat
+import com.mojang.renderpearl.api.vertex.VertexFormat
+
+
 /**
  * libgltf · GpuFormats
  *
@@ -9,10 +13,6 @@ package com.micheanl.libgltf.render.gpu
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.mojang.renderpearl.api.GpuFormat
-import com.mojang.renderpearl.api.vertex.VertexFormat
 
 object GpuFormats {
     val GEOMETRY: VertexFormat = VertexFormat.builder(0)

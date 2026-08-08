@@ -20,7 +20,6 @@ package com.micheanl.libgltf.model
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 data class GltfLight(
     val name: String,
     val type: LightType,

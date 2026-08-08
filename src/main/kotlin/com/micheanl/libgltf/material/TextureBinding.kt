@@ -1,5 +1,9 @@
 package com.micheanl.libgltf.material
 
+import kotlin.math.cos
+import kotlin.math.sin
+
+
 /**
  * libgltf · TextureBinding
  *
@@ -19,10 +23,6 @@ package com.micheanl.libgltf.material
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import kotlin.math.cos
-import kotlin.math.sin
 
 data class TextureBinding(
     val textureIndex: Int,

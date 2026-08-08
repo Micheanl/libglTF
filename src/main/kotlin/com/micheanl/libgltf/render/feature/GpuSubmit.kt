@@ -1,20 +1,5 @@
 package com.micheanl.libgltf.render.feature
 
-/**
- * libgltf · GpuSubmit
- *
- * <pre><code>
- * Array(instanceCount) { GpuSubmit(this, nodeIndex, meshIndex, primitiveIndex) }
- * </code></pre>
- *
- * 一次 GPU 提交：实例、材质与变换
- *
- * @author Chen Micheanl
- * @license MIT
- * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
- */
-
-
 import com.micheanl.libgltf.api.GltfInstance
 import com.micheanl.libgltf.render.GltfRenderAsset
 import com.micheanl.libgltf.render.GltfRenderTypes
@@ -28,6 +13,21 @@ import org.joml.Matrix4f
 import org.joml.Matrix4fc
 import kotlin.math.cos
 import kotlin.math.sin
+
+
+/**
+ * libgltf · GpuSubmit
+ *
+ * <pre><code>
+ * Array(instanceCount) { GpuSubmit(this, nodeIndex, meshIndex, primitiveIndex) }
+ * </code></pre>
+ *
+ * 一次 GPU 提交：实例、材质与变换
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
 
 class GpuSubmit(
     val instance: GltfInstance,

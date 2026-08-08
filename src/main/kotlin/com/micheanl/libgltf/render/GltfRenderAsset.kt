@@ -1,5 +1,11 @@
 package com.micheanl.libgltf.render
 
+import com.micheanl.libgltf.model.GltfAsset
+import com.micheanl.libgltf.render.gpu.GpuResources
+import com.micheanl.libgltf.render.texture.GltfTextureFactory
+import com.micheanl.libgltf.render.texture.GltfTextureSet
+
+
 /**
  * libgltf · GltfRenderAsset
  *
@@ -13,12 +19,6 @@ package com.micheanl.libgltf.render
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.model.GltfAsset
-import com.micheanl.libgltf.render.gpu.GpuResources
-import com.micheanl.libgltf.render.texture.GltfTextureFactory
-import com.micheanl.libgltf.render.texture.GltfTextureSet
 
 class GltfRenderAsset(
     val id: Long,

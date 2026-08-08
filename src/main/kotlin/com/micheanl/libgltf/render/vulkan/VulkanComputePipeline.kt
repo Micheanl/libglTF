@@ -1,5 +1,18 @@
 package com.micheanl.libgltf.render.vulkan
 
+import com.micheanl.libgltf.mixin.VulkanCommandEncoderAccessor
+import com.mojang.renderpearl.api.buffers.GpuBuffer
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice
+import com.mojang.renderpearl.backend.vulkan.VulkanDevice
+import com.mojang.renderpearl.backend.vulkan.VulkanGpuBuffer
+import org.joml.Matrix4f
+import org.lwjgl.system.MemoryStack
+import org.lwjgl.system.MemoryUtil
+import org.lwjgl.util.shaderc.Shaderc
+import org.lwjgl.vulkan.*
+import java.nio.ByteBuffer
+
+
 /**
  * libgltf · VulkanComputePipeline
  *
@@ -13,19 +26,6 @@ package com.micheanl.libgltf.render.vulkan
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.mixin.VulkanCommandEncoderAccessor
-import com.mojang.renderpearl.api.buffers.GpuBuffer
-import com.mojang.renderpearl.api.buffers.GpuBufferSlice
-import com.mojang.renderpearl.backend.vulkan.VulkanDevice
-import com.mojang.renderpearl.backend.vulkan.VulkanGpuBuffer
-import org.joml.Matrix4f
-import org.lwjgl.system.MemoryStack
-import org.lwjgl.system.MemoryUtil
-import org.lwjgl.util.shaderc.Shaderc
-import org.lwjgl.vulkan.*
-import java.nio.ByteBuffer
 
 class VulkanComputePipeline private constructor(
     private val device: VulkanDevice,

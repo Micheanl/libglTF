@@ -1,5 +1,19 @@
 package com.micheanl.libgltf.render.gl
 
+import com.micheanl.libgltf.render.gpu.MeshletStorage
+import com.micheanl.libgltf.render.gpu.GpuBackend
+import com.mojang.logging.LogUtils
+import com.mojang.renderpearl.api.buffers.GpuBuffer
+import com.mojang.renderpearl.api.pipeline.RenderPipeline
+import net.minecraft.client.renderer.rendertype.PreparedRenderType
+import org.lwjgl.opengl.EXTMeshShader
+import org.lwjgl.opengl.GL
+import org.lwjgl.opengl.GL33C
+import org.lwjgl.opengl.NVMeshShader
+import java.util.Collections
+import java.util.IdentityHashMap
+
+
 /**
  * libgltf · GlMeshPipelineCache
  *
@@ -13,20 +27,6 @@ package com.micheanl.libgltf.render.gl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.render.gpu.MeshletStorage
-import com.micheanl.libgltf.render.gpu.GpuBackend
-import com.mojang.logging.LogUtils
-import com.mojang.renderpearl.api.buffers.GpuBuffer
-import com.mojang.renderpearl.api.pipeline.RenderPipeline
-import net.minecraft.client.renderer.rendertype.PreparedRenderType
-import org.lwjgl.opengl.EXTMeshShader
-import org.lwjgl.opengl.GL
-import org.lwjgl.opengl.GL33C
-import org.lwjgl.opengl.NVMeshShader
-import java.util.Collections
-import java.util.IdentityHashMap
 
 class GlMeshPipelineCache : AutoCloseable {
     private val pipelines = Collections.synchronizedMap(IdentityHashMap<RenderPipeline, GlMeshPipeline>())

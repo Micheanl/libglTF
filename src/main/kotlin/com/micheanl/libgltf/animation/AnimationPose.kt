@@ -1,5 +1,10 @@
 package com.micheanl.libgltf.animation
 
+import com.micheanl.libgltf.material.MaterialUvAnimationState
+import com.micheanl.libgltf.material.MaterialFactorAnimationState
+import org.joml.Matrix4f
+
+
 /**
  * libgltf · AnimationPose
  *
@@ -11,11 +16,6 @@ package com.micheanl.libgltf.animation
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.material.MaterialUvAnimationState
-import com.micheanl.libgltf.material.MaterialFactorAnimationState
-import org.joml.Matrix4f
 
 class AnimationPose(nodeCount: Int, morphWeightCount: Int, materialCount: Int) {
     val localMatrices: Array<Matrix4f> = Array(nodeCount) { Matrix4f() }

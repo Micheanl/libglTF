@@ -1,5 +1,20 @@
 package com.micheanl.libgltf.render.gpu
 
+import com.micheanl.libgltf.model.GltfPrimitive
+import com.micheanl.libgltf.model.PrimitiveMode
+import com.micheanl.libgltf.model.VertexLayout
+import com.micheanl.libgltf.render.GpuBackendType
+import com.micheanl.libgltf.render.vulkan.VulkanUsage
+import com.mojang.renderpearl.api.pipeline.IndexType
+import com.mojang.renderpearl.api.buffers.GpuBuffer
+import com.mojang.renderpearl.api.device.GpuDevice
+import org.lwjgl.system.MemoryUtil
+import org.lwjgl.util.meshoptimizer.MeshOptimizer
+import java.nio.ByteBuffer
+import java.nio.FloatBuffer
+import java.nio.IntBuffer
+
+
 /**
  * libgltf · GpuMesh
  *
@@ -18,21 +33,6 @@ package com.micheanl.libgltf.render.gpu
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.model.GltfPrimitive
-import com.micheanl.libgltf.model.PrimitiveMode
-import com.micheanl.libgltf.model.VertexLayout
-import com.micheanl.libgltf.render.GpuBackendType
-import com.micheanl.libgltf.render.vulkan.VulkanUsage
-import com.mojang.renderpearl.api.pipeline.IndexType
-import com.mojang.renderpearl.api.buffers.GpuBuffer
-import com.mojang.renderpearl.api.device.GpuDevice
-import org.lwjgl.system.MemoryUtil
-import org.lwjgl.util.meshoptimizer.MeshOptimizer
-import java.nio.ByteBuffer
-import java.nio.FloatBuffer
-import java.nio.IntBuffer
 
 class GpuMesh private constructor(
     val vertexBuffer: GpuBuffer,

@@ -1,5 +1,11 @@
 package com.micheanl.libgltf.render
 
+import com.micheanl.libgltf.api.GltfInstance
+import com.micheanl.libgltf.api.GltfInstanceId
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicLong
+
+
 /**
  * libgltf · GltfRenderRegistry
  *
@@ -13,12 +19,6 @@ package com.micheanl.libgltf.render
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.api.GltfInstance
-import com.micheanl.libgltf.api.GltfInstanceId
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicLong
 
 object GltfRenderRegistry {
     private val nextId = AtomicLong(1L)

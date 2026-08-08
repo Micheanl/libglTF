@@ -1,5 +1,18 @@
 package com.micheanl.libgltf.api
 
+import com.micheanl.libgltf.animation.AnimationController
+import com.micheanl.libgltf.animation.AnimationPlayer
+import com.micheanl.libgltf.lod.LodPolicy
+import com.micheanl.libgltf.lod.LodSelector
+import com.micheanl.libgltf.material.GltfMaterial
+import com.micheanl.libgltf.material.MaterialOverride
+import com.micheanl.libgltf.render.cpu.GltfGeometryRenderer
+import com.micheanl.libgltf.render.feature.GpuSubmit
+import com.micheanl.libgltf.render.gpu.GpuAnimationState
+import org.joml.Matrix4f
+import org.joml.Matrix4fc
+
+
 /**
  * libgltf · GltfInstance
  *
@@ -13,19 +26,6 @@ package com.micheanl.libgltf.api
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.animation.AnimationController
-import com.micheanl.libgltf.animation.AnimationPlayer
-import com.micheanl.libgltf.lod.LodPolicy
-import com.micheanl.libgltf.lod.LodSelector
-import com.micheanl.libgltf.material.GltfMaterial
-import com.micheanl.libgltf.material.MaterialOverride
-import com.micheanl.libgltf.render.cpu.GltfGeometryRenderer
-import com.micheanl.libgltf.render.feature.GpuSubmit
-import com.micheanl.libgltf.render.gpu.GpuAnimationState
-import org.joml.Matrix4f
-import org.joml.Matrix4fc
 
 class GltfInstance internal constructor(val handle: GltfHandle) {
     val transform: Matrix4f = Matrix4f()

@@ -17,7 +17,6 @@ package com.micheanl.libgltf.material
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 data class SheenMaterial(
     val colorFactor: FloatArray,
     val colorTexture: TextureBinding?,

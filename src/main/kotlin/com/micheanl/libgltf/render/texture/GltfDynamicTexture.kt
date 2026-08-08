@@ -1,20 +1,5 @@
 package com.micheanl.libgltf.render.texture
 
-/**
- * libgltf · GltfDynamicTexture
- *
- * <pre><code>
- * val dynamic = GltfDynamicTexture(identifiers[index].toString(), image, texture.sampler)
- * </code></pre>
- *
- * 动态更新的 GPU 纹理
- *
- * @author Chen Micheanl
- * @license MIT
- * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
- */
-
-
 import com.micheanl.libgltf.material.TextureFilter
 import com.micheanl.libgltf.material.TextureSampler
 import com.micheanl.libgltf.material.TextureWrap
@@ -28,6 +13,21 @@ import com.mojang.logging.LogUtils
 import net.minecraft.client.renderer.texture.AbstractTexture
 import java.util.OptionalDouble
 import kotlin.math.max
+
+
+/**
+ * libgltf · GltfDynamicTexture
+ *
+ * <pre><code>
+ * val dynamic = GltfDynamicTexture(identifiers[index].toString(), image, texture.sampler)
+ * </code></pre>
+ *
+ * 动态更新的 GPU 纹理
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
 
 class GltfDynamicTexture(
     label: String,

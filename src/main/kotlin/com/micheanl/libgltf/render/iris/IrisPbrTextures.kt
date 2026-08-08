@@ -1,5 +1,10 @@
 package com.micheanl.libgltf.render.iris
 
+import net.irisshaders.iris.pbr.texture.PBRTextureHolder
+import net.minecraft.client.renderer.texture.AbstractTexture
+import java.util.concurrent.ConcurrentHashMap
+
+
 /**
  * libgltf · IrisPbrTextures
  *
@@ -11,11 +16,6 @@ package com.micheanl.libgltf.render.iris
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import net.irisshaders.iris.pbr.texture.PBRTextureHolder
-import net.minecraft.client.renderer.texture.AbstractTexture
-import java.util.concurrent.ConcurrentHashMap
 
 object IrisPbrTextures {
     private val holders = ConcurrentHashMap<Int, PBRTextureHolder>()

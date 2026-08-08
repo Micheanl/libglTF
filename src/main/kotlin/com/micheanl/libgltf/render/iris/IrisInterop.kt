@@ -1,5 +1,10 @@
 package com.micheanl.libgltf.render.iris
 
+import com.mojang.renderpearl.backend.opengl.GlTexture
+import net.irisshaders.iris.api.v0.IrisApi
+import net.minecraft.client.renderer.texture.AbstractTexture
+
+
 /**
  * libgltf · IrisInterop
  *
@@ -11,11 +16,6 @@ package com.micheanl.libgltf.render.iris
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.mojang.renderpearl.backend.opengl.GlTexture
-import net.irisshaders.iris.api.v0.IrisApi
-import net.minecraft.client.renderer.texture.AbstractTexture
 
 object IrisInterop {
     fun shaderPackActive(): Boolean = IrisApi.getInstance().isShaderPackInUse

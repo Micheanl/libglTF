@@ -1,5 +1,8 @@
 package com.micheanl.libgltf.render.vulkan
 
+import java.util.Properties
+
+
 /**
  * libgltf · RenderConfig
  *
@@ -13,9 +16,6 @@ package com.micheanl.libgltf.render.vulkan
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import java.util.Properties
 
 object RenderConfig {
     val enabled: Boolean = booleanProperty("libgltf.vulkan.gpuDriven", true)

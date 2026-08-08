@@ -10,7 +10,6 @@ package com.micheanl.libgltf.api
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 enum class GltfRenderMode {
     AUTO,
     GPU_PREFERRED,

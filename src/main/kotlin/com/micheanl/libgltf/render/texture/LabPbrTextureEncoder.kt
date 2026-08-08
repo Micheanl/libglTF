@@ -1,5 +1,16 @@
 package com.micheanl.libgltf.render.texture
 
+import com.micheanl.libgltf.material.GltfMaterial
+import com.micheanl.libgltf.material.TextureBinding
+import com.micheanl.libgltf.model.GltfAsset
+import com.mojang.blaze3d.platform.NativeImage
+import net.minecraft.util.Mth
+import org.lwjgl.system.MemoryUtil
+import kotlin.math.max
+import kotlin.math.roundToInt
+import kotlin.math.sqrt
+
+
 /**
  * libgltf · LabPbrTextureEncoder
  *
@@ -11,17 +22,6 @@ package com.micheanl.libgltf.render.texture
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.material.GltfMaterial
-import com.micheanl.libgltf.material.TextureBinding
-import com.micheanl.libgltf.model.GltfAsset
-import com.mojang.blaze3d.platform.NativeImage
-import net.minecraft.util.Mth
-import org.lwjgl.system.MemoryUtil
-import kotlin.math.max
-import kotlin.math.roundToInt
-import kotlin.math.sqrt
 
 object LabPbrTextureEncoder {
     private const val DIELECTRIC_G_MAX: Int = 229

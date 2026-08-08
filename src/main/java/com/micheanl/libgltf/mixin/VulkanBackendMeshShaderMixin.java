@@ -1,14 +1,5 @@
 package com.micheanl.libgltf.mixin;
 
-/**
- * libgltf · VulkanBackendMeshShaderMixin
- *
- * @author Chen Micheanl
- * @license MIT
- * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
- */
-
-
 import com.micheanl.libgltf.render.vulkan.RenderConfig;
 import com.mojang.renderpearl.api.device.GpuDebugOptions;
 import com.mojang.renderpearl.backend.vulkan.VulkanBackend;
@@ -27,6 +18,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(VulkanBackend.class)
+/**
+ * libgltf · VulkanBackendMeshShaderMixin
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 public abstract class VulkanBackendMeshShaderMixin {
     private static final VulkanPNextStruct LIBGLTF_MESH_FEATURES = new VulkanPNextStruct(
             VkPhysicalDeviceMeshShaderFeaturesEXT.class,

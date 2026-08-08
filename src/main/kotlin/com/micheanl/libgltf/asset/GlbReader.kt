@@ -1,5 +1,9 @@
 package com.micheanl.libgltf.asset
 
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+
+
 /**
  * libgltf · GlbReader
  *
@@ -11,10 +15,6 @@ package com.micheanl.libgltf.asset
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 
 object GlbReader {
     private const val MAGIC: Int = 0x46546C67

@@ -1,5 +1,11 @@
 package com.micheanl.libgltf.render.gl
 
+import com.micheanl.libgltf.render.gpu.GpuBackend
+import com.micheanl.libgltf.render.gpu.GpuDriver
+import com.micheanl.libgltf.render.vulkan.RenderConfig
+import org.lwjgl.opengl.GL
+
+
 /**
  * libgltf · GlGpuDriver
  *
@@ -9,12 +15,6 @@ package com.micheanl.libgltf.render.gl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.render.gpu.GpuBackend
-import com.micheanl.libgltf.render.gpu.GpuDriver
-import com.micheanl.libgltf.render.vulkan.RenderConfig
-import org.lwjgl.opengl.GL
 
 class GlGpuDriver private constructor(
     val meshPipelines: GlMeshPipelineCache?

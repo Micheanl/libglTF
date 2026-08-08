@@ -1,5 +1,11 @@
 package com.micheanl.libgltf.lod
 
+import org.lwjgl.system.MemoryUtil
+import org.lwjgl.util.meshoptimizer.MeshOptimizer
+import java.nio.FloatBuffer
+import java.nio.IntBuffer
+
+
 /**
  * libgltf · MeshLodBuilder
  *
@@ -13,12 +19,6 @@ package com.micheanl.libgltf.lod
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import org.lwjgl.system.MemoryUtil
-import org.lwjgl.util.meshoptimizer.MeshOptimizer
-import java.nio.FloatBuffer
-import java.nio.IntBuffer
 
 object MeshLodBuilder {
     fun build(indices: IntArray, positions: FloatArray, ratios: FloatArray): Array<IntArray> {

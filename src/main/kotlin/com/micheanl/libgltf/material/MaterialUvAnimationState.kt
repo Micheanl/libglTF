@@ -12,7 +12,6 @@ package com.micheanl.libgltf.material
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 class MaterialUvAnimationState(private val materialCount: Int) {
     val animated = BooleanArray(materialCount)
     val offsetX = FloatArray(materialCount)

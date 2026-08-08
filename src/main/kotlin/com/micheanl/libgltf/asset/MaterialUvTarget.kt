@@ -12,7 +12,6 @@ package com.micheanl.libgltf.asset
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 data class MaterialUvTarget(
     val materialIndex: Int,
     val textureSlot: Int,

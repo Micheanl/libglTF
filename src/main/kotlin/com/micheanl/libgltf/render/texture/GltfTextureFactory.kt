@@ -1,5 +1,16 @@
 package com.micheanl.libgltf.render.texture
 
+import com.micheanl.libgltf.LibGltf
+import com.micheanl.libgltf.material.GltfMaterial
+import com.micheanl.libgltf.material.TextureBinding
+import com.micheanl.libgltf.material.TextureSampler
+import com.micheanl.libgltf.model.GltfAsset
+import com.micheanl.libgltf.render.iris.IrisCompat
+import com.mojang.blaze3d.platform.NativeImage
+import net.minecraft.client.Minecraft
+import net.minecraft.resources.Identifier
+
+
 /**
  * libgltf · GltfTextureFactory
  *
@@ -13,17 +24,6 @@ package com.micheanl.libgltf.render.texture
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.LibGltf
-import com.micheanl.libgltf.material.GltfMaterial
-import com.micheanl.libgltf.material.TextureBinding
-import com.micheanl.libgltf.material.TextureSampler
-import com.micheanl.libgltf.model.GltfAsset
-import com.micheanl.libgltf.render.iris.IrisCompat
-import com.mojang.blaze3d.platform.NativeImage
-import net.minecraft.client.Minecraft
-import net.minecraft.resources.Identifier
 
 object GltfTextureFactory {
     fun create(asset: GltfAsset, resourceId: Long): GltfTextureSet {

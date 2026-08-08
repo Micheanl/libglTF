@@ -21,7 +21,6 @@ package com.micheanl.libgltf.model
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 data class GltfStats(
     val nodeCount: Int,
     val meshCount: Int,

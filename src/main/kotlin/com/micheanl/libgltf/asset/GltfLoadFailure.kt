@@ -12,5 +12,4 @@ package com.micheanl.libgltf.asset
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 data class GltfLoadFailure(val message: String, val cause: Throwable? = null) : GltfLoadResult

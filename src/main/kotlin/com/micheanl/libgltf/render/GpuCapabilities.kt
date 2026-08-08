@@ -27,7 +27,6 @@ package com.micheanl.libgltf.render
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 data class GpuCapabilities(
     val backend: GpuBackendType,
     val instancing: Boolean,

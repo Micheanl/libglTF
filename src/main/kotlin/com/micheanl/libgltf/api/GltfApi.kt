@@ -1,16 +1,5 @@
 package com.micheanl.libgltf.api
 
-/**
- * libgltf · GltfApi
- *
- * 对外加载、查询与释放 glTF 资源的入口
- *
- * @author Chen Micheanl
- * @license MIT
- * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
- */
-
-
 import com.micheanl.libgltf.asset.GltfLoadResult
 import com.micheanl.libgltf.lod.LodPolicy
 import com.micheanl.libgltf.model.GltfAsset
@@ -20,6 +9,17 @@ import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector
 import net.minecraft.client.renderer.texture.OverlayTexture
+
+
+/**
+ * libgltf · GltfApi
+ *
+ * 对外加载、查询与释放 glTF 资源的入口
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
 
 interface GltfApi {
     fun load(path: Path, lodPolicy: LodPolicy = LodPolicy.DEFAULT): GltfLoadResult

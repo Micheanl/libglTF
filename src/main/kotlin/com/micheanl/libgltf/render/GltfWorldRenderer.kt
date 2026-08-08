@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render
 
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext
+import net.minecraft.client.Minecraft
+import net.minecraft.client.multiplayer.ClientLevel
+import net.minecraft.core.BlockPos
+import net.minecraft.util.LightCoordsUtil
+import net.minecraft.util.Mth
+import net.minecraft.world.level.chunk.status.ChunkStatus
+import org.joml.Matrix4f
+
+
 /**
  * libgltf · GltfWorldRenderer
  *
@@ -9,16 +19,6 @@ package com.micheanl.libgltf.render
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext
-import net.minecraft.client.Minecraft
-import net.minecraft.client.multiplayer.ClientLevel
-import net.minecraft.core.BlockPos
-import net.minecraft.util.LightCoordsUtil
-import net.minecraft.util.Mth
-import net.minecraft.world.level.chunk.status.ChunkStatus
-import org.joml.Matrix4f
 
 object GltfWorldRenderer {
     private val relativeTransform = Matrix4f()

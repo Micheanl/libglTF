@@ -1,5 +1,8 @@
 package com.micheanl.libgltf.render.texture
 
+import com.micheanl.libgltf.material.TextureFilter
+
+
 /**
  * libgltf · MipmapFilterState
  *
@@ -11,9 +14,6 @@ package com.micheanl.libgltf.render.texture
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.material.TextureFilter
 
 object MipmapFilterState {
     private val active = ThreadLocal.withInitial { TextureFilter.LINEAR }

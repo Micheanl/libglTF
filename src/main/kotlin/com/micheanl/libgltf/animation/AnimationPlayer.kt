@@ -1,5 +1,12 @@
 package com.micheanl.libgltf.animation
 
+import com.micheanl.libgltf.model.GltfAsset
+import com.micheanl.libgltf.material.MaterialFactorAnimationState
+import com.micheanl.libgltf.material.MaterialUvAnimationState
+import org.joml.Quaternionf
+import kotlin.math.abs
+
+
 /**
  * libgltf · AnimationPlayer
  *
@@ -13,13 +20,6 @@ package com.micheanl.libgltf.animation
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.model.GltfAsset
-import com.micheanl.libgltf.material.MaterialFactorAnimationState
-import com.micheanl.libgltf.material.MaterialUvAnimationState
-import org.joml.Quaternionf
-import kotlin.math.abs
 
 class AnimationPlayer(private val asset: GltfAsset) {
     val pose: AnimationPose = AnimationPose(asset.nodes.size, asset.totalMorphWeights, asset.materials.size)

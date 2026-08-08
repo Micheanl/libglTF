@@ -1,5 +1,11 @@
 package com.micheanl.libgltf.mixin;
 
+import com.micheanl.libgltf.render.gpu.VertexAttributeLimitProvider;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL20;
+import org.spongepowered.asm.mixin.Mixin;
+
+@Mixin(targets = "com.mojang.renderpearl.backend.opengl.GlDevice")
 /**
  * libgltf · GlDeviceMixin
  *
@@ -8,13 +14,6 @@ package com.micheanl.libgltf.mixin;
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
-import com.micheanl.libgltf.render.gpu.VertexAttributeLimitProvider;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL20;
-import org.spongepowered.asm.mixin.Mixin;
-
-@Mixin(targets = "com.mojang.renderpearl.backend.opengl.GlDevice")
 public abstract class GlDeviceMixin implements VertexAttributeLimitProvider {
     @Override
     public int getMaxVertexAttributes() {

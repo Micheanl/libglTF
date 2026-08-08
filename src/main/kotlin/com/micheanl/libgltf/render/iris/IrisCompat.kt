@@ -1,5 +1,9 @@
 package com.micheanl.libgltf.render.iris
 
+import net.fabricmc.loader.api.FabricLoader
+import net.minecraft.client.renderer.texture.AbstractTexture
+
+
 /**
  * libgltf · IrisCompat
  *
@@ -13,10 +17,6 @@ package com.micheanl.libgltf.render.iris
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import net.fabricmc.loader.api.FabricLoader
-import net.minecraft.client.renderer.texture.AbstractTexture
 
 object IrisCompat {
     private val loaded: Boolean = FabricLoader.getInstance().isModLoaded("iris")

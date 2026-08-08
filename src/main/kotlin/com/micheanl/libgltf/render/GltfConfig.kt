@@ -1,5 +1,12 @@
 package com.micheanl.libgltf.render
 
+import com.micheanl.libgltf.render.vulkan.RenderConfig
+import net.fabricmc.loader.api.FabricLoader
+import java.nio.file.Files
+import java.nio.file.Path
+import java.util.Properties
+
+
 /**
  * libgltf · GltfConfig
  *
@@ -13,13 +20,6 @@ package com.micheanl.libgltf.render
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.render.vulkan.RenderConfig
-import net.fabricmc.loader.api.FabricLoader
-import java.nio.file.Files
-import java.nio.file.Path
-import java.util.Properties
 
 object GltfConfig {
     fun load() {

@@ -12,7 +12,6 @@ package com.micheanl.libgltf.model
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 data class GltfSkin(
     val name: String,
     val joints: IntArray,

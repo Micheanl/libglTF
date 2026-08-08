@@ -1,5 +1,8 @@
 package com.micheanl.libgltf.animation
 
+import com.micheanl.libgltf.model.GltfAsset
+
+
 /**
  * libgltf · AnimationStateMachineBuilder
  *
@@ -7,9 +10,6 @@ package com.micheanl.libgltf.animation
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.model.GltfAsset
 
 class AnimationStateMachineBuilder(private val asset: GltfAsset) {
     private val parameters = ArrayList<AnimationParameter>()

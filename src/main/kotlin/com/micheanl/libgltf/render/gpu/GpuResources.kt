@@ -1,5 +1,12 @@
 package com.micheanl.libgltf.render.gpu
 
+import com.micheanl.libgltf.model.GltfAsset
+import com.micheanl.libgltf.render.GpuBackendType
+import com.micheanl.libgltf.render.vulkan.RenderConfig
+import com.mojang.blaze3d.systems.RenderSystem
+import com.mojang.logging.LogUtils
+
+
 /**
  * libgltf · GpuResources
  *
@@ -13,13 +20,6 @@ package com.micheanl.libgltf.render.gpu
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.model.GltfAsset
-import com.micheanl.libgltf.render.GpuBackendType
-import com.micheanl.libgltf.render.vulkan.RenderConfig
-import com.mojang.blaze3d.systems.RenderSystem
-import com.mojang.logging.LogUtils
 
 class GpuResources(
     private val resourceId: Long,

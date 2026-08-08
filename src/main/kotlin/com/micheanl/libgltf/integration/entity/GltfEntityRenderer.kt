@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.integration.entity
 
+import com.micheanl.libgltf.render.GltfSceneRenderer
+import com.mojang.blaze3d.vertex.PoseStack
+import net.minecraft.client.renderer.SubmitNodeCollector
+import net.minecraft.client.renderer.entity.EntityRenderer
+import net.minecraft.client.renderer.entity.EntityRendererProvider
+import net.minecraft.client.renderer.state.level.CameraRenderState
+import net.minecraft.client.renderer.texture.OverlayTexture
+import net.minecraft.world.entity.Entity
+
+
 /**
  * libgltf · GltfEntityRenderer
  *
@@ -11,16 +21,6 @@ package com.micheanl.libgltf.integration.entity
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.render.GltfSceneRenderer
-import com.mojang.blaze3d.vertex.PoseStack
-import net.minecraft.client.renderer.SubmitNodeCollector
-import net.minecraft.client.renderer.entity.EntityRenderer
-import net.minecraft.client.renderer.entity.EntityRendererProvider
-import net.minecraft.client.renderer.state.level.CameraRenderState
-import net.minecraft.client.renderer.texture.OverlayTexture
-import net.minecraft.world.entity.Entity
 
 class GltfEntityRenderer<T : Entity>(
     context: EntityRendererProvider.Context,

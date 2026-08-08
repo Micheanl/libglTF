@@ -25,7 +25,6 @@ package com.micheanl.libgltf.model
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 data class GltfNode(
     val name: String,
     val parentIndex: Int,

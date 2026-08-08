@@ -19,7 +19,6 @@ package com.micheanl.libgltf.material
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 data class IridescenceMaterial(
     val factor: Float,
     val texture: TextureBinding?,

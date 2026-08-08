@@ -1,20 +1,5 @@
 package com.micheanl.libgltf.render
 
-/**
- * libgltf · GltfSceneRenderer
- *
- * <pre><code>
- * GltfSceneRenderer.submit(instance, poseStack, submitNodeCollector, light, overlay, distanceSquared)
- * </code></pre>
- *
- * 场景实例收集与提交入口
- *
- * @author Chen Micheanl
- * @license MIT
- * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
- */
-
-
 import com.micheanl.libgltf.api.GltfInstance
 import com.micheanl.libgltf.api.GltfRenderMode
 import com.micheanl.libgltf.material.TextureWrap
@@ -37,6 +22,21 @@ import org.joml.Matrix4f
 import org.joml.Matrix4fc
 import org.joml.Vector3f
 import org.joml.Vector3fc
+
+
+/**
+ * libgltf · GltfSceneRenderer
+ *
+ * <pre><code>
+ * GltfSceneRenderer.submit(instance, poseStack, submitNodeCollector, light, overlay, distanceSquared)
+ * </code></pre>
+ *
+ * 场景实例收集与提交入口
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
 
 object GltfSceneRenderer {
     private val cullMatrix = Matrix4f()

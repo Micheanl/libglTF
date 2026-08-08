@@ -16,7 +16,6 @@ package com.micheanl.libgltf.animation
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 data class AnimationClip(
     val name: String,
     val durationSeconds: Float,

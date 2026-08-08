@@ -20,7 +20,6 @@ package com.micheanl.libgltf.animation
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 data class AnimationTransition(
     val fromState: Int,
     val toState: Int,

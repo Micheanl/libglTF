@@ -12,7 +12,6 @@ package com.micheanl.libgltf.animation
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 data class AnimationParameter(
     val name: String,
     val index: Int,

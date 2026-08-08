@@ -1,5 +1,9 @@
 package com.micheanl.libgltf.integration.entity
 
+import com.micheanl.libgltf.api.GltfInstance
+import net.minecraft.world.entity.Entity
+
+
 /**
  * libgltf · GltfEntityRenderProvider
  *
@@ -7,10 +11,6 @@ package com.micheanl.libgltf.integration.entity
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.api.GltfInstance
-import net.minecraft.world.entity.Entity
 
 interface GltfEntityRenderProvider<T : Entity> {
     fun instance(entity: T): GltfInstance?

@@ -18,7 +18,6 @@ package com.micheanl.libgltf.material
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 data class TextureSampler(
     val magnification: TextureFilter,
     val minification: TextureFilter,

@@ -1,5 +1,8 @@
 package com.micheanl.libgltf.render
 
+import com.micheanl.libgltf.api.GltfInstance
+
+
 /**
  * libgltf · GltfFrameState
  *
@@ -13,9 +16,6 @@ package com.micheanl.libgltf.render
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.api.GltfInstance
 
 object GltfFrameState {
     @Volatile

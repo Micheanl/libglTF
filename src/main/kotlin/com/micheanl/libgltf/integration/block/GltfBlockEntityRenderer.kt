@@ -1,5 +1,16 @@
 package com.micheanl.libgltf.integration.block
 
+import com.micheanl.libgltf.render.GltfSceneRenderer
+import com.mojang.blaze3d.vertex.PoseStack
+import net.minecraft.client.renderer.SubmitNodeCollector
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer
+import net.minecraft.client.renderer.state.level.CameraRenderState
+import net.minecraft.client.renderer.texture.OverlayTexture
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.phys.Vec3
+
+
 /**
  * libgltf · GltfBlockEntityRenderer
  *
@@ -11,17 +22,6 @@ package com.micheanl.libgltf.integration.block
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.render.GltfSceneRenderer
-import com.mojang.blaze3d.vertex.PoseStack
-import net.minecraft.client.renderer.SubmitNodeCollector
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer
-import net.minecraft.client.renderer.state.level.CameraRenderState
-import net.minecraft.client.renderer.texture.OverlayTexture
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.phys.Vec3
 
 class GltfBlockEntityRenderer<T : BlockEntity>(
     private val provider: GltfBlockEntityRenderProvider<T>

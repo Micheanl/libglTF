@@ -1,5 +1,11 @@
 package com.micheanl.libgltf.render.texture
 
+import com.mojang.blaze3d.platform.NativeImage
+import org.lwjgl.stb.STBImage
+import org.lwjgl.system.MemoryStack
+import org.lwjgl.system.MemoryUtil
+
+
 /**
  * libgltf · NativeImageDecoder
  *
@@ -11,12 +17,6 @@ package com.micheanl.libgltf.render.texture
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.mojang.blaze3d.platform.NativeImage
-import org.lwjgl.stb.STBImage
-import org.lwjgl.system.MemoryStack
-import org.lwjgl.system.MemoryUtil
 
 object NativeImageDecoder {
     fun decode(bytes: ByteArray): NativeImage? {

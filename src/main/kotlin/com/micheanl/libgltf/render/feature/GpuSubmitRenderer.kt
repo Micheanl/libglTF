@@ -1,16 +1,5 @@
 package com.micheanl.libgltf.render.feature
 
-/**
- * libgltf · GpuSubmitRenderer
- *
- * GPU 提交的 FeatureRenderer 接入
- *
- * @author Chen Micheanl
- * @license MIT
- * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
- */
-
-
 import com.micheanl.libgltf.render.vulkan.RenderConfig
 import com.micheanl.libgltf.render.vulkan.VulkanGpuDriver
 import com.micheanl.libgltf.render.gpu.OcclusionDepth
@@ -22,6 +11,17 @@ import com.mojang.logging.LogUtils
 import net.minecraft.client.renderer.feature.FeatureFrameContext
 import net.minecraft.client.renderer.feature.FeatureRenderer
 import net.minecraft.client.renderer.oit.OitStage
+
+
+/**
+ * libgltf · GpuSubmitRenderer
+ *
+ * GPU 提交的 FeatureRenderer 接入
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
 
 class GpuSubmitRenderer : FeatureRenderer<GpuSubmit> {
     private val batches = ArrayList<GpuBatch>()

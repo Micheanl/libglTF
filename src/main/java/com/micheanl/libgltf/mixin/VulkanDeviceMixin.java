@@ -1,14 +1,5 @@
 package com.micheanl.libgltf.mixin;
 
-/**
- * libgltf · VulkanDeviceMixin
- *
- * @author Chen Micheanl
- * @license MIT
- * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
- */
-
-
 import com.micheanl.libgltf.render.gpu.VertexAttributeLimitProvider;
 import com.mojang.renderpearl.api.vertex.VertexFormat;
 import com.mojang.renderpearl.backend.vulkan.VulkanDevice;
@@ -24,6 +15,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(VulkanDevice.class)
+/**
+ * libgltf · VulkanDeviceMixin
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 public abstract class VulkanDeviceMixin implements VertexAttributeLimitProvider {
     @Unique
     private int libgltf$maxVertexAttributes = VertexFormat.MAX_VERTEX_ELEMENTS;

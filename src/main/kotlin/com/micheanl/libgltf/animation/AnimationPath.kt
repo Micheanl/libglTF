@@ -8,7 +8,6 @@ package com.micheanl.libgltf.animation
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 enum class AnimationPath {
     TRANSLATION,
     ROTATION,

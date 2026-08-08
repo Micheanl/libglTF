@@ -1,5 +1,17 @@
 package com.micheanl.libgltf.render.gpu
 
+import com.micheanl.libgltf.mixin.FrontendGpuDeviceAccessor
+import com.micheanl.libgltf.render.GpuBackendType
+import com.micheanl.libgltf.render.GpuCapabilities
+import com.micheanl.libgltf.render.GpuPath
+import com.micheanl.libgltf.render.vulkan.RenderConfig
+import com.mojang.blaze3d.systems.RenderSystem
+import com.mojang.renderpearl.api.vertex.VertexFormat
+import com.mojang.renderpearl.api.device.DeviceInfo
+import com.mojang.renderpearl.backend.vulkan.VulkanDevice
+import org.lwjgl.opengl.GL
+
+
 /**
  * libgltf · GpuBackend
  *
@@ -13,18 +25,6 @@ package com.micheanl.libgltf.render.gpu
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.mixin.FrontendGpuDeviceAccessor
-import com.micheanl.libgltf.render.GpuBackendType
-import com.micheanl.libgltf.render.GpuCapabilities
-import com.micheanl.libgltf.render.GpuPath
-import com.micheanl.libgltf.render.vulkan.RenderConfig
-import com.mojang.blaze3d.systems.RenderSystem
-import com.mojang.renderpearl.api.vertex.VertexFormat
-import com.mojang.renderpearl.api.device.DeviceInfo
-import com.mojang.renderpearl.backend.vulkan.VulkanDevice
-import org.lwjgl.opengl.GL
 
 object GpuBackend {
     @Volatile

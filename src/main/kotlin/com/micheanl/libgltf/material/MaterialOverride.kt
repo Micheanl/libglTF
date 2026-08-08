@@ -1,5 +1,8 @@
 package com.micheanl.libgltf.material
 
+import net.minecraft.resources.Identifier
+
+
 /**
  * libgltf · MaterialOverride
  *
@@ -7,9 +10,6 @@ package com.micheanl.libgltf.material
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import net.minecraft.resources.Identifier
 
 data class MaterialOverride(
     val baseColorFactor: FloatArray? = null,

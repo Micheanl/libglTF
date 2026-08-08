@@ -1,5 +1,9 @@
 package com.micheanl.libgltf.render.texture
 
+import com.micheanl.libgltf.render.iris.IrisCompat
+import net.minecraft.resources.Identifier
+
+
 /**
  * libgltf · GltfMaterialTexture
  *
@@ -11,10 +15,6 @@ package com.micheanl.libgltf.render.texture
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.render.iris.IrisCompat
-import net.minecraft.resources.Identifier
 
 class GltfMaterialTexture(
     val identifier: Identifier,

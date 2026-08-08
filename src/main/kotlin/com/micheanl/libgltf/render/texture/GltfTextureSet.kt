@@ -1,5 +1,9 @@
 package com.micheanl.libgltf.render.texture
 
+import net.minecraft.client.Minecraft
+import net.minecraft.resources.Identifier
+
+
 /**
  * libgltf · GltfTextureSet
  *
@@ -19,10 +23,6 @@ package com.micheanl.libgltf.render.texture
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import net.minecraft.client.Minecraft
-import net.minecraft.resources.Identifier
 
 class GltfTextureSet(
     val identifiers: Array<Identifier>,

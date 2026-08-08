@@ -1,20 +1,5 @@
 package com.micheanl.libgltf.asset
 
-/**
- * libgltf · GltfLoader
- *
- * <pre><code>
- * override fun load(path: Path, lodPolicy: LodPolicy): GltfLoadResult = GltfLoader.load(path, lodPolicy)
- * </code></pre>
- *
- * glTF 解析入口
- *
- * @author Chen Micheanl
- * @license MIT
- * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
- */
-
-
 import com.micheanl.libgltf.util.JsonValue
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -61,6 +46,21 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import org.joml.Matrix4f
+
+
+/**
+ * libgltf · GltfLoader
+ *
+ * <pre><code>
+ * override fun load(path: Path, lodPolicy: LodPolicy): GltfLoadResult = GltfLoader.load(path, lodPolicy)
+ * </code></pre>
+ *
+ * glTF 解析入口
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
 
 object GltfLoader {
     private val json = Json {

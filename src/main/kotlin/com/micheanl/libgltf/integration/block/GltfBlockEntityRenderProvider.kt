@@ -1,5 +1,10 @@
 package com.micheanl.libgltf.integration.block
 
+import com.micheanl.libgltf.api.GltfInstance
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.phys.Vec3
+
+
 /**
  * libgltf · GltfBlockEntityRenderProvider
  *
@@ -7,11 +12,6 @@ package com.micheanl.libgltf.integration.block
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.api.GltfInstance
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.phys.Vec3
 
 interface GltfBlockEntityRenderProvider<T : BlockEntity> {
     fun instance(blockEntity: T): GltfInstance?

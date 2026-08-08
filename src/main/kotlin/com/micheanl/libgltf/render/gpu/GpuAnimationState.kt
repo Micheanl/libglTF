@@ -1,5 +1,10 @@
 package com.micheanl.libgltf.render.gpu
 
+import com.micheanl.libgltf.animation.AnimationPose
+import com.micheanl.libgltf.model.GltfAsset
+import org.joml.Matrix4f
+
+
 /**
  * libgltf · GpuAnimationState
  *
@@ -13,11 +18,6 @@ package com.micheanl.libgltf.render.gpu
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.animation.AnimationPose
-import com.micheanl.libgltf.model.GltfAsset
-import org.joml.Matrix4f
 
 class GpuAnimationState(private val asset: GltfAsset) {
     val jointPalettes: Array<FloatArray> = Array(asset.skins.size) { index -> FloatArray(asset.skins[index].joints.size * 16) }

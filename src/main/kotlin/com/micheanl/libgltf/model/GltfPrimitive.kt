@@ -1,5 +1,8 @@
 package com.micheanl.libgltf.model
 
+import java.nio.ByteBuffer
+
+
 /**
  * libgltf · GltfPrimitive
  *
@@ -25,9 +28,6 @@ package com.micheanl.libgltf.model
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import java.nio.ByteBuffer
 
 data class GltfPrimitive(
     val vertices: ByteBuffer,

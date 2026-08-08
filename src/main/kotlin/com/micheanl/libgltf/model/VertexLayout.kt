@@ -8,7 +8,6 @@ package com.micheanl.libgltf.model
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 object VertexLayout {
     const val STRIDE: Int = 60
     const val POSITION: Int = 0

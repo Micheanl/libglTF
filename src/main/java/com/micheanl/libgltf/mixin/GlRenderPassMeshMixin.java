@@ -1,14 +1,5 @@
 package com.micheanl.libgltf.mixin;
 
-/**
- * libgltf · GlRenderPassMeshMixin
- *
- * @author Chen Micheanl
- * @license MIT
- * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
- */
-
-
 import com.micheanl.libgltf.render.gl.GlMeshRenderPass;
 import com.micheanl.libgltf.render.gl.GlMeshPipelineCache;
 import com.micheanl.libgltf.render.gpu.MeshletStorage;
@@ -20,6 +11,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(targets = "com.mojang.renderpearl.backend.opengl.GlRenderPass")
+/**
+ * libgltf · GlRenderPassMeshMixin
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 public abstract class GlRenderPassMeshMixin implements GlMeshRenderPass {
     @Shadow
     protected GlRenderPipeline pipeline;

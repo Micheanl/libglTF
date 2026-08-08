@@ -1,20 +1,5 @@
 package com.micheanl.libgltf.render.vulkan
 
-/**
- * libgltf · MeshletDispatcher
- *
- * <pre><code>
- * private val gpuDriven = MeshletDispatcher()
- * </code></pre>
- *
- * 每帧 meshlet 分发与间接绘制准备
- *
- * @author Chen Micheanl
- * @license MIT
- * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
- */
-
-
 import com.micheanl.libgltf.mixin.FrontendRenderPassAccessor
 import com.micheanl.libgltf.render.gl.GlMeshRenderPass
 import com.micheanl.libgltf.render.gl.GlGpuDriver
@@ -28,6 +13,21 @@ import com.mojang.renderpearl.api.commands.RenderPass
 import com.mojang.blaze3d.systems.RenderSystem
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.rendertype.PreparedRenderType
+
+
+/**
+ * libgltf · MeshletDispatcher
+ *
+ * <pre><code>
+ * private val gpuDriven = MeshletDispatcher()
+ * </code></pre>
+ *
+ * 每帧 meshlet 分发与间接绘制准备
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
 
 class MeshletDispatcher : AutoCloseable {
     private var commandRing: VulkanBufferRing? = null

@@ -1,20 +1,5 @@
 package com.micheanl.libgltf.render.cpu
 
-/**
- * libgltf · GltfGeometryRenderer
- *
- * <pre><code>
- * GltfGeometryRenderer(this, nodeIndex, handle.asset.meshes[meshIndex].primitives[primitiveIndex])
- * </code></pre>
- *
- * CPU 渲染器
- *
- * @author Chen Micheanl
- * @license MIT
- * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
- */
-
-
 import com.micheanl.libgltf.api.GltfInstance
 import com.micheanl.libgltf.render.GltfRenderAsset
 import com.micheanl.libgltf.render.GltfRenderTypes
@@ -40,6 +25,21 @@ import kotlin.math.sqrt
 private const val DEFORMED_VERTEX_STRIDE: Int = 6
 private val EMPTY_DEFORMED_VERTICES: FloatArray = FloatArray(0)
 private val EMPTY_DEFORMED_REVISIONS: LongArray = LongArray(0)
+
+
+/**
+ * libgltf · GltfGeometryRenderer
+ *
+ * <pre><code>
+ * GltfGeometryRenderer(this, nodeIndex, handle.asset.meshes[meshIndex].primitives[primitiveIndex])
+ * </code></pre>
+ *
+ * CPU 渲染器
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
 
 class GltfGeometryRenderer(
     private val instance: GltfInstance,

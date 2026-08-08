@@ -1,28 +1,5 @@
 package com.micheanl.libgltf.render
 
-/**
- * libgltf · GltfRenderTypes
- *
- * <pre><code>
- * val renderType = GltfRenderTypes.get(
- * resource.id,
- * materialIndex,
- * textureIndex,
- * alphaCutoff,
- * primitive.mode,
- * material,
- * texture
- * )
- * </code></pre>
- *
- * 运行时 RenderType 构建
- *
- * @author Chen Micheanl
- * @license MIT
- * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
- */
-
-
 import com.micheanl.libgltf.LibGltf
 import com.micheanl.libgltf.material.AlphaMode
 import com.micheanl.libgltf.material.GltfMaterial
@@ -51,6 +28,29 @@ import java.util.concurrent.ConcurrentHashMap
 private val JOINT_MATRICES_LAYOUT = BindGroupLayout.builder()
     .withUniform("JointMatrices", UniformType.TEXEL_BUFFER, GpuFormat.RGBA32_FLOAT)
     .build()
+
+
+/**
+ * libgltf · GltfRenderTypes
+ *
+ * <pre><code>
+ * val renderType = GltfRenderTypes.get(
+ * resource.id,
+ * materialIndex,
+ * textureIndex,
+ * alphaCutoff,
+ * primitive.mode,
+ * material,
+ * texture
+ * )
+ * </code></pre>
+ *
+ * 运行时 RenderType 构建
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
 
 object GltfRenderTypes {
     private val resources = ConcurrentHashMap<Long, ConcurrentHashMap<Long, RenderType>>()

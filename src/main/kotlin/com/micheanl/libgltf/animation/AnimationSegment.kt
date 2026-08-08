@@ -1,5 +1,8 @@
 package com.micheanl.libgltf.animation
 
+import kotlin.math.floor
+
+
 /**
  * libgltf · AnimationSegment
  *
@@ -11,9 +14,6 @@ package com.micheanl.libgltf.animation
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import kotlin.math.floor
 
 data class AnimationSegment(
     val name: String,

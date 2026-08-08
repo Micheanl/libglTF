@@ -1,5 +1,14 @@
 package com.micheanl.libgltf.render.vulkan
 
+import com.micheanl.libgltf.mixin.FrontendGpuDeviceAccessor
+import com.micheanl.libgltf.render.GpuBackendType
+import com.micheanl.libgltf.render.gpu.GpuDriver
+import com.micheanl.libgltf.render.gpu.GpuBackend
+import com.micheanl.libgltf.render.gpu.OcclusionDepth
+import com.mojang.renderpearl.api.device.GpuDevice
+import com.mojang.renderpearl.backend.vulkan.VulkanDevice
+
+
 /**
  * libgltf · VulkanGpuDriver
  *
@@ -13,15 +22,6 @@ package com.micheanl.libgltf.render.vulkan
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.mixin.FrontendGpuDeviceAccessor
-import com.micheanl.libgltf.render.GpuBackendType
-import com.micheanl.libgltf.render.gpu.GpuDriver
-import com.micheanl.libgltf.render.gpu.GpuBackend
-import com.micheanl.libgltf.render.gpu.OcclusionDepth
-import com.mojang.renderpearl.api.device.GpuDevice
-import com.mojang.renderpearl.backend.vulkan.VulkanDevice
 
 class VulkanGpuDriver private constructor(
     val pipeline: VulkanComputePipeline,

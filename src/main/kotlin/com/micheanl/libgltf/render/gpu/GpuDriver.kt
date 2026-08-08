@@ -10,7 +10,6 @@ package com.micheanl.libgltf.render.gpu
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 interface GpuDriver : AutoCloseable {
     val meshSupported: Boolean
 }

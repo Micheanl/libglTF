@@ -1,14 +1,5 @@
 package com.micheanl.libgltf.mixin;
 
-/**
- * libgltf · VulkanGpuSamplerMixin
- *
- * @author Chen Micheanl
- * @license MIT
- * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
- */
-
-
 import com.micheanl.libgltf.render.texture.MipmapFilterState;
 import com.mojang.renderpearl.backend.vulkan.VulkanGpuSampler;
 import org.lwjgl.vulkan.VK10;
@@ -17,6 +8,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @Mixin(VulkanGpuSampler.class)
+/**
+ * libgltf · VulkanGpuSamplerMixin
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 public abstract class VulkanGpuSamplerMixin {
     @ModifyArg(
             method = "<init>",

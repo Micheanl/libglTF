@@ -8,7 +8,6 @@ package com.micheanl.libgltf.material
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 enum class TextureWrap {
     CLAMP_TO_EDGE,
     MIRRORED_REPEAT,

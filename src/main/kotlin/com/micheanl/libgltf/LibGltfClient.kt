@@ -1,5 +1,9 @@
 package com.micheanl.libgltf
 
+import com.micheanl.libgltf.render.GltfRenderSystem
+import net.fabricmc.api.ClientModInitializer
+
+
 /**
  * libgltf · LibGltfClient
  *
@@ -9,10 +13,6 @@ package com.micheanl.libgltf
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.render.GltfRenderSystem
-import net.fabricmc.api.ClientModInitializer
 
 object LibGltfClient : ClientModInitializer {
     override fun onInitializeClient() {

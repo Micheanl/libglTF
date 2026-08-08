@@ -1,5 +1,9 @@
 package com.micheanl.libgltf.render.feature
 
+import net.fabricmc.fabric.api.client.rendering.v1.FeatureRendererRegistry
+import net.minecraft.client.renderer.feature.FeatureRendererType
+
+
 /**
  * libgltf · GpuFeature
  *
@@ -13,10 +17,6 @@ package com.micheanl.libgltf.render.feature
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import net.fabricmc.fabric.api.client.rendering.v1.FeatureRendererRegistry
-import net.minecraft.client.renderer.feature.FeatureRendererType
 
 object GpuFeature {
     val TYPE: FeatureRendererType<GpuSubmit> = FeatureRendererType.create("libgltf_gpu")

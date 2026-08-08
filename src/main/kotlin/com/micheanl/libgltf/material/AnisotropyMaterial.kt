@@ -16,7 +16,6 @@ package com.micheanl.libgltf.material
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 data class AnisotropyMaterial(
     val strength: Float,
     val rotation: Float,

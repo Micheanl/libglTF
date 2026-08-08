@@ -8,7 +8,6 @@ package com.micheanl.libgltf.render.vulkan
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-
 object VulkanUsage {
     const val STORAGE: Int = 1 shl 10
 }

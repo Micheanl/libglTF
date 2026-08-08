@@ -1,5 +1,11 @@
 package com.micheanl.libgltf
 
+import com.micheanl.libgltf.api.GltfApi
+import com.micheanl.libgltf.api.GltfApiImpl
+import net.fabricmc.api.ModInitializer
+import net.minecraft.resources.Identifier
+
+
 /**
  * libgltf · LibGltf
  *
@@ -13,12 +19,6 @@ package com.micheanl.libgltf
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.api.GltfApi
-import com.micheanl.libgltf.api.GltfApiImpl
-import net.fabricmc.api.ModInitializer
-import net.minecraft.resources.Identifier
 
 object LibGltf : ModInitializer {
     const val MOD_ID: String = "libgltf"

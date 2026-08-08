@@ -1,5 +1,9 @@
 package com.micheanl.libgltf.model
 
+import com.micheanl.libgltf.animation.AnimationClip
+import com.micheanl.libgltf.material.GltfMaterial
+
+
 /**
  * libgltf · GltfAsset
  *
@@ -26,10 +30,6 @@ package com.micheanl.libgltf.model
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
-
-
-import com.micheanl.libgltf.animation.AnimationClip
-import com.micheanl.libgltf.material.GltfMaterial
 
 data class GltfAsset(
     val name: String,
