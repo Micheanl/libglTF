@@ -229,7 +229,6 @@ private class GltfVulkanNvMeshPipeline(
                 NVMeshShader.vkCmdDrawMeshTasksNV(commandBuffer, 0, groups)
                 baseCandidate += groups
             }
-            counters.read()
         }
     }
 
@@ -300,7 +299,12 @@ private class GltfVulkanNvMeshPipeline(
                     debugMacros + ("MESH_WORKGROUP_SIZE" to meshWorkgroupSize.toString())
                 )
                 try {
-                    val fragmentModule = compileFragment(device, renderPipeline, bindings)
+                    val fragmentModule = compileFragment(
+                        device,
+                        renderPipeline,
+                        bindings,
+                        debugMinimal
+                    )
                     try {
                         return create(device, original, renderPipeline, taskModule, meshModule, fragmentModule)
                     } catch (error: RuntimeException) {
@@ -508,12 +512,14 @@ private class GltfVulkanNvMeshPipeline(
         private fun compileFragment(
             device: VulkanDevice,
             renderPipeline: RenderPipeline,
-            bindings: Map<String, Int>
+            bindings: Map<String, Int>,
+            debugMinimal: Boolean
         ): Long {
             val source = requireNotNull(GltfVulkanNvMeshPipeline::class.java.getResourceAsStream(FRAGMENT_SHADER))
                 .bufferedReader()
                 .use { it.readText() }
             val macros = HashMap(bindings.mapValues { it.value.toString() })
+            if (debugMinimal) macros["MESH_DEBUG_MINIMAL"] = ""
             val defines = renderPipeline.getShaderDefines()
             for ((name, value) in defines.values()) macros[name] = value
             for (flag in defines.flags()) macros[flag] = ""

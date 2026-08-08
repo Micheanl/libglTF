@@ -168,6 +168,12 @@ vec4 sampleColorForAccumulation(vec4 color) {
 }
 #endif
 void main() {
+#ifdef MESH_DEBUG_MINIMAL
+    #ifndef OIT_ALPHA_ONLY
+    fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    return;
+    #endif
+#endif
     vec4 color = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;
 #ifdef ALPHA_CUTOUT
     if (color.a < ALPHA_CUTOUT) discard;
