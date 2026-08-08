@@ -53,7 +53,7 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
     ) {
         val start = groupStarts[groupIndex]
         val end = start + groupCounts[groupIndex]
-        for (index in start until end) batches[index].execute(renderPass)
+        for (index in start until end) batches[index].execute(stage, renderPass)
     }
 
     override fun close() {

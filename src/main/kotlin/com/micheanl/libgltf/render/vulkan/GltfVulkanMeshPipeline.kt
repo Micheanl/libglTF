@@ -4,13 +4,17 @@ import com.micheanl.libgltf.render.gpu.GltfMeshletLod
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.pipeline.BlendFunction
 import com.mojang.renderpearl.api.pipeline.RenderPipeline
+import com.mojang.renderpearl.api.pipeline.ShaderSource
 import com.mojang.renderpearl.api.pipeline.ShaderType
 import com.mojang.renderpearl.api.pipeline.UniformType
 import com.mojang.renderpearl.backend.vulkan.VulkanConst
 import com.mojang.renderpearl.backend.vulkan.VulkanDevice
 import com.mojang.renderpearl.backend.vulkan.VulkanGpuBuffer
 import com.mojang.renderpearl.backend.vulkan.VulkanRenderPipeline
+import com.mojang.renderpearl.frontend.shaders.GlslCompiler
 import it.unimi.dsi.fastutil.longs.LongArrayList
+import net.minecraft.client.Minecraft
+import net.minecraft.client.renderer.ShaderDefines
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
 import org.lwjgl.util.shaderc.Shaderc
@@ -201,6 +205,8 @@ private class GltfVulkanMeshPipeline(
             val uniforms = original.uniforms()
             val storageBinding = uniforms.size
             require(storageBinding + DESCRIPTOR_COUNT <= maxPushDescriptors)
+            val sampler0Binding = uniforms.indexOfFirst { it.name() == "Sampler0" }
+            require(sampler0Binding >= 0)
             val bindings = mapOf(
                 "PROJECTION_BINDING" to uniforms.indexOfFirst { it.name() == "Projection" },
                 "DYNAMIC_TRANSFORMS_BINDING" to uniforms.indexOfFirst { it.name() == "DynamicTransforms" },
@@ -218,7 +224,7 @@ private class GltfVulkanMeshPipeline(
             try {
                 val meshModule = compileModule(device, MESH_SHADER, Shaderc.shaderc_mesh_shader, bindings)
                 try {
-                    val fragmentModule = compileFragment(device, renderPipeline, bindings)
+                    val fragmentModule = compileFragment(device, renderPipeline, sampler0Binding)
                     try {
                         return create(device, original, renderPipeline, taskModule, meshModule, fragmentModule)
                     } catch (error: RuntimeException) {
@@ -417,32 +423,55 @@ private class GltfVulkanMeshPipeline(
         private fun compileFragment(
             device: VulkanDevice,
             renderPipeline: RenderPipeline,
-            bindings: Map<String, Int>
+            sampler0Binding: Int
         ): Long {
             val shader = requireNotNull(renderPipeline.getShaders()[ShaderType.FRAGMENT])
-            val path = "/assets/${shader.namespace}/shaders/${shader.path}.fsh"
-            val source = requireNotNull(GltfVulkanMeshPipeline::class.java.getResourceAsStream(path))
-                .bufferedReader()
-                .use { it.readText() }
-            val compiler = Shaderc.shaderc_compiler_initialize()
-            val options = Shaderc.shaderc_compile_options_initialize()
-            check(compiler != MemoryUtil.NULL && options != MemoryUtil.NULL)
-            Shaderc.shaderc_compile_options_set_target_env(
-                options,
-                Shaderc.shaderc_target_env_vulkan,
-                Shaderc.shaderc_env_version_vulkan_1_3
-            )
-            for ((name, value) in bindings) {
-                Shaderc.shaderc_compile_options_add_macro_definition(options, name, value.toString())
+            val source = requireNotNull(gameShaderSource.get(shader, ShaderType.FRAGMENT))
+            val info = device.getDeviceInfo()
+            val compiler = GlslCompiler(info.isZZeroToOne(), info.features().shaderDrawParameters())
+            try {
+                val defines = renderPipeline.getShaderDefines()
+                val fragmentDefines = ShaderDefines(
+                    defines.values() + ("SAMPLER0_BINDING" to sampler0Binding.toString()),
+                    defines.flags()
+                )
+                val spv = compiler.compileToSpv(
+                    shader.toString(),
+                    source,
+                    ShaderType.FRAGMENT,
+                    fragmentDefines,
+                    gameShaderSource
+                )
+                try {
+                    MemoryStack.stackPush().use { stack ->
+                        val pointer = stack.mallocLong(1)
+                        checkVk(
+                            VK10.vkCreateShaderModule(
+                                device.vkDevice(),
+                                VkShaderModuleCreateInfo.calloc(stack).`sType$Default`().pCode(spv.spv()),
+                                null,
+                                pointer
+                            )
+                        )
+                        return pointer[0]
+                    }
+                } finally {
+                    spv.close()
+                }
+            } finally {
+                compiler.close()
             }
-            val defines = renderPipeline.getShaderDefines()
-            for ((name, value) in defines.values()) {
-                Shaderc.shaderc_compile_options_add_macro_definition(options, name, value)
+        }
+
+        private val gameShaderSource = ShaderSource { id, type ->
+            val location = if (type == null) {
+                id.withPrefix("shaders/include/")
+            } else {
+                type.idConverter().idToFile(id)
             }
-            for (flag in defines.flags()) {
-                Shaderc.shaderc_compile_options_add_macro_definition(options, flag, "")
-            }
-            return compileSpv(device, compiler, options, source, path, Shaderc.shaderc_fragment_shader)
+            val resource = Minecraft.getInstance().resourceManager.getResource(location).orElse(null)
+                ?: return@ShaderSource null
+            resource.openAsReader().use { it.readText() }
         }
 
         private fun compileSpv(

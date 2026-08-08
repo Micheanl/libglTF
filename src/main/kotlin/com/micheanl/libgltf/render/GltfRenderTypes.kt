@@ -16,6 +16,7 @@ import com.mojang.renderpearl.api.pipeline.UniformType
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import net.minecraft.client.renderer.BindGroupLayouts
 import net.minecraft.client.renderer.RenderPipelines
+import net.minecraft.client.renderer.oit.OitPipelineSet
 import net.minecraft.client.renderer.rendertype.RenderSetup
 import net.minecraft.client.renderer.rendertype.RenderType
 import net.minecraft.resources.Identifier
@@ -85,9 +86,10 @@ object GltfRenderTypes {
             .withVertexBinding(0, DefaultVertexFormat.ENTITY)
             .withPrimitiveTopology(topology(mode))
             .withCull(!material.doubleSided)
+        val oitPipelineSet = if (material.alphaMode == AlphaMode.BLEND) buildOitPipelineSet(suffix, builder) else null
         applyMaterial(builder, material, alphaCutoff)
         val pipeline = builder.build()
-        return createRenderType("libgltf_$suffix", pipeline, texture)
+        return createRenderType("libgltf_$suffix", pipeline, oitPipelineSet, texture)
     }
 
     private fun createGpu(
@@ -116,18 +118,39 @@ object GltfRenderTypes {
                 .withVertexBinding(2, GltfGpuFormats.SKIN)
                 .withShaderDefine("SKINNED")
         }
+        val oitPipelineSet = if (material.alphaMode == AlphaMode.BLEND) buildOitPipelineSet(suffix, builder) else null
         applyMaterial(builder, material, alphaCutoff)
         val pipeline = builder.build()
-        return createRenderType("libgltf_$suffix", pipeline, texture)
+        return createRenderType("libgltf_$suffix", pipeline, oitPipelineSet, texture)
     }
 
-    private fun createRenderType(name: String, pipeline: RenderPipeline, texture: Identifier): RenderType {
-        val setup = RenderSetup.builder(pipeline)
+    private fun createRenderType(
+        name: String,
+        pipeline: RenderPipeline,
+        oitPipelineSet: OitPipelineSet?,
+        texture: Identifier
+    ): RenderType {
+        val builder = RenderSetup.builder(pipeline)
             .withTexture("Sampler0", texture)
             .useLightmap()
             .useOverlay()
-            .createRenderSetup()
+        if (oitPipelineSet != null) builder.setOitPipelines(oitPipelineSet)
+        val setup = builder.createRenderSetup()
         return RenderType.create(name, setup)
+    }
+
+    private fun buildOitPipelineSet(suffix: String, builder: RenderPipeline.Builder): OitPipelineSet {
+        val base = builder.buildSnippet()
+        val depthBounds = RenderPipeline.builder(base, RenderPipelines.OIT_DEPTH_BOUNDS_SNIPPET)
+            .withLocation(LibGltf.id("pipeline/oit_depth_bounds_$suffix"))
+            .build()
+        val transmittance = RenderPipeline.builder(base, RenderPipelines.OIT_TRANSMITTANCE_SNIPPET)
+            .withLocation(LibGltf.id("pipeline/oit_transmittance_$suffix"))
+            .build()
+        val accumulate = RenderPipeline.builder(base, RenderPipelines.OIT_ACCUMULATE_SNIPPET)
+            .withLocation(LibGltf.id("pipeline/oit_accumulate_$suffix"))
+            .build()
+        return OitPipelineSet(depthBounds, transmittance, accumulate)
     }
 
     private fun applyMaterial(builder: RenderPipeline.Builder, material: GltfMaterial, alphaCutoff: Float) {

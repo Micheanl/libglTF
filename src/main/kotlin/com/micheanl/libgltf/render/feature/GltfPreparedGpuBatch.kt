@@ -15,7 +15,9 @@ import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.CompactVectorArray
 import com.mojang.logging.LogUtils
+import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.MappableRingBuffer
+import net.minecraft.client.renderer.oit.OitStage
 import net.minecraft.client.renderer.rendertype.PreparedRenderType
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -56,7 +58,9 @@ class GltfPreparedGpuBatch : AutoCloseable {
             ensureInstanceCapacity(instanceCount * GltfGpuFormats.INSTANCE_STRIDE, driver != null)
             writeInstances(submits, fromIndex, toIndex)
             if (skinned) writePalettes(submits, fromIndex, toIndex)
-            useSortedIndexBuffer = first.renderType.hasBlending() && primitive.triangleCenters != null
+            useSortedIndexBuffer = first.renderType.hasBlending() &&
+                primitive.triangleCenters != null &&
+                !Minecraft.getInstance().gameRenderer.useImprovedTransparency()
             if (useSortedIndexBuffer) prepareSortedIndices(first)
             gpuDriven.prepare(
                 primitive,
@@ -74,7 +78,7 @@ class GltfPreparedGpuBatch : AutoCloseable {
         }
     }
 
-    fun execute(renderPass: RenderPass) {
+    fun execute(stage: OitStage?, renderPass: RenderPass) {
         if (!active) return
         val benchmarkStart = if (GltfGpuDrivenSettings.benchmark && GltfGpuBackend.capabilities().backend == GltfGpuBackendType.VULKAN) System.nanoTime() else 0L
         val instances = requireNotNull(instanceBuffer)
@@ -84,7 +88,12 @@ class GltfPreparedGpuBatch : AutoCloseable {
         val meshRequested = gpuDrivenDriver?.let(gpuDriven::meshReady) == true
         val indirect = !meshRequested && gpuDrivenDriver?.let { gpuDriven.dispatch(it, primitive, instanceGpuBuffer, instanceCount) } == true
         var meshDrawn = false
-        renderPass.setPipeline(RenderSystem.getCompiledPipeline(preparedRenderType.pipeline()))
+        val pipeline = if (stage != null) {
+            preparedRenderType.oitPipelineSet()?.getPipeline(stage) ?: preparedRenderType.pipeline()
+        } else {
+            preparedRenderType.pipeline()
+        }
+        renderPass.setPipeline(RenderSystem.getCompiledPipeline(pipeline))
         val scissor = preparedRenderType.scissorState()
         if (scissor.enabled()) renderPass.enableScissor(scissor.x(), scissor.y(), scissor.width(), scissor.height())
         RenderSystem.bindDefaultUniforms(renderPass)
@@ -122,7 +131,8 @@ class GltfPreparedGpuBatch : AutoCloseable {
             renderPass.setIndexBuffer(indexBuffer, primitive.indexType)
             renderPass.drawIndexed(primitive.indexCounts[lod], instanceCount, 0, 0, 0)
         }
-        if (benchmarkStart != 0L) {
+        val frameEnd = stage == null || stage == OitStage.ACCUMULATE
+        if (benchmarkStart != 0L && frameEnd) {
             val elapsed = System.nanoTime() - benchmarkStart
             if (meshDrawn) {
                 gpuDriven.captureMesh(elapsed, instanceCount, primitive.indexCounts[lod] / 3, lod)
@@ -135,10 +145,12 @@ class GltfPreparedGpuBatch : AutoCloseable {
                 )
             }
         }
-        instances.rotate()
-        palettes?.rotate()
-        sortedIndices?.rotate()
-        if (indirect) gpuDriven.rotate()
+        if (frameEnd) {
+            instances.rotate()
+            palettes?.rotate()
+            sortedIndices?.rotate()
+            if (indirect) gpuDriven.rotate()
+        }
     }
     override fun close() {
         instanceBuffer?.close()

@@ -1,10 +1,10 @@
 #version 330
 
-#moj_import <minecraft:light.glsl>
-#moj_import <minecraft:fog.glsl>
-#moj_import <minecraft:dynamictransforms.glsl>
-#moj_import <minecraft:projection.glsl>
-#moj_import <minecraft:sample_lightmap.glsl>
+#include <minecraft:light.glsl>
+#include <minecraft:fog.glsl>
+#include <minecraft:dynamictransforms.glsl>
+#include <minecraft:projection.glsl>
+#include <minecraft:sample_lightmap.glsl>
 
 in vec3 Position;
 in vec3 Normal;
@@ -29,8 +29,10 @@ in vec4 Weights;
 uniform samplerBuffer JointMatrices;
 #endif
 
+#if !defined(OIT_ALPHA_ONLY)
 uniform sampler2D Sampler1;
 uniform sampler2D Sampler2;
+#endif
 
 out float sphericalVertexDistance;
 out float cylindricalVertexDistance;
@@ -71,7 +73,9 @@ void main() {
     sphericalVertexDistance = fog_spherical_distance(worldPosition.xyz);
     cylindricalVertexDistance = fog_cylindrical_distance(worldPosition.xyz);
     vertexColor = minecraft_mix_light(Light0_Direction, Light1_Direction, worldNormal, Color * InstanceColor);
+#if !defined(OIT_ALPHA_ONLY)
     lightMapColor = sample_lightmap(Sampler2, InstanceLight);
     overlayColor = texelFetch(Sampler1, InstanceOverlay, 0);
+#endif
     texCoord0 = UV0;
 }

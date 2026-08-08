@@ -13,6 +13,7 @@ import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.CompactVectorArray
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
+import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.SubmitNodeCollector
 import net.minecraft.client.renderer.rendertype.RenderType
 import net.minecraft.client.renderer.texture.OverlayTexture
@@ -111,7 +112,11 @@ class GltfGeometryRenderer(
         val vertices = primitive.vertices
         val lod = instance.lodLevel.coerceAtMost(primitive.lodIndices.lastIndex)
         val indices = primitive.lodIndices[lod]
-        val triangleOrder = if (material.alphaMode == AlphaMode.BLEND && primitive.mode == PrimitiveMode.TRIANGLES) {
+        val triangleOrder = if (
+            material.alphaMode == AlphaMode.BLEND &&
+            primitive.mode == PrimitiveMode.TRIANGLES &&
+            !Minecraft.getInstance().gameRenderer.useImprovedTransparency()
+        ) {
             sortTriangles(pose, indices, revision, morphWeights, morphWeightOffset, palette)
         } else {
             null
