@@ -16,6 +16,7 @@ class GltfGlMeshPipelineCache : AutoCloseable {
     private val failed = Collections.newSetFromMap(IdentityHashMap<RenderPipeline, Boolean>())
     private val maxDrawCount: Int
     private val useNv: Boolean
+    private val meshWorkgroupSize: Int
     val supported: Boolean
 
     init {
@@ -27,6 +28,14 @@ class GltfGlMeshPipelineCache : AutoCloseable {
         val outputPrimitivesTarget = if (useNv) NVMeshShader.GL_MAX_MESH_OUTPUT_PRIMITIVES_NV else EXTMeshShader.GL_MAX_MESH_OUTPUT_PRIMITIVES_EXT
         val taskInvocationTarget = if (useNv) NVMeshShader.GL_MAX_TASK_WORK_GROUP_INVOCATIONS_NV else EXTMeshShader.GL_MAX_TASK_WORK_GROUP_INVOCATIONS_EXT
         val meshInvocationTarget = if (useNv) NVMeshShader.GL_MAX_MESH_WORK_GROUP_INVOCATIONS_NV else EXTMeshShader.GL_MAX_MESH_WORK_GROUP_INVOCATIONS_EXT
+        val maxMeshInvocations = if (extSupported || nvSupported) query(meshInvocationTarget) else 0
+        meshWorkgroupSize = if (maxMeshInvocations >= 64) {
+            64
+        } else if (maxMeshInvocations >= 32) {
+            32
+        } else {
+            0
+        }
         maxDrawCount = if (extSupported || nvSupported) {
             if (useNv) {
                 query(NVMeshShader.GL_MAX_DRAW_MESH_TASKS_COUNT_NV)
@@ -40,7 +49,7 @@ class GltfGlMeshPipelineCache : AutoCloseable {
             query(outputVerticesTarget) >= 64 &&
             query(outputPrimitivesTarget) >= 124 &&
             query(taskInvocationTarget) >= 32 &&
-            query(meshInvocationTarget) >= 64 &&
+            meshWorkgroupSize >= 32 &&
             maxDrawCount > 0
     }
 
@@ -57,7 +66,7 @@ class GltfGlMeshPipelineCache : AutoCloseable {
     ): Boolean {
         if (!supported || failed.contains(renderPipeline)) return false
         val pipeline = pipelines[renderPipeline] ?: try {
-            GltfGlMeshPipeline.create(renderPipeline, useNv).also { pipelines[renderPipeline] = it }
+            GltfGlMeshPipeline.create(renderPipeline, useNv, meshWorkgroupSize).also { pipelines[renderPipeline] = it }
         } catch (_: RuntimeException) {
             failed.add(renderPipeline)
             return false

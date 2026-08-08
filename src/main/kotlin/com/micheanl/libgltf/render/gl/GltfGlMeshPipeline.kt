@@ -150,14 +150,14 @@ class GltfGlMeshPipeline private constructor(
     }
 
     companion object {
-        fun create(renderPipeline: RenderPipeline, useNv: Boolean): GltfGlMeshPipeline {
+        fun create(renderPipeline: RenderPipeline, useNv: Boolean, meshWorkgroupSize: Int): GltfGlMeshPipeline {
             val taskType = if (useNv) NVMeshShader.GL_TASK_SHADER_NV else EXTMeshShader.GL_TASK_SHADER_EXT
             val meshType = if (useNv) NVMeshShader.GL_MESH_SHADER_NV else EXTMeshShader.GL_MESH_SHADER_EXT
             val meshPath = if (useNv) "/assets/libgltf/shaders/mesh/gpu_mesh_nv.mesh" else "/assets/libgltf/shaders/mesh/gpu_mesh_gl.mesh"
             val taskPath = if (useNv) "/assets/libgltf/shaders/mesh/gpu_mesh_nv.task" else "/assets/libgltf/shaders/mesh/gpu_mesh_gl.task"
             val task = compile(taskType, shader(taskPath))
             try {
-                val mesh = compile(meshType, shader(meshPath))
+                val mesh = compile(meshType, withMeshWorkgroupSize(shader(meshPath), meshWorkgroupSize))
                 try {
                     val defines = renderPipeline.getShaderDefines()
                     val oit = defines.flags().contains("OIT")
@@ -207,6 +207,11 @@ class GltfGlMeshPipeline private constructor(
             }
             val versionEnd = source.indexOf('\n') + 1
             return source.substring(0, versionEnd) + builder.toString() + source.substring(versionEnd)
+        }
+
+        private fun withMeshWorkgroupSize(source: String, size: Int): String {
+            val versionEnd = source.indexOf('\n') + 1
+            return source.substring(0, versionEnd) + "#define MESH_WORKGROUP_SIZE $size\n" + source.substring(versionEnd)
         }
 
         private fun compile(type: Int, source: String): Int {
