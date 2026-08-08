@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.feature
 /**
  * libgltf · GpuBatch
  *
- * <pre>{@code
+ * ```
  * GpuBatch().also(batches::add)
- * }</pre>
+ * ```
  *
  * 单个提交组的 GPU 绘制批
  *

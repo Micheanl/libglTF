@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.cpu
 /**
  * libgltf · GltfGeometryRenderer
  *
- * <pre>{@code
+ * ```
  * GltfGeometryRenderer(this, nodeIndex, handle.asset.meshes[meshIndex].primitives[primitiveIndex])
- * }</pre>
+ * ```
  *
  * CPU 渲染器
  *

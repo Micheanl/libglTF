@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.gpu
 /**
  * libgltf · GpuAnimationState
  *
- * <pre>{@code
+ * ```
  * val animationState: GpuAnimationState = GpuAnimationState(handle.asset)
- * }</pre>
+ * ```
  *
  * 动画姿态的 GPU 表示
  *

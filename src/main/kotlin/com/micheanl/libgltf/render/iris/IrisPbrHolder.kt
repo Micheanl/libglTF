@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.iris
 /**
  * libgltf · IrisPbrHolder
  *
- * <pre>{@code
+ * ```
  * holders[id] = IrisPbrHolder(normal, specular)
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

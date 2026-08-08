@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.texture
 /**
  * libgltf · NativeImageDecoder
  *
- * <pre>{@code
+ * ```
  * val image = asset.images.getOrNull(texture.imageIndex)?.let { NativeImageDecoder.decode(it.bytes) } ?: whiteImage()
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

@@ -3,9 +3,9 @@ package com.micheanl.libgltf.model
 /**
  * libgltf · GltfImage
  *
- * <pre>{@code
+ * ```
  * GltfImage(JsonFields.string(image, "name", "image_$index"), mime, bytes)
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

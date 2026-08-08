@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.gpu
 /**
  * libgltf · GpuBackend
  *
- * <pre>{@code
+ * ```
  * override fun gpuCapabilities(): GpuCapabilities = GpuBackend.capabilities()
- * }</pre>
+ * ```
  *
  * 后端能力探测与厂商配置
  *

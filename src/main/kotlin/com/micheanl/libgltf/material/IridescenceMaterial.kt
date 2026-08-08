@@ -3,7 +3,7 @@ package com.micheanl.libgltf.material
 /**
  * libgltf · IridescenceMaterial
  *
- * <pre>{@code
+ * ```
  * IridescenceMaterial(
  * JsonFields.float(it, "iridescenceFactor"),
  * parseBinding(JsonFields.value(it, "iridescenceTexture")),
@@ -12,7 +12,7 @@ package com.micheanl.libgltf.material
  * JsonFields.float(it, "iridescenceThicknessMaximum", 400.0f),
  * parseBinding(JsonFields.value(it, "iridescenceThicknessTexture"))
  * )
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

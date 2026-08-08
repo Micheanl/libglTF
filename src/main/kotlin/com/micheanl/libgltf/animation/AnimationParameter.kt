@@ -3,9 +3,9 @@ package com.micheanl.libgltf.animation
 /**
  * libgltf · AnimationParameter
  *
- * <pre>{@code
+ * ```
  * return AnimationParameter(name, index, type).also(parameters::add)
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

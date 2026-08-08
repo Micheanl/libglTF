@@ -3,7 +3,7 @@ package com.micheanl.libgltf.model
 /**
  * libgltf · GltfCamera
  *
- * <pre>{@code
+ * ```
  * GltfCamera(
  * JsonFields.string(value, "name", "camera_$index"),
  * cameraType(JsonFields.string(value, "type", "perspective")),
@@ -14,7 +14,7 @@ package com.micheanl.libgltf.model
  * JsonFields.float(orthographic, "xmag", -1.0f),
  * JsonFields.float(orthographic, "ymag", -1.0f)
  * )
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

@@ -3,9 +3,9 @@ package com.micheanl.libgltf.model
 /**
  * libgltf · GltfTexture
  *
- * <pre>{@code
+ * ```
  * GltfTexture(JsonFields.int(texture, "source"), sampler)
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

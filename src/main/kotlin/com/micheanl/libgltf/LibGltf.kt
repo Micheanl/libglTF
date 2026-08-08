@@ -3,9 +3,9 @@ package com.micheanl.libgltf
 /**
  * libgltf · LibGltf
  *
- * <pre>{@code
+ * ```
  * LibGltf.id("runtime/$resourceId/texture_$index")
- * }</pre>
+ * ```
  *
  * 模组主入口与资源 ID 定义
  *

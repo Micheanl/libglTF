@@ -3,7 +3,7 @@ package com.micheanl.libgltf.model
 /**
  * libgltf · GltfStats
  *
- * <pre>{@code
+ * ```
  * val stats = GltfStats(
  * resolvedNodes.size,
  * meshes.size,
@@ -14,7 +14,7 @@ package com.micheanl.libgltf.model
  * skins.size,
  * morphTargetCount
  * )
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.texture
 /**
  * libgltf · GltfMaterialTexture
  *
- * <pre>{@code
+ * ```
  * materialTexture = GltfMaterialTexture(identifier, albedo, normal, specular)
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.gl
 /**
  * libgltf · GlMeshPipeline
  *
- * <pre>{@code
+ * ```
  * GlMeshPipeline.create(renderPipeline, useNv, meshWorkgroupSize).also { pipelines[renderPipeline] = it }
- * }</pre>
+ * ```
  *
  * OpenGL mesh 管线与绘制
  *

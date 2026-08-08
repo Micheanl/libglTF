@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render
 /**
  * libgltf · GltfFrameState
  *
- * <pre>{@code
+ * ```
  * LevelExtractionEvents.END_EXTRACTION.register { GltfFrameState.capture() }
- * }</pre>
+ * ```
  *
  * 当前帧实例状态
  *

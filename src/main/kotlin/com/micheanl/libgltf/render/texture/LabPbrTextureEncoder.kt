@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.texture
 /**
  * libgltf · LabPbrTextureEncoder
  *
- * <pre>{@code
+ * ```
  * LabPbrTextureEncoder.normal(asset, material),
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

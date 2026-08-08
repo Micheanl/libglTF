@@ -3,7 +3,7 @@ package com.micheanl.libgltf.render
 /**
  * libgltf · GpuCapabilities
  *
- * <pre>{@code
+ * ```
  * private var capabilities = GpuCapabilities(
  * GpuBackendType.UNKNOWN,
  * false,
@@ -18,7 +18,7 @@ package com.micheanl.libgltf.render
  * false,
  * false,
  * GpuPath.CPU
- * }</pre>
+ * ```
  *
  * GPU 能力集合
  *

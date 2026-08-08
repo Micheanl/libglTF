@@ -3,9 +3,9 @@ package com.micheanl.libgltf.lod
 /**
  * libgltf · LodSelector
  *
- * <pre>{@code
+ * ```
  * lodSelector = LodSelector(value)
- * }</pre>
+ * ```
  *
  * LOD 距离选择
  *

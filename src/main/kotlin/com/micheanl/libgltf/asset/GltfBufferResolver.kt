@@ -3,9 +3,9 @@ package com.micheanl.libgltf.asset
 /**
  * libgltf · GltfBufferResolver
  *
- * <pre>{@code
+ * ```
  * val resolver = GltfBufferResolver(root, basePath, payload.binary)
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

@@ -3,9 +3,9 @@ package com.micheanl.libgltf.animation
 /**
  * libgltf · AnimationController
  *
- * <pre>{@code
+ * ```
  * val animator: AnimationController = AnimationController(handle.asset, animation)
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

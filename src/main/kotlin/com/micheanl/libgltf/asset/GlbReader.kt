@@ -3,9 +3,9 @@ package com.micheanl.libgltf.asset
 /**
  * libgltf · GlbReader
  *
- * <pre>{@code
+ * ```
  * val payload = if (GlbReader.isGlb(source)) {
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

@@ -3,7 +3,7 @@ package com.micheanl.libgltf.model
 /**
  * libgltf · GltfPrimitive
  *
- * <pre>{@code
+ * ```
  * return GltfPrimitive(
  * vertices,
  * skin,
@@ -17,7 +17,7 @@ package com.micheanl.libgltf.model
  * morphNormals,
  * targetCount
  * )
- * }</pre>
+ * ```
  *
  * 网格基元与 LOD 索引
  *

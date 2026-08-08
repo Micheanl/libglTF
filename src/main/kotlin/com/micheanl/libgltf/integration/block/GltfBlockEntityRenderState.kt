@@ -3,9 +3,9 @@ package com.micheanl.libgltf.integration.block
 /**
  * libgltf · GltfBlockEntityRenderState
  *
- * <pre>{@code
+ * ```
  * override fun createRenderState(): GltfBlockEntityRenderState = GltfBlockEntityRenderState()
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

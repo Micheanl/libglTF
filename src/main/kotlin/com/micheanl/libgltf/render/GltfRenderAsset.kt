@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render
 /**
  * libgltf · GltfRenderAsset
  *
- * <pre>{@code
+ * ```
  * resources[id] = GltfRenderAsset(id, asset)
- * }</pre>
+ * ```
  *
  * 渲染资源封装
  *

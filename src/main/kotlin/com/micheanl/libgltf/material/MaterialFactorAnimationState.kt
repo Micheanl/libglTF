@@ -3,9 +3,9 @@ package com.micheanl.libgltf.material
 /**
  * libgltf · MaterialFactorAnimationState
  *
- * <pre>{@code
+ * ```
  * private val restMaterialFactor = MaterialFactorAnimationState(asset.materials.size)
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

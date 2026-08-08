@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.iris
 /**
  * libgltf · IrisInterop
  *
- * <pre>{@code
+ * ```
  * fun shaderPackActive(): Boolean = loaded && IrisInterop.shaderPackActive()
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

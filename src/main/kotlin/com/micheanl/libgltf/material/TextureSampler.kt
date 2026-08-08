@@ -3,7 +3,7 @@ package com.micheanl.libgltf.material
 /**
  * libgltf · TextureSampler
  *
- * <pre>{@code
+ * ```
  * return TextureSampler(
  * mag,
  * min,
@@ -11,7 +11,7 @@ package com.micheanl.libgltf.material
  * wrap(JsonFields.int(value, "wrapS", 10497)),
  * wrap(JsonFields.int(value, "wrapT", 10497))
  * )
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

@@ -3,7 +3,7 @@ package com.micheanl.libgltf.material
 /**
  * libgltf · TextureBinding
  *
- * <pre>{@code
+ * ```
  * return TextureBinding(
  * JsonFields.int(value, "index"),
  * JsonFields.int(transform, "texCoord", JsonFields.int(value, "texCoord", 0)),
@@ -13,7 +13,7 @@ package com.micheanl.libgltf.material
  * scale.getOrElse(1) { 1.0f },
  * JsonFields.float(transform, "rotation")
  * )
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

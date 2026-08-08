@@ -3,9 +3,9 @@ package com.micheanl.libgltf.animation
 /**
  * libgltf · AnimationSegment
  *
- * <pre>{@code
+ * ```
  * return AnimationSegment.full(index, asset.animations[index], framesPerSecond)
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

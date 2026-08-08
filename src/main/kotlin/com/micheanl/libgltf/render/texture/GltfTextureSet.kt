@@ -3,7 +3,7 @@ package com.micheanl.libgltf.render.texture
 /**
  * libgltf · GltfTextureSet
  *
- * <pre>{@code
+ * ```
  * GltfTextureSet(
  * identifiers,
  * Array(textures.size) { requireNotNull(textures[it]) },
@@ -11,7 +11,7 @@ package com.micheanl.libgltf.render.texture
  * materialTextures,
  * fallback
  * )
- * }</pre>
+ * ```
  *
  * 资源纹理集合
  *

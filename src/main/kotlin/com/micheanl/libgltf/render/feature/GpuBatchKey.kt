@@ -3,7 +3,7 @@ package com.micheanl.libgltf.render.feature
 /**
  * libgltf · GpuBatchKey
  *
- * <pre>{@code
+ * ```
  * batchKey = GpuBatchKey(
  * resource.id,
  * meshIndex,
@@ -12,7 +12,7 @@ package com.micheanl.libgltf.render.feature
  * skinIndex,
  * renderType
  * )
- * }</pre>
+ * ```
  *
  * 提交分组键
  *

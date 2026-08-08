@@ -3,9 +3,9 @@ package com.micheanl.libgltf.animation
 /**
  * libgltf · AnimationPlayer
  *
- * <pre>{@code
+ * ```
  * val animation: AnimationPlayer = AnimationPlayer(handle.asset)
- * }</pre>
+ * ```
  *
  * 动画播放与姿态计算
  *

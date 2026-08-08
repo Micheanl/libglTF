@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.vulkan
 /**
  * libgltf · VulkanGpuDriver
  *
- * <pre>{@code
+ * ```
  * gpuDriven = VulkanGpuDriver.create(RenderSystem.getDevice()) ?: GlGpuDriver.create()
- * }</pre>
+ * ```
  *
  * Vulkan 后端的 GPU 驱动
  *

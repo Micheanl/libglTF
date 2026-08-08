@@ -3,7 +3,7 @@ package com.micheanl.libgltf.model
 /**
  * libgltf · GltfMesh
  *
- * <pre>{@code
+ * ```
  * GltfMesh(
  * JsonFields.string(mesh, "name", "mesh_$meshIndex"),
  * Array(primitives.size()) { primitiveIndex ->
@@ -11,7 +11,7 @@ package com.micheanl.libgltf.model
  * },
  * JsonFields.floats(mesh, "weights")
  * )
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT

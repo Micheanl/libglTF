@@ -3,9 +3,9 @@ package com.micheanl.libgltf.render.feature
 /**
  * libgltf · GpuFeature
  *
- * <pre>{@code
+ * ```
  * GpuFeature.initialize()
- * }</pre>
+ * ```
  *
  * GPU FeatureRenderer 注册
  *

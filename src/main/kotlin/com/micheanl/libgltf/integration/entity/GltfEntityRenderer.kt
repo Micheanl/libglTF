@@ -3,9 +3,9 @@ package com.micheanl.libgltf.integration.entity
 /**
  * libgltf · GltfEntityRenderer
  *
- * <pre>{@code
+ * ```
  * ): GltfEntityRenderer<T> = GltfEntityRenderer(context, provider)
- * }</pre>
+ * ```
  *
  * @author Chen Micheanl
  * @license MIT
