@@ -143,6 +143,14 @@ flowchart LR
 > 需要 Minecraft **26.3-snapshot-7**、Fabric Loader **0.19.3+**、Fabric API、Fabric Language Kotlin 与 Java **25**。
 > mesh shader 路径需要 `VK_EXT_mesh_shader` / `VK_NV_mesh_shader`（Vulkan）或 `GL_EXT_mesh_shader` / `GL_NV_mesh_shader`（OpenGL）。
 
+## 发布
+
+推送 `v*` tag（或手动触发发布工作流）：
+
+- **GitHub Packages** 自动接收 Maven 构件。
+- **Maven Central** 在仓库配置好 `OSSRH_USERNAME`、`OSSRH_PASSWORD`、`GPG_PRIVATE_KEY`、`GPG_PASSPHRASE` 后自动签名发布并关闭暂存。
+- 自动创建 **GitHub Release** 并附带构建产物。
+
 ---
 
 <div align="center">

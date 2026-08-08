@@ -143,6 +143,14 @@ Output → `build/libs/libgltf-0.10-fabric-26.3-snapshot-7.jar`
 > Requires Minecraft **26.3-snapshot-7**, Fabric Loader **0.19.3+**, Fabric API, Fabric Language Kotlin and Java **25**.
 > The mesh-shader path needs `VK_EXT_mesh_shader` / `VK_NV_mesh_shader` (Vulkan) or `GL_EXT_mesh_shader` / `GL_NV_mesh_shader` (OpenGL).
 
+## Releasing
+
+Push a `v*` tag (or trigger the release workflow manually):
+
+- **GitHub Packages** receives the Maven artifacts automatically.
+- **Maven Central** publishes once the repository secrets are configured: `OSSRH_USERNAME`, `OSSRH_PASSWORD`, `GPG_PRIVATE_KEY`, `GPG_PASSPHRASE`.
+- A **GitHub Release** is created with the built jars.
+
 ---
 
 <div align="center">
