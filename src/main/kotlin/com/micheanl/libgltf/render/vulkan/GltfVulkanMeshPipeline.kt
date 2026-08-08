@@ -111,7 +111,8 @@ class GltfVulkanMeshPipelineCache(
             instanceCount,
             instanceCulling,
             meshletCulling,
-            maxMeshGroups
+            maxMeshGroups,
+            GltfGpuDrivenSettings.meshGroupLimit
         )
         return true
     }
@@ -168,7 +169,8 @@ private class GltfVulkanMeshPipeline(
         instanceCount: Int,
         instanceCulling: Boolean,
         meshletCulling: Boolean,
-        maxMeshGroups: Int
+        maxMeshGroups: Int,
+        meshGroupLimit: Int
     ) {
         VK10.vkCmdBindPipeline(
             commandBuffer,
@@ -193,18 +195,20 @@ private class GltfVulkanMeshPipeline(
                 writes
             )
             val candidateCount = instanceCount.toLong() * meshlets.meshletCount
+            val chunkGroups = if (meshGroupLimit > 0) minOf(maxMeshGroups, meshGroupLimit) else maxMeshGroups
             if (!diagnosticsLogged) {
                 diagnosticsLogged = true
                 LOGGER.info(
-                    "libgltf Vulkan mesh draw instanceCount={} meshletCount={} candidates={}",
+                    "libgltf Vulkan mesh draw instanceCount={} meshletCount={} candidates={} chunkGroups={}",
                     instanceCount,
                     meshlets.meshletCount,
-                    candidateCount
+                    candidateCount,
+                    chunkGroups
                 )
             }
             var baseCandidate = 0L
             while (baseCandidate < candidateCount) {
-                val groups = minOf(maxMeshGroups.toLong(), candidateCount - baseCandidate).toInt()
+                val groups = minOf(chunkGroups.toLong(), candidateCount - baseCandidate).toInt()
                 val parameters = stack.malloc(PUSH_CONSTANT_SIZE)
                 for (index in sphere.indices) parameters.putFloat(index * Float.SIZE_BYTES, sphere[index])
                 parameters.putInt(16, instanceCount)

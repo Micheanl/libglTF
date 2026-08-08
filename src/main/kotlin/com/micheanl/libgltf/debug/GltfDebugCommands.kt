@@ -147,6 +147,18 @@ object GltfDebugCommands {
                                     .then(ClientCommands.literal("on").executes { meshMinimal(it.source, true) })
                                     .then(ClientCommands.literal("off").executes { meshMinimal(it.source, false) })
                             )
+                            .then(
+                                ClientCommands.literal("limit")
+                                    .then(
+                                        ClientCommands.argument("groups", IntegerArgumentType.integer(0))
+                                            .executes { context ->
+                                                meshLimit(
+                                                    context.source,
+                                                    context.getArgument("groups", Int::class.java)
+                                                )
+                                            }
+                                    )
+                            )
                     )
             )
         }
@@ -219,6 +231,7 @@ object GltfDebugCommands {
         }
         lines += "libgltf mesh=${if (GltfGpuFeatureRenderer.activeMesh) "on" else "off"}($meshMode) " +
             "minimal=${if (GltfGpuDrivenSettings.debugMeshMinimal) "on" else "off"} " +
+            "limit=${GltfGpuDrivenSettings.meshGroupLimit} " +
             "oit=${if (oit) "on" else "off"}"
         lines += "libgltf gpu=${GltfSceneRenderer.lastGpuSubmits} " +
             "cpu=${GltfSceneRenderer.lastCpuSubmits} " +
@@ -431,6 +444,12 @@ object GltfDebugCommands {
             GltfGpuFeatureRenderer.resetMeshShader()
         }
         source.sendFeedback(Component.literal("Mesh minimal debug set to $value"))
+        return 0
+    }
+
+    private fun meshLimit(source: FabricClientCommandSource, groups: Int): Int {
+        GltfGpuDrivenSettings.meshGroupLimit = groups
+        source.sendFeedback(Component.literal("Mesh group limit set to $groups"))
         return 0
     }
 }

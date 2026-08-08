@@ -14,6 +14,9 @@ object GltfGpuDrivenSettings {
     @Volatile
     var debugMeshMinimal: Boolean = booleanProperty("libgltf.vulkan.meshShader.debugMinimal", false)
 
+    @Volatile
+    var meshGroupLimit: Int = intProperty("libgltf.vulkan.meshShader.groupLimit", 1024)
+
     fun meshShaderEnabled(): Boolean = meshShaderOverride ?: meshShader
 
     fun profitable(instanceCount: Int, meshletCount: Int): Boolean = force ||
@@ -21,6 +24,9 @@ object GltfGpuDrivenSettings {
 
     private fun booleanProperty(name: String, default: Boolean): Boolean =
         System.getProperty(name)?.toBooleanStrictOrNull() ?: default
+
+    private fun intProperty(name: String, default: Int): Int =
+        System.getProperty(name)?.toIntOrNull() ?: default
 
     private const val MIN_INSTANCE_COUNT = 16
     private const val MIN_COMMAND_COUNT = 32
