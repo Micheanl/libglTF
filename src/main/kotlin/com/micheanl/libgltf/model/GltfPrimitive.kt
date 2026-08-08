@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.model
 
+/**
+ * libgltf · GltfPrimitive
+ *
+ * 网格基元与 LOD 索引
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import java.nio.ByteBuffer
 
 data class GltfPrimitive(

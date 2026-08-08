@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render.vulkan
 
+/**
+ * libgltf · VulkanComputePipeline
+ *
+ * 间接路径的计算剔除管线
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.mixin.VulkanCommandEncoderAccessor
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice

@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render
 
+/**
+ * libgltf · GltfSceneRenderer
+ *
+ * 场景实例收集与提交入口
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.api.GltfInstance
 import com.micheanl.libgltf.api.GltfRenderMode
 import com.micheanl.libgltf.material.TextureWrap

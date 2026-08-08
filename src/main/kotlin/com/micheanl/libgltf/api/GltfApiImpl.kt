@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.api
 
+/**
+ * libgltf · GltfApiImpl
+ *
+ * GltfApi 的默认实现
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.asset.GltfLoadResult
 import com.micheanl.libgltf.asset.GltfLoader
 import com.micheanl.libgltf.lod.LodPolicy

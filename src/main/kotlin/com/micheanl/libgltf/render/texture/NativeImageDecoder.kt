@@ -1,5 +1,13 @@
 package com.micheanl.libgltf.render.texture
 
+/**
+ * libgltf · NativeImageDecoder
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.mojang.blaze3d.platform.NativeImage
 import org.lwjgl.stb.STBImage
 import org.lwjgl.system.MemoryStack

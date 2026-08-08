@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render.vulkan
 
+/**
+ * libgltf · RenderConfig
+ *
+ * 渲染性能配置与 config 文件映射
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import java.util.Properties
 
 object RenderConfig {

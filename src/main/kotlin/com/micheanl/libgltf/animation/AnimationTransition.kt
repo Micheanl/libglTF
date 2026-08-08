@@ -1,5 +1,13 @@
 package com.micheanl.libgltf.animation
 
+/**
+ * libgltf · AnimationTransition
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 data class AnimationTransition(
     val fromState: Int,
     val toState: Int,

@@ -1,5 +1,13 @@
 package com.micheanl.libgltf.animation
 
+/**
+ * libgltf · AnimationStateMachine
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 class AnimationStateMachine(
     val parameters: Array<AnimationParameter>,
     val states: Array<AnimationState>,

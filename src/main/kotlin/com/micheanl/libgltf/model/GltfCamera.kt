@@ -1,5 +1,13 @@
 package com.micheanl.libgltf.model
 
+/**
+ * libgltf · GltfCamera
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 data class GltfCamera(
     val name: String,
     val type: CameraType,

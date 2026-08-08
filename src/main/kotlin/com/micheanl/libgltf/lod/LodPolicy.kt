@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.lod
 
+/**
+ * libgltf · LodPolicy
+ *
+ * LOD 策略配置
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 data class LodPolicy(
     val renderDistance: Float,
     val animationDistance: Float,

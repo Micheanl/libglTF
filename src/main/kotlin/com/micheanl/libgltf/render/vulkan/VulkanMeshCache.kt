@@ -1,5 +1,13 @@
 package com.micheanl.libgltf.render.vulkan
 
+/**
+ * libgltf · VulkanMeshCache
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.render.gpu.MeshletStorage
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.pipeline.RenderPipeline

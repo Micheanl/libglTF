@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render.gpu
 
+/**
+ * libgltf · GpuVendor
+ *
+ * 厂商识别与设备画像
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.mojang.renderpearl.api.device.DeviceInfo
 
 enum class GpuVendor {

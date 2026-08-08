@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render.gpu
 
+/**
+ * libgltf · GpuFormats
+ *
+ * 顶点与实例格式定义
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.mojang.renderpearl.api.GpuFormat
 import com.mojang.renderpearl.api.vertex.VertexFormat
 

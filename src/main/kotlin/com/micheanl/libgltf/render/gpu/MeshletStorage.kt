@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render.gpu
 
+/**
+ * libgltf · MeshletStorage
+ *
+ * meshlet 的 GPU 缓冲：紧凑顶点、三角形与元数据
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.render.vulkan.VulkanUsage
 import com.micheanl.libgltf.model.VertexLayout
 import com.mojang.renderpearl.api.pipeline.IndexType

@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render.texture
 
+/**
+ * libgltf · GltfDynamicTexture
+ *
+ * 动态更新的 GPU 纹理
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.material.TextureFilter
 import com.micheanl.libgltf.material.TextureSampler
 import com.micheanl.libgltf.material.TextureWrap

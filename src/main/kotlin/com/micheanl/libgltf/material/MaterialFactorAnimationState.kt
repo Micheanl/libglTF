@@ -1,5 +1,13 @@
 package com.micheanl.libgltf.material
 
+/**
+ * libgltf · MaterialFactorAnimationState
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 class MaterialFactorAnimationState(private val materialCount: Int) {
     val animated = BooleanArray(materialCount)
     val baseColorFactor = FloatArray(materialCount * 4)

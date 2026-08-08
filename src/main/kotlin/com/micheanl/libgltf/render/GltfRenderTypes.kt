@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render
 
+/**
+ * libgltf · GltfRenderTypes
+ *
+ * 运行时 RenderType 构建
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.LibGltf
 import com.micheanl.libgltf.material.AlphaMode
 import com.micheanl.libgltf.material.GltfMaterial

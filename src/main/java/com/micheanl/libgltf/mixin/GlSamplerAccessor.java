@@ -1,5 +1,13 @@
 package com.micheanl.libgltf.mixin;
 
+/**
+ * libgltf · GlSamplerAccessor
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 

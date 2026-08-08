@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.lod
 
+/**
+ * libgltf · MeshLodBuilder
+ *
+ * LOD 网格简化
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import org.lwjgl.system.MemoryUtil
 import org.lwjgl.util.meshoptimizer.MeshOptimizer
 import java.nio.FloatBuffer

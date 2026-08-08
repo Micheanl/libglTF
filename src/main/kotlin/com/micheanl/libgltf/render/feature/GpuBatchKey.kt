@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render.feature
 
+/**
+ * libgltf · GpuBatchKey
+ *
+ * 提交分组键
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import net.minecraft.client.renderer.rendertype.RenderType
 
 data class GpuBatchKey(

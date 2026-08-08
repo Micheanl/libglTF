@@ -1,5 +1,13 @@
 package com.micheanl.libgltf.model
 
+/**
+ * libgltf · GltfStats
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 data class GltfStats(
     val nodeCount: Int,
     val meshCount: Int,

@@ -1,5 +1,13 @@
 package com.micheanl.libgltf.material
 
+/**
+ * libgltf · TextureBinding
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import kotlin.math.cos
 import kotlin.math.sin
 

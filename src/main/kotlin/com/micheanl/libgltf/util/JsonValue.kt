@@ -1,5 +1,13 @@
 package com.micheanl.libgltf.util
 
+/**
+ * libgltf · JsonValue
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 

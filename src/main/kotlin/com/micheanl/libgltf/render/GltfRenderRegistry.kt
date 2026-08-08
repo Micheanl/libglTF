@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render
 
+/**
+ * libgltf · GltfRenderRegistry
+ *
+ * 渲染类型注册表
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.api.GltfInstance
 import com.micheanl.libgltf.api.GltfInstanceId
 import java.util.concurrent.ConcurrentHashMap

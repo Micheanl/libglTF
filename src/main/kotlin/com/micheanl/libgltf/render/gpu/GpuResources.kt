@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render.gpu
 
+/**
+ * libgltf · GpuResources
+ *
+ * 资源对应的 GPU 数据
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.model.GltfAsset
 import com.micheanl.libgltf.render.GpuBackendType
 import com.micheanl.libgltf.render.vulkan.RenderConfig

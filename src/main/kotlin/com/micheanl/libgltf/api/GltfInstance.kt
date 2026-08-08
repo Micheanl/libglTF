@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.api
 
+/**
+ * libgltf · GltfInstance
+ *
+ * 场景中的一个 glTF 实例：变换、材质、动画状态与 LOD
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.animation.AnimationController
 import com.micheanl.libgltf.animation.AnimationPlayer
 import com.micheanl.libgltf.lod.LodPolicy

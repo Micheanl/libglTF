@@ -1,5 +1,13 @@
 package com.micheanl.libgltf.animation
 
+/**
+ * libgltf · AnimationController
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.model.GltfAsset
 import kotlin.math.abs
 

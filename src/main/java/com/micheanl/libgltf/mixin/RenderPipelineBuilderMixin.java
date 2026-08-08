@@ -1,5 +1,13 @@
 package com.micheanl.libgltf.mixin;
 
+/**
+ * libgltf · RenderPipelineBuilderMixin
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.LibGltf;
 import com.micheanl.libgltf.render.gpu.GpuBackend;
 import com.mojang.renderpearl.api.pipeline.RenderPipeline;

@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render.vulkan
 
+/**
+ * libgltf · VulkanBufferRing
+ *
+ * Vulkan 环形缓冲
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.device.GpuDevice
 

@@ -1,5 +1,13 @@
 package com.micheanl.libgltf.render.texture
 
+/**
+ * libgltf · LabPbrTextureEncoder
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.material.GltfMaterial
 import com.micheanl.libgltf.material.TextureBinding
 import com.micheanl.libgltf.model.GltfAsset

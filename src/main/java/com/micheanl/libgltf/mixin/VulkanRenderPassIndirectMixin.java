@@ -1,5 +1,13 @@
 package com.micheanl.libgltf.mixin;
 
+/**
+ * libgltf · VulkanRenderPassIndirectMixin
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.render.gpu.MeshletStorage;
 import com.micheanl.libgltf.render.vulkan.VulkanMeshCache;
 import com.micheanl.libgltf.render.vulkan.VulkanIndirectRenderPass;

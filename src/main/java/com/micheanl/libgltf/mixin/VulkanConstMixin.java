@@ -1,5 +1,13 @@
 package com.micheanl.libgltf.mixin;
 
+/**
+ * libgltf · VulkanConstMixin
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.render.vulkan.VulkanUsage;
 import com.mojang.renderpearl.backend.vulkan.VulkanConst;
 import org.lwjgl.vulkan.VK10;

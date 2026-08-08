@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render
 
+/**
+ * libgltf · GltfWorldRenderer
+ *
+ * 世界渲染提交
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext
 import net.minecraft.client.Minecraft
 import net.minecraft.client.multiplayer.ClientLevel

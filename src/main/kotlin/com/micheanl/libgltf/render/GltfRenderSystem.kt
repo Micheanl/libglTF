@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render
 
+/**
+ * libgltf · GltfRenderSystem
+ *
+ * 渲染资源生命周期管理
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.api.GltfHandle
 import com.micheanl.libgltf.model.GltfAsset
 import com.micheanl.libgltf.render.feature.GpuFeature

@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render.gpu
 
+/**
+ * libgltf · GpuBackend
+ *
+ * 后端能力探测与厂商配置
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.mixin.FrontendGpuDeviceAccessor
 import com.micheanl.libgltf.render.GpuBackendType
 import com.micheanl.libgltf.render.GpuCapabilities

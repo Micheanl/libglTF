@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render.texture
 
+/**
+ * libgltf · GltfTextureSet
+ *
+ * 资源纹理集合
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import net.minecraft.client.Minecraft
 import net.minecraft.resources.Identifier
 

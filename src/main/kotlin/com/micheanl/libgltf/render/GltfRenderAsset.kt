@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render
 
+/**
+ * libgltf · GltfRenderAsset
+ *
+ * 渲染资源封装
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.model.GltfAsset
 import com.micheanl.libgltf.render.gpu.GpuResources
 import com.micheanl.libgltf.render.texture.GltfTextureFactory

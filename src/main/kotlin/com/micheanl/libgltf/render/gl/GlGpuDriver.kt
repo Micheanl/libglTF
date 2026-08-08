@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render.gl
 
+/**
+ * libgltf · GlGpuDriver
+ *
+ * OpenGL 后端的 GPU 驱动
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.render.gpu.GpuBackend
 import com.micheanl.libgltf.render.gpu.GpuDriver
 import com.micheanl.libgltf.render.vulkan.RenderConfig

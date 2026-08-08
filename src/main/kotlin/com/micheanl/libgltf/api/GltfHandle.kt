@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.api
 
+/**
+ * libgltf · GltfHandle
+ *
+ * 已加载 glTF 资源的句柄
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.model.GltfAsset
 import com.micheanl.libgltf.render.GltfRenderSystem
 import java.util.concurrent.atomic.AtomicBoolean

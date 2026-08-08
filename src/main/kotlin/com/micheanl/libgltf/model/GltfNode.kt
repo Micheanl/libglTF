@@ -1,5 +1,13 @@
 package com.micheanl.libgltf.model
 
+/**
+ * libgltf · GltfNode
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 data class GltfNode(
     val name: String,
     val parentIndex: Int,

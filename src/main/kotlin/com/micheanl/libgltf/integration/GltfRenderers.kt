@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.integration
 
+/**
+ * libgltf · GltfRenderers
+ *
+ * 集成渲染器注册
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.api.GltfInstance
 import com.micheanl.libgltf.integration.block.GltfBlockEntityRenderProvider
 import com.micheanl.libgltf.integration.block.GltfBlockEntityRenderer

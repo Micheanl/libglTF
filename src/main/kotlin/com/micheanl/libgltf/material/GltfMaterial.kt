@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.material
 
+/**
+ * libgltf · GltfMaterial
+ *
+ * glTF 材质与扩展
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 data class GltfMaterial(
     val name: String,
     val baseColorFactor: FloatArray,

@@ -1,5 +1,13 @@
 package com.micheanl.libgltf.animation
 
+/**
+ * libgltf · AnimationChannel
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 data class AnimationChannel(
     val nodeIndex: Int,
     val path: AnimationPath,

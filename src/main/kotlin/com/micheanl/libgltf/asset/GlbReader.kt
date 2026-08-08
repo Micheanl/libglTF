@@ -1,5 +1,13 @@
 package com.micheanl.libgltf.asset
 
+/**
+ * libgltf · GlbReader
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 

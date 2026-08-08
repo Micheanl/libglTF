@@ -1,5 +1,15 @@
 package com.micheanl.libgltf.render.gpu
 
+/**
+ * libgltf · OcclusionDepth
+ *
+ * 上一帧深度遮挡纹理与复制
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
+
 import com.micheanl.libgltf.render.vulkan.RenderConfig
 import com.micheanl.libgltf.render.GpuBackendType
 import com.mojang.blaze3d.systems.RenderSystem
