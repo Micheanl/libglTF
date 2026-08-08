@@ -1,7 +1,16 @@
 package com.micheanl.libgltf.model
 
+
+
+
 /**
  * libgltf · VertexLayout
+ *
+ * ```
+ * val vertices = ByteBuffer.allocate(vertexCount * VertexLayout.STRIDE).order(ByteOrder.nativeOrder())
+ * ```
+ *
+ * 顶点布局常量：属性偏移与步长
  *
  * @author Chen Micheanl
  * @license MIT

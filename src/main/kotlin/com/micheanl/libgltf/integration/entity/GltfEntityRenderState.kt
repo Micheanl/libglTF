@@ -5,12 +5,16 @@ import net.minecraft.client.renderer.entity.state.EntityRenderState
 import org.joml.Matrix4f
 
 
+
+
 /**
  * libgltf · GltfEntityRenderState
  *
  * ```
- * override fun createRenderState(): GltfEntityRenderState = GltfEntityRenderState()
+ * ) : EntityRenderer<T, GltfEntityRenderState>(context) {
  * ```
+ *
+ * 实体渲染状态
  *
  * @author Chen Micheanl
  * @license MIT

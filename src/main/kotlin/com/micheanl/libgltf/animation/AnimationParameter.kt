@@ -1,11 +1,16 @@
 package com.micheanl.libgltf.animation
 
+
+
+
 /**
  * libgltf · AnimationParameter
  *
  * ```
- * return AnimationParameter(name, index, type).also(parameters::add)
+ * val parameter: AnimationParameter,
  * ```
+ *
+ * 动画参数
  *
  * @author Chen Micheanl
  * @license MIT

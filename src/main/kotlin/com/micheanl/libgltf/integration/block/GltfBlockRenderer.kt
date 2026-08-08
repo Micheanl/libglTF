@@ -9,12 +9,16 @@ import net.minecraft.client.renderer.special.NoDataSpecialModelRenderer
 import org.joml.Vector3fc
 
 
+
+
 /**
  * libgltf · GltfBlockRenderer
  *
  * ```
  * fun block(instance: GltfInstance): GltfBlockRenderer = GltfBlockRenderer(instance)
  * ```
+ *
+ * 方块 glTF 渲染器
  *
  * @author Chen Micheanl
  * @license MIT

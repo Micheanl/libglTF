@@ -19,8 +19,18 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(VulkanRenderPass.class)
+
+
+
+
 /**
  * libgltf · VulkanRenderPassIndirectMixin
+ *
+ * ```
+ * @Mixin(VulkanRenderPass.class)
+ * ```
+ *
+ * Vulkan 间接绘制与 mesh 绘制接入 mixin
  *
  * @author Chen Micheanl
  * @license MIT

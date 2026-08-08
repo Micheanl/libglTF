@@ -1,14 +1,5 @@
 package com.micheanl.libgltf.mixin.iris;
 
-/**
- * libgltf · IrisMixinPlugin
- *
- * @author Chen Micheanl
- * @license MIT
- * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
- */
-
-
 import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -16,6 +7,23 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
 import java.util.List;
 import java.util.Set;
+
+
+
+
+/**
+ * libgltf · IrisMixinPlugin
+ *
+ * ```
+ * class IrisMixinPlugin : IMixinConfigPlugin
+ * ```
+ *
+ * Iris mixin 配置插件
+ *
+ * @author Chen Micheanl
+ * @license MIT
+ * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
+ */
 
 public final class IrisMixinPlugin implements IMixinConfigPlugin {
     private static final boolean AVAILABLE = FabricLoader.getInstance().isModLoaded("iris");

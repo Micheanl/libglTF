@@ -1,7 +1,16 @@
 package com.micheanl.libgltf.animation
 
+
+
+
 /**
  * libgltf · AnimationComparison
+ *
+ * ```
+ * val comparison: AnimationComparison,
+ * ```
+ *
+ * 状态机比较条件
  *
  * @author Chen Micheanl
  * @license MIT

@@ -1,5 +1,8 @@
 package com.micheanl.libgltf.material
 
+
+
+
 /**
  * libgltf · AnisotropyMaterial
  *
@@ -10,6 +13,8 @@ package com.micheanl.libgltf.material
  * parseBinding(JsonFields.value(it, "anisotropyTexture"))
  * )
  * ```
+ *
+ * 各向异性材质扩展
  *
  * @author Chen Micheanl
  * @license MIT

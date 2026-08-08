@@ -15,22 +15,13 @@ import java.nio.FloatBuffer
 import java.nio.IntBuffer
 
 
+
+
 /**
  * libgltf · MeshletStorage
  *
  * ```
- * MeshletStorage.create(
- * device,
- * "$label lod $level",
- * optimized[level],
- * remappedPositions,
- * remappedVertices,
- * primitive.vertexCount,
- * indexType,
- * if (gl) 256 else 64,
- * if (gl) 256 else 64,
- * primitive.bounds
- * )
+ * MeshletStorage meshlets,
  * ```
  *
  * meshlet 的 GPU 缓冲：紧凑顶点、三角形与元数据

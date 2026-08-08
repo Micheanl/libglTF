@@ -10,12 +10,16 @@ import net.minecraft.world.item.ItemStack
 import org.joml.Vector3fc
 
 
+
+
 /**
  * libgltf · GltfItemRenderer
  *
  * ```
  * fun item(instance: GltfInstance): GltfItemRenderer = GltfItemRenderer(instance)
  * ```
+ *
+ * 物品 glTF 渲染器
  *
  * @author Chen Micheanl
  * @license MIT

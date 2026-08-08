@@ -15,8 +15,18 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(VulkanDevice.class)
+
+
+
+
 /**
  * libgltf · VulkanDeviceMixin
+ *
+ * ```
+ * @Mixin(VulkanDevice.class)
+ * ```
+ *
+ * 提供 Vulkan 顶点属性上限的 mixin
  *
  * @author Chen Micheanl
  * @license MIT

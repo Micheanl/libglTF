@@ -6,11 +6,13 @@ import net.fabricmc.api.ModInitializer
 import net.minecraft.resources.Identifier
 
 
+
+
 /**
  * libgltf · LibGltf
  *
  * ```
- * LibGltf.id("runtime/$resourceId/texture_$index")
+ * return pipelineLocation != null && LibGltf.MOD_ID.equals(pipelineLocation.getNamespace())
  * ```
  *
  * 模组主入口与资源 ID 定义

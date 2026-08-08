@@ -6,8 +6,14 @@ import com.mojang.renderpearl.api.pipeline.RenderPipeline
 import net.minecraft.client.renderer.rendertype.PreparedRenderType
 
 
+
+
 /**
  * libgltf · GlMeshRenderPass
+ *
+ * ```
+ * public abstract class GlRenderPassMeshMixin implements GlMeshRenderPass {
+ * ```
  *
  * OpenGL mesh 绘制接入
  *

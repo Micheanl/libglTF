@@ -14,11 +14,13 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 
 
+
+
 /**
  * libgltf · GltfRenderSystem
  *
  * ```
- * override fun upload(asset: GltfAsset): GltfHandle = GltfRenderSystem.upload(asset)
+ * GltfRenderSystem.initialize()
  * ```
  *
  * 渲染资源生命周期管理

@@ -1,7 +1,14 @@
 package com.micheanl.libgltf.api
 
+
+
+
 /**
  * libgltf · GltfRenderMode
+ *
+ * ```
+ * var renderMode: GltfRenderMode = GltfRenderMode.AUTO
+ * ```
  *
  * 渲染模式：CPU、GPU 或自动
  *

@@ -1,7 +1,14 @@
 package com.micheanl.libgltf.lod
 
+
+
+
 /**
  * libgltf · LodPolicy
+ *
+ * ```
+ * fun load(path: Path, lodPolicy: LodPolicy = LodPolicy.DEFAULT): GltfLoadResult
+ * ```
  *
  * LOD 策略配置
  *

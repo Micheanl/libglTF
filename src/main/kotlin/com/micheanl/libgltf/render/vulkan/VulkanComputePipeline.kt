@@ -13,11 +13,13 @@ import org.lwjgl.vulkan.*
 import java.nio.ByteBuffer
 
 
+
+
 /**
  * libgltf · VulkanComputePipeline
  *
  * ```
- * return VulkanGpuDriver(VulkanComputePipeline.create(backend), mesh)
+ * VulkanComputePipeline.STATS_SIZE
  * ```
  *
  * 间接路径的计算剔除管线

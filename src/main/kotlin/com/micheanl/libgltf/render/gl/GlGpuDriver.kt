@@ -6,8 +6,14 @@ import com.micheanl.libgltf.render.vulkan.RenderConfig
 import org.lwjgl.opengl.GL
 
 
+
+
 /**
  * libgltf · GlGpuDriver
+ *
+ * ```
+ * (driver is VulkanGpuDriver || driver is GlGpuDriver)
+ * ```
  *
  * OpenGL 后端的 GPU 驱动
  *

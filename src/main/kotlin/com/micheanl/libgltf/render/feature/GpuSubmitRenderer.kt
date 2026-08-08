@@ -13,8 +13,14 @@ import net.minecraft.client.renderer.feature.FeatureRenderer
 import net.minecraft.client.renderer.oit.OitStage
 
 
+
+
 /**
  * libgltf · GpuSubmitRenderer
+ *
+ * ```
+ * FeatureRendererRegistry.register(TYPE, ::GpuSubmitRenderer)
+ * ```
  *
  * GPU 提交的 FeatureRenderer 接入
  *

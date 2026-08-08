@@ -4,8 +4,14 @@ import com.micheanl.libgltf.render.GltfRenderSystem
 import net.fabricmc.api.ClientModInitializer
 
 
+
+
 /**
  * libgltf · LibGltfClient
+ *
+ * ```
+ * object LibGltfClient : ClientModInitializer
+ * ```
  *
  * 客户端侧初始化与生命周期
  *

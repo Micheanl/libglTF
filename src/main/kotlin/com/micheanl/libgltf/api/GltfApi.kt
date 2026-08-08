@@ -11,8 +11,14 @@ import net.minecraft.client.renderer.OrderedSubmitNodeCollector
 import net.minecraft.client.renderer.texture.OverlayTexture
 
 
+
+
 /**
  * libgltf · GltfApi
+ *
+ * ```
+ * object GltfApiImpl : GltfApi {
+ * ```
  *
  * 对外加载、查询与释放 glTF 资源的入口
  *

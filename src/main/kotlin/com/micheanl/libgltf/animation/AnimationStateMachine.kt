@@ -1,19 +1,16 @@
 package com.micheanl.libgltf.animation
 
+
+
+
 /**
  * libgltf · AnimationStateMachine
  *
  * ```
- * fun build(): AnimationStateMachine = AnimationStateMachine(
- * parameters.toTypedArray(),
- * states.toTypedArray(),
- * transitions.toTypedArray(),
- * initialState,
- * floatCount,
- * intCount,
- * booleanCount
- * )
+ * var machine: AnimationStateMachine? = null
  * ```
+ *
+ * 动画状态机
  *
  * @author Chen Micheanl
  * @license MIT

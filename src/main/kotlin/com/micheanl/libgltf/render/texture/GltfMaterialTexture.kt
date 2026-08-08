@@ -4,12 +4,16 @@ import com.micheanl.libgltf.render.iris.IrisCompat
 import net.minecraft.resources.Identifier
 
 
+
+
 /**
  * libgltf · GltfMaterialTexture
  *
  * ```
- * materialTexture = GltfMaterialTexture(identifier, albedo, normal, specular)
+ * val materialTextures = arrayOfNulls<GltfMaterialTexture>(asset.materials.size)
  * ```
+ *
+ * 材质贴图的 GPU 纹理
  *
  * @author Chen Micheanl
  * @license MIT

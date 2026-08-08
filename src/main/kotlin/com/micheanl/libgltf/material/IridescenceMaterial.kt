@@ -1,5 +1,8 @@
 package com.micheanl.libgltf.material
 
+
+
+
 /**
  * libgltf · IridescenceMaterial
  *
@@ -13,6 +16,8 @@ package com.micheanl.libgltf.material
  * parseBinding(JsonFields.value(it, "iridescenceThicknessTexture"))
  * )
  * ```
+ *
+ * 虹彩材质扩展
  *
  * @author Chen Micheanl
  * @license MIT

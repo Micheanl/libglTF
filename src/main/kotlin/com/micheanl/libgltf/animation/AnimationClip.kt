@@ -1,15 +1,16 @@
 package com.micheanl.libgltf.animation
 
+
+
+
 /**
  * libgltf · AnimationClip
  *
  * ```
- * AnimationClip(
- * JsonFields.string(animation, "name", "animation_$animationIndex"),
- * duration,
- * parsed.toTypedArray()
- * )
+ * clip: AnimationClip,
  * ```
+ *
+ * 动画片段：通道集合与总时长
  *
  * @author Chen Micheanl
  * @license MIT

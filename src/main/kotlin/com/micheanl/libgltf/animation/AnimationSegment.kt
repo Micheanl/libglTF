@@ -3,12 +3,16 @@ package com.micheanl.libgltf.animation
 import kotlin.math.floor
 
 
+
+
 /**
  * libgltf · AnimationSegment
  *
  * ```
- * return AnimationSegment.full(index, asset.animations[index], framesPerSecond)
+ * private var activeSegment: AnimationSegment? = null
  * ```
+ *
+ * 动画曲线段
  *
  * @author Chen Micheanl
  * @license MIT

@@ -10,11 +10,13 @@ import com.mojang.renderpearl.api.textures.GpuTextureView
 import net.minecraft.client.Minecraft
 
 
+
+
 /**
  * libgltf · OcclusionDepth
  *
  * ```
- * OcclusionDepth.close()
+ * OcclusionDepth.INSTANCE.update();
  * ```
  *
  * 上一帧深度遮挡纹理与复制

@@ -1,7 +1,16 @@
 package com.micheanl.libgltf.material
 
+
+
+
 /**
  * libgltf · TextureWrap
+ *
+ * ```
+ * private fun wrap(value: Int): TextureWrap = when (value) {
+ * ```
+ *
+ * 纹理包裹模式
  *
  * @author Chen Micheanl
  * @license MIT

@@ -7,11 +7,13 @@ import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.logging.LogUtils
 
 
+
+
 /**
  * libgltf · GpuResources
  *
  * ```
- * resources = GpuResources(id, asset)
+ * private var gpuResources: GpuResources? = null
  * ```
  *
  * 资源对应的 GPU 数据

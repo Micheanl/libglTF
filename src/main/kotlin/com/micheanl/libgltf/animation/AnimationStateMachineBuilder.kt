@@ -3,8 +3,16 @@ package com.micheanl.libgltf.animation
 import com.micheanl.libgltf.model.GltfAsset
 
 
+
+
 /**
  * libgltf · AnimationStateMachineBuilder
+ *
+ * ```
+ * AnimationStateMachineBuilder(asset).floatParameter("speed")
+ * ```
+ *
+ * 动画状态机构建器
  *
  * @author Chen Micheanl
  * @license MIT

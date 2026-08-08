@@ -5,8 +5,14 @@ import com.mojang.renderpearl.api.pipeline.RenderPipeline
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 
 
+
+
 /**
  * libgltf · VulkanMeshRenderPass
+ *
+ * ```
+ * public abstract class VulkanRenderPassIndirectMixin implements VulkanIndirectRenderPass, VulkanMeshRenderPass {
+ * ```
  *
  * Vulkan mesh 绘制接入
  *

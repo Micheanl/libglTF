@@ -3,12 +3,16 @@ package com.micheanl.libgltf.asset
 import java.nio.ByteBuffer
 
 
+
+
 /**
  * libgltf · GlbPayload
  *
  * ```
- * return GlbPayload(json, binary)
+ * fun read(source: ByteBuffer): GlbPayload {
  * ```
+ *
+ * GLB 二进制块载荷
  *
  * @author Chen Micheanl
  * @license MIT

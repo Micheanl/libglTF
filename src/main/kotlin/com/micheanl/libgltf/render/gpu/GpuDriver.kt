@@ -1,7 +1,14 @@
 package com.micheanl.libgltf.render.gpu
 
+
+
+
 /**
  * libgltf · GpuDriver
+ *
+ * ```
+ * private var gpuDrivenDriver: GpuDriver? = null
+ * ```
  *
  * GPU 驱动抽象：mesh 与间接绘制
  *

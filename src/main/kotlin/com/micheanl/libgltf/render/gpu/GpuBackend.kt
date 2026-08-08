@@ -12,11 +12,13 @@ import com.mojang.renderpearl.backend.vulkan.VulkanDevice
 import org.lwjgl.opengl.GL
 
 
+
+
 /**
  * libgltf · GpuBackend
  *
  * ```
- * override fun gpuCapabilities(): GpuCapabilities = GpuBackend.capabilities()
+ * ? GpuBackend.INSTANCE.vertexAttributeLimit()
  * ```
  *
  * 后端能力探测与厂商配置

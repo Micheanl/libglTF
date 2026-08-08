@@ -18,8 +18,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(VulkanBackend.class)
+
+
+
+
 /**
  * libgltf · VulkanBackendMeshShaderMixin
+ *
+ * ```
+ * @Mixin(VulkanBackend.class)
+ * ```
+ *
+ * 启用 Vulkan mesh shader 设备特性的 mixin
  *
  * @author Chen Micheanl
  * @license MIT

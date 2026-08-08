@@ -1,19 +1,16 @@
 package com.micheanl.libgltf.animation
 
+
+
+
 /**
  * libgltf · AnimationTransition
  *
  * ```
- * AnimationTransition(
- * fromState,
- * toState,
- * conditions.copyOf(),
- * fadeSeconds,
- * minimumStateSeconds,
- * exitTime,
- * priority
- * )
+ * private fun selectTransition(machine: AnimationStateMachine): AnimationTransition? {
  * ```
+ *
+ * 状态机状态转换
  *
  * @author Chen Micheanl
  * @license MIT

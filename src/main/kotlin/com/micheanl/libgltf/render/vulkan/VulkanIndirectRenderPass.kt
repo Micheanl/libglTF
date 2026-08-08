@@ -3,8 +3,14 @@ package com.micheanl.libgltf.render.vulkan
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice
 
 
+
+
 /**
  * libgltf · VulkanIndirectRenderPass
+ *
+ * ```
+ * public abstract class VulkanRenderPassIndirectMixin implements VulkanIndirectRenderPass, VulkanMeshRenderPass {
+ * ```
  *
  * Vulkan 间接绘制接入
  *

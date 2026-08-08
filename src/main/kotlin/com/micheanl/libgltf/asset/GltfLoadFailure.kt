@@ -1,11 +1,16 @@
 package com.micheanl.libgltf.asset
 
+
+
+
 /**
  * libgltf · GltfLoadFailure
  *
  * ```
  * GltfLoadFailure(throwable.message ?: throwable.javaClass.simpleName, throwable)
  * ```
+ *
+ * 加载失败结果
  *
  * @author Chen Micheanl
  * @license MIT

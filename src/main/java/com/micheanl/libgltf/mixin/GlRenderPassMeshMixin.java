@@ -11,8 +11,18 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(targets = "com.mojang.renderpearl.backend.opengl.GlRenderPass")
+
+
+
+
 /**
  * libgltf · GlRenderPassMeshMixin
+ *
+ * ```
+ * @Mixin(targets = "com.mojang.renderpearl.backend.opengl.GlRenderPass")
+ * ```
+ *
+ * OpenGL 渲染通道 mesh 绘制接入 mixin
  *
  * @author Chen Micheanl
  * @license MIT

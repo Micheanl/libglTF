@@ -5,8 +5,16 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.phys.Vec3
 
 
+
+
 /**
  * libgltf · GltfBlockEntityRenderProvider
+ *
+ * ```
+ * private val provider: GltfBlockEntityRenderProvider<T>
+ * ```
+ *
+ * 方块实体渲染提供者
  *
  * @author Chen Micheanl
  * @license MIT

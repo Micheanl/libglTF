@@ -3,8 +3,16 @@ package com.micheanl.libgltf.material
 import net.minecraft.resources.Identifier
 
 
+
+
 /**
  * libgltf · MaterialOverride
+ *
+ * ```
+ * val materialOverrides: Array<MaterialOverride?> = arrayOfNulls(handle.asset.materials.size)
+ * ```
+ *
+ * 材质覆盖配置
  *
  * @author Chen Micheanl
  * @license MIT

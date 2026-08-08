@@ -13,8 +13,14 @@ import net.minecraft.world.entity.Entity
 import net.minecraft.world.level.block.entity.BlockEntity
 
 
+
+
 /**
  * libgltf · GltfRenderers
+ *
+ * ```
+ * GltfRenderers.item(instance)
+ * ```
  *
  * 集成渲染器注册
  *

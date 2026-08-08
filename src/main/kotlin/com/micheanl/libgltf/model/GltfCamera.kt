@@ -1,20 +1,16 @@
 package com.micheanl.libgltf.model
 
+
+
+
 /**
  * libgltf · GltfCamera
  *
  * ```
- * GltfCamera(
- * JsonFields.string(value, "name", "camera_$index"),
- * cameraType(JsonFields.string(value, "type", "perspective")),
- * JsonFields.float(perspective, "yfov", 0.7853982f),
- * JsonFields.float(perspective, "znear", 0.01f),
- * JsonFields.float(perspective, "zfar", -1.0f),
- * JsonFields.float(perspective, "aspectRatio", -1.0f),
- * JsonFields.float(orthographic, "xmag", -1.0f),
- * JsonFields.float(orthographic, "ymag", -1.0f)
- * )
+ * private fun parseCameras(root: JsonValue): Array<GltfCamera> {
  * ```
+ *
+ * glTF 相机
  *
  * @author Chen Micheanl
  * @license MIT

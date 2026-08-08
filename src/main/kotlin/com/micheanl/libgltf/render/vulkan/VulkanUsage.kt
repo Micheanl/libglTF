@@ -1,7 +1,16 @@
 package com.micheanl.libgltf.render.vulkan
 
+
+
+
 /**
  * libgltf · VulkanUsage
+ *
+ * ```
+ * if ((usage & VulkanUsage.STORAGE) != 0) {
+ * ```
+ *
+ * Vulkan 缓冲用途常量
  *
  * @author Chen Micheanl
  * @license MIT

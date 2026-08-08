@@ -3,12 +3,16 @@ package com.micheanl.libgltf.asset
 import com.micheanl.libgltf.model.GltfAsset
 
 
+
+
 /**
  * libgltf · GltfLoadSuccess
  *
  * ```
  * GltfLoadSuccess(parse(path, lodPolicy))
  * ```
+ *
+ * 加载成功结果
  *
  * @author Chen Micheanl
  * @license MIT

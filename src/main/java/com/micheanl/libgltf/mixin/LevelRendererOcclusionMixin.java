@@ -9,8 +9,18 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LevelRenderer.class)
+
+
+
+
 /**
  * libgltf · LevelRendererOcclusionMixin
+ *
+ * ```
+ * @Mixin(LevelRenderer.class)
+ * ```
+ *
+ * 帧末主深度复制 mixin
  *
  * @author Chen Micheanl
  * @license MIT

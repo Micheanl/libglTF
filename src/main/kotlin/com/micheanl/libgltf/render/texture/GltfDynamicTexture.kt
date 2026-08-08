@@ -15,11 +15,13 @@ import java.util.OptionalDouble
 import kotlin.math.max
 
 
+
+
 /**
  * libgltf · GltfDynamicTexture
  *
  * ```
- * val dynamic = GltfDynamicTexture(identifiers[index].toString(), image, texture.sampler)
+ * private val albedo: GltfDynamicTexture,
  * ```
  *
  * 动态更新的 GPU 纹理

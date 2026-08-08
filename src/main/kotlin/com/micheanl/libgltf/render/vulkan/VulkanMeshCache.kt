@@ -7,8 +7,16 @@ import com.mojang.renderpearl.backend.vulkan.VulkanRenderPipeline
 import org.lwjgl.vulkan.VkCommandBuffer
 
 
+
+
 /**
  * libgltf · VulkanMeshCache
+ *
+ * ```
+ * VulkanMeshCache cache,
+ * ```
+ *
+ * Vulkan mesh 管线缓存接口
  *
  * @author Chen Micheanl
  * @license MIT

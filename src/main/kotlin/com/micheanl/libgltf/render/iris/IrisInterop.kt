@@ -5,12 +5,16 @@ import net.irisshaders.iris.api.v0.IrisApi
 import net.minecraft.client.renderer.texture.AbstractTexture
 
 
+
+
 /**
  * libgltf · IrisInterop
  *
  * ```
  * fun shaderPackActive(): Boolean = loaded && IrisInterop.shaderPackActive()
  * ```
+ *
+ * Iris 互操作
  *
  * @author Chen Micheanl
  * @license MIT

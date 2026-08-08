@@ -1,11 +1,16 @@
 package com.micheanl.libgltf.material
 
+
+
+
 /**
  * libgltf · MaterialUvAnimationState
  *
  * ```
  * private val restMaterialUv = MaterialUvAnimationState(asset.materials.size)
  * ```
+ *
+ * 材质 UV 动画状态
  *
  * @author Chen Micheanl
  * @license MIT

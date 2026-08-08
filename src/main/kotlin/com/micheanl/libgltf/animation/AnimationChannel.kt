@@ -1,21 +1,16 @@
 package com.micheanl.libgltf.animation
 
+
+
+
 /**
  * libgltf · AnimationChannel
  *
  * ```
- * parsed += AnimationChannel(
- * -1,
- * AnimationPath.MATERIAL_UV,
- * interpolation,
- * input,
- * output,
- * components,
- * materialTarget.materialIndex,
- * materialTarget.textureSlot,
- * materialTarget.textureProperty
- * )
+ * val channels: Array<AnimationChannel>
  * ```
+ *
+ * 动画通道：属性路径与采样曲线
  *
  * @author Chen Micheanl
  * @license MIT

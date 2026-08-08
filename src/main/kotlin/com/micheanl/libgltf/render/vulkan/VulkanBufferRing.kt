@@ -4,16 +4,13 @@ import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.device.GpuDevice
 
 
+
+
 /**
  * libgltf · VulkanBufferRing
  *
  * ```
- * commandRing = VulkanBufferRing(
- * device,
- * "libgltf indirect commands",
- * GpuBuffer.USAGE_INDIRECT_PARAMETERS or VulkanUsage.STORAGE,
- * commandCapacity
- * )
+ * private var commandRing: VulkanBufferRing? = null
  * ```
  *
  * Vulkan 环形缓冲

@@ -4,11 +4,13 @@ import net.fabricmc.fabric.api.client.rendering.v1.FeatureRendererRegistry
 import net.minecraft.client.renderer.feature.FeatureRendererType
 
 
+
+
 /**
  * libgltf · GpuFeature
  *
  * ```
- * GpuFeature.initialize()
+ * override fun featureType(): FeatureRendererType<GpuSubmit> = GpuFeature.TYPE
  * ```
  *
  * GPU FeatureRenderer 注册

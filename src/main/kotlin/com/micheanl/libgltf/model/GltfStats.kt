@@ -1,5 +1,8 @@
 package com.micheanl.libgltf.model
 
+
+
+
 /**
  * libgltf · GltfStats
  *
@@ -15,6 +18,8 @@ package com.micheanl.libgltf.model
  * morphTargetCount
  * )
  * ```
+ *
+ * 加载统计信息
  *
  * @author Chen Micheanl
  * @license MIT

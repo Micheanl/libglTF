@@ -3,11 +3,12 @@ package com.micheanl.libgltf.render.vulkan
 import java.util.Properties
 
 
+
 /**
  * libgltf · RenderConfig
  *
  * ```
- * if (!extensionAvailable || !profile.preferMeshShader || !RenderConfig.meshShaderEnabled()) {
+ * if (!RenderConfig.INSTANCE.getMeshShader()) {
  * ```
  *
  * 渲染性能配置与 config 文件映射

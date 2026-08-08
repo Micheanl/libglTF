@@ -7,11 +7,13 @@ import org.joml.Quaternionf
 import kotlin.math.abs
 
 
+
+
 /**
  * libgltf · AnimationPlayer
  *
  * ```
- * val animation: AnimationPlayer = AnimationPlayer(handle.asset)
+ * val player: AnimationPlayer
  * ```
  *
  * 动画播放与姿态计算

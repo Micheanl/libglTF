@@ -4,24 +4,13 @@ import com.micheanl.libgltf.animation.AnimationClip
 import com.micheanl.libgltf.material.GltfMaterial
 
 
+
+
 /**
  * libgltf · GltfAsset
  *
  * ```
- * return GltfAsset(
- * path.fileName.toString(),
- * resolvedNodes,
- * order,
- * roots,
- * sceneNames,
- * sceneNodeMasks,
- * defaultScene,
- * meshes,
- * skins,
- * animations,
- * materials,
- * materialVariantNames,
- * cameras,
+ * private val asset: GltfAsset,
  * ```
  *
  * 解析后的 glTF 资源模型

@@ -5,12 +5,16 @@ import com.micheanl.libgltf.material.MaterialFactorAnimationState
 import org.joml.Matrix4f
 
 
+
+
 /**
  * libgltf · AnimationPose
  *
  * ```
- * val pose: AnimationPose = AnimationPose(asset.nodes.size, asset.totalMorphWeights, asset.materials.size)
+ * fun evaluate(deltaSeconds: Float): AnimationPose {
  * ```
+ *
+ * 节点动画姿态：局部矩阵集合
  *
  * @author Chen Micheanl
  * @license MIT

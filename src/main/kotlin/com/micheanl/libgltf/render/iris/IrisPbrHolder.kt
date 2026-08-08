@@ -4,12 +4,16 @@ import net.irisshaders.iris.pbr.texture.PBRTextureHolder
 import net.minecraft.client.renderer.texture.AbstractTexture
 
 
+
+
 /**
  * libgltf · IrisPbrHolder
  *
  * ```
  * holders[id] = IrisPbrHolder(normal, specular)
  * ```
+ *
+ * Iris PBR 纹理持有
  *
  * @author Chen Micheanl
  * @license MIT

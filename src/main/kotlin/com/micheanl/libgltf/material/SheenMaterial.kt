@@ -1,5 +1,8 @@
 package com.micheanl.libgltf.material
 
+
+
+
 /**
  * libgltf · SheenMaterial
  *
@@ -11,6 +14,8 @@ package com.micheanl.libgltf.material
  * parseBinding(JsonFields.value(it, "sheenRoughnessTexture"))
  * )
  * ```
+ *
+ * 丝绒材质扩展
  *
  * @author Chen Micheanl
  * @license MIT

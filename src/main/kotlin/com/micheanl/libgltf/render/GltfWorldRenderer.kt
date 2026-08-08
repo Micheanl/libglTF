@@ -10,8 +10,14 @@ import net.minecraft.world.level.chunk.status.ChunkStatus
 import org.joml.Matrix4f
 
 
+
+
 /**
  * libgltf · GltfWorldRenderer
+ *
+ * ```
+ * LevelRenderEvents.COLLECT_SUBMITS.register(GltfWorldRenderer::submit)
+ * ```
  *
  * 世界渲染提交
  *

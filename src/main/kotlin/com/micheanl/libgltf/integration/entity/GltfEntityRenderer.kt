@@ -10,12 +10,16 @@ import net.minecraft.client.renderer.texture.OverlayTexture
 import net.minecraft.world.entity.Entity
 
 
+
+
 /**
  * libgltf · GltfEntityRenderer
  *
  * ```
  * ): GltfEntityRenderer<T> = GltfEntityRenderer(context, provider)
  * ```
+ *
+ * 实体 glTF 渲染器
  *
  * @author Chen Micheanl
  * @license MIT

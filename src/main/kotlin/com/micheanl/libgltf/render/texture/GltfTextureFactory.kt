@@ -11,6 +11,8 @@ import net.minecraft.client.Minecraft
 import net.minecraft.resources.Identifier
 
 
+
+
 /**
  * libgltf · GltfTextureFactory
  *

@@ -1,23 +1,13 @@
 package com.micheanl.libgltf.render
 
+
+
+
 /**
  * libgltf · GpuCapabilities
  *
  * ```
- * private var capabilities = GpuCapabilities(
- * GpuBackendType.UNKNOWN,
- * false,
- * false,
- * false,
- * false,
- * false,
- * false,
- * false,
- * false,
- * false,
- * false,
- * false,
- * GpuPath.CPU
+ * fun gpuCapabilities(): GpuCapabilities
  * ```
  *
  * GPU 能力集合

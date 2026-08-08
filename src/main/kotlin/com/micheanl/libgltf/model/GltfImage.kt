@@ -1,11 +1,16 @@
 package com.micheanl.libgltf.model
 
+
+
+
 /**
  * libgltf · GltfImage
  *
  * ```
- * GltfImage(JsonFields.string(image, "name", "image_$index"), mime, bytes)
+ * private fun parseImages(root: JsonValue, resolver: GltfBufferResolver): Array<GltfImage> {
  * ```
+ *
+ * glTF 图像资源
  *
  * @author Chen Micheanl
  * @license MIT

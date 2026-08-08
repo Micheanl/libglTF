@@ -21,11 +21,13 @@ import org.lwjgl.opengl.NVMeshShader
 import org.lwjgl.system.MemoryStack
 
 
+
+
 /**
  * libgltf · GlMeshPipeline
  *
  * ```
- * GlMeshPipeline.create(renderPipeline, useNv, meshWorkgroupSize).also { pipelines[renderPipeline] = it }
+ * private val pipelines = Collections.synchronizedMap(IdentityHashMap<RenderPipeline, GlMeshPipeline>())
  * ```
  *
  * OpenGL mesh 管线与绘制

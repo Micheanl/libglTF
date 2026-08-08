@@ -4,11 +4,13 @@ import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.renderer.texture.AbstractTexture
 
 
+
+
 /**
  * libgltf · IrisCompat
  *
  * ```
- * IrisCompat.registerPbr(albedo, normal, specular)
+ * !IrisCompat.shaderPackActive()
  * ```
  *
  * Iris 兼容性检测

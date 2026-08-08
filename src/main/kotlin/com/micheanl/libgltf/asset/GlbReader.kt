@@ -4,12 +4,16 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 
+
+
 /**
  * libgltf · GlbReader
  *
  * ```
  * val payload = if (GlbReader.isGlb(source)) {
  * ```
+ *
+ * GLB 容器解析
  *
  * @author Chen Micheanl
  * @license MIT

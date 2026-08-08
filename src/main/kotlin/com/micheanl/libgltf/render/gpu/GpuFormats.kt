@@ -4,8 +4,14 @@ import com.mojang.renderpearl.api.GpuFormat
 import com.mojang.renderpearl.api.vertex.VertexFormat
 
 
+
+
 /**
  * libgltf · GpuFormats
+ *
+ * ```
+ * GpuFormats.INSTANCE_STRIDE_GL
+ * ```
  *
  * 顶点与实例格式定义
  *

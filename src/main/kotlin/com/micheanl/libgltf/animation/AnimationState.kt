@@ -1,11 +1,16 @@
 package com.micheanl.libgltf.animation
 
+
+
+
 /**
  * libgltf · AnimationState
  *
  * ```
- * states.add(AnimationState(name, segment, looping, speed))
+ * val states: Array<AnimationState>,
  * ```
+ *
+ * 状态机中的单个状态
  *
  * @author Chen Micheanl
  * @license MIT

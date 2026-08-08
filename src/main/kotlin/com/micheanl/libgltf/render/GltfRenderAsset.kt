@@ -6,11 +6,13 @@ import com.micheanl.libgltf.render.texture.GltfTextureFactory
 import com.micheanl.libgltf.render.texture.GltfTextureSet
 
 
+
+
 /**
  * libgltf · GltfRenderAsset
  *
  * ```
- * resources[id] = GltfRenderAsset(id, asset)
+ * fun renderType(resource: GltfRenderAsset, textures: GltfTextureSet): RenderType {
  * ```
  *
  * 渲染资源封装

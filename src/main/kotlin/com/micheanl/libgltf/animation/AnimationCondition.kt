@@ -1,7 +1,16 @@
 package com.micheanl.libgltf.animation
 
+
+
+
 /**
  * libgltf · AnimationCondition
+ *
+ * ```
+ * vararg conditions: AnimationCondition
+ * ```
+ *
+ * 状态机转换条件
  *
  * @author Chen Micheanl
  * @license MIT

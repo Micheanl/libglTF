@@ -1,17 +1,16 @@
 package com.micheanl.libgltf.model
 
+
+
+
 /**
  * libgltf · GltfMesh
  *
  * ```
- * GltfMesh(
- * JsonFields.string(mesh, "name", "mesh_$meshIndex"),
- * Array(primitives.size()) { primitiveIndex ->
- * parsePrimitive(primitives[primitiveIndex], decoder, lodPolicy, variantCount)
- * },
- * JsonFields.floats(mesh, "weights")
- * )
+ * ): Array<GltfMesh> {
  * ```
+ *
+ * glTF 网格：基元集合
  *
  * @author Chen Micheanl
  * @license MIT

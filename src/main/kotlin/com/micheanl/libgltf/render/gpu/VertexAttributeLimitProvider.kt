@@ -1,7 +1,14 @@
 package com.micheanl.libgltf.render.gpu
 
+
+
+
 /**
  * libgltf · VertexAttributeLimitProvider
+ *
+ * ```
+ * public abstract class GlDeviceMixin implements VertexAttributeLimitProvider {
+ * ```
  *
  * 顶点属性上限提供者
  *

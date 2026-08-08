@@ -5,12 +5,16 @@ import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState
 import org.joml.Matrix4f
 
 
+
+
 /**
  * libgltf · GltfBlockEntityRenderState
  *
  * ```
- * override fun createRenderState(): GltfBlockEntityRenderState = GltfBlockEntityRenderState()
+ * ) : BlockEntityRenderer<T, GltfBlockEntityRenderState> {
  * ```
+ *
+ * 方块实体渲染状态
  *
  * @author Chen Micheanl
  * @license MIT

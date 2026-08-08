@@ -15,11 +15,13 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 
+
+
 /**
  * libgltf · GpuSubmit
  *
  * ```
- * Array(instanceCount) { GpuSubmit(this, nodeIndex, meshIndex, primitiveIndex) }
+ * internal val gpuSubmits: Array<Array<Array<GpuSubmit>>> = createGpuSubmits()
  * ```
  *
  * 一次 GPU 提交：实例、材质与变换

@@ -27,11 +27,13 @@ private val EMPTY_DEFORMED_VERTICES: FloatArray = FloatArray(0)
 private val EMPTY_DEFORMED_REVISIONS: LongArray = LongArray(0)
 
 
+
+
 /**
  * libgltf · GltfGeometryRenderer
  *
  * ```
- * GltfGeometryRenderer(this, nodeIndex, handle.asset.meshes[meshIndex].primitives[primitiveIndex])
+ * internal val geometryRenderers: Array<Array<GltfGeometryRenderer>> = createRenderers()
  * ```
  *
  * CPU 渲染器

@@ -1,17 +1,16 @@
 package com.micheanl.libgltf.material
 
+
+
+
 /**
  * libgltf · TextureSampler
  *
  * ```
- * return TextureSampler(
- * mag,
- * min,
- * mipmap,
- * wrap(JsonFields.int(value, "wrapS", 10497)),
- * wrap(JsonFields.int(value, "wrapT", 10497))
- * )
+ * val sampler = if (samplerIndex >= 0 && samplers != null) parseSampler(samplers[samplerIndex]) else TextureSampler.DEFAULT
  * ```
+ *
+ * glTF 采样器配置
  *
  * @author Chen Micheanl
  * @license MIT

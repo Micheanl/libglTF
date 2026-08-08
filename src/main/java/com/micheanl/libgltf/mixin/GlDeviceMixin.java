@@ -6,8 +6,18 @@ import org.lwjgl.opengl.GL20;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(targets = "com.mojang.renderpearl.backend.opengl.GlDevice")
+
+
+
+
 /**
  * libgltf · GlDeviceMixin
+ *
+ * ```
+ * @Mixin(targets = "com.mojang.renderpearl.backend.opengl.GlDevice")
+ * ```
+ *
+ * 提供 OpenGL 顶点属性上限的 mixin
  *
  * @author Chen Micheanl
  * @license MIT

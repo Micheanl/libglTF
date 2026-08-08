@@ -8,8 +8,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @Mixin(VulkanGpuSampler.class)
+
+
+
+
 /**
  * libgltf · VulkanGpuSamplerMixin
+ *
+ * ```
+ * @Mixin(VulkanGpuSampler.class)
+ * ```
+ *
+ * 控制 Vulkan 采样器 mipmap 模式的 mixin
  *
  * @author Chen Micheanl
  * @license MIT

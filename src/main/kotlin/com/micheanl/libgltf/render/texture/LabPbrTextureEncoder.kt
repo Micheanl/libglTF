@@ -11,12 +11,16 @@ import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 
+
+
 /**
  * libgltf · LabPbrTextureEncoder
  *
  * ```
  * LabPbrTextureEncoder.normal(asset, material),
  * ```
+ *
+ * Lab PBR 纹理编码
  *
  * @author Chen Micheanl
  * @license MIT

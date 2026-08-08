@@ -3,18 +3,13 @@ package com.micheanl.libgltf.render.feature
 import net.minecraft.client.renderer.rendertype.RenderType
 
 
+
+
 /**
  * libgltf · GpuBatchKey
  *
  * ```
- * batchKey = GpuBatchKey(
- * resource.id,
- * meshIndex,
- * primitiveIndex,
- * lod,
- * skinIndex,
- * renderType
- * )
+ * private lateinit var batchKey: GpuBatchKey
  * ```
  *
  * 提交分组键

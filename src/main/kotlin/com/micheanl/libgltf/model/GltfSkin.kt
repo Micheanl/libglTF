@@ -1,11 +1,16 @@
 package com.micheanl.libgltf.model
 
+
+
+
 /**
  * libgltf · GltfSkin
  *
  * ```
- * GltfSkin(JsonFields.string(skin, "name", "skin_$index"), joints, matrices)
+ * private fun parseSkins(root: JsonValue, decoder: AccessorDecoder): Array<GltfSkin> {
  * ```
+ *
+ * glTF 蒙皮：关节与逆绑定矩阵
  *
  * @author Chen Micheanl
  * @license MIT

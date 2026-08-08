@@ -4,17 +4,13 @@ import net.minecraft.client.Minecraft
 import net.minecraft.resources.Identifier
 
 
+
+
 /**
  * libgltf · GltfTextureSet
  *
  * ```
- * GltfTextureSet(
- * identifiers,
- * Array(textures.size) { requireNotNull(textures[it]) },
- * materialIdentifiers,
- * materialTextures,
- * fallback
- * )
+ * textures: GltfTextureSet,
  * ```
  *
  * 资源纹理集合

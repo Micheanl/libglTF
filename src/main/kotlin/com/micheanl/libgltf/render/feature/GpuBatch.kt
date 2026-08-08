@@ -24,11 +24,13 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 
+
+
 /**
  * libgltf · GpuBatch
  *
  * ```
- * GpuBatch().also(batches::add)
+ * private val batches = ArrayList<GpuBatch>()
  * ```
  *
  * 单个提交组的 GPU 绘制批
@@ -436,7 +438,6 @@ class GpuBatch : AutoCloseable {
             sortedIndexCapacity
         )
     }
-
 
     private fun capacity(required: Int): Int {
         var capacity = 256

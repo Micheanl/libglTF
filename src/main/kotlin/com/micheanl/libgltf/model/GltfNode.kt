@@ -1,24 +1,16 @@
 package com.micheanl.libgltf.model
 
+
+
+
 /**
  * libgltf · GltfNode
  *
  * ```
- * GltfNode(
- * JsonFields.string(node, "name", "node_$index"),
- * -1,
- * JsonFields.ints(node, "children"),
- * JsonFields.int(node, "mesh"),
- * JsonFields.int(node, "skin"),
- * JsonFields.int(node, "camera"),
- * JsonFields.int(punctualLight, "light"),
- * instanceMatrices,
- * JsonFields.floats(node, "translation", floatArrayOf(0.0f, 0.0f, 0.0f)),
- * JsonFields.floats(node, "rotation", floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f)),
- * JsonFields.floats(node, "scale", floatArrayOf(1.0f, 1.0f, 1.0f)),
- * JsonFields.value(node, "matrix")?.let { JsonFields.floats(node, "matrix") },
- * JsonFields.floats(node, "weights")
+ * private fun parseNodes(root: JsonValue, decoder: AccessorDecoder): Array<GltfNode> {
  * ```
+ *
+ * glTF 节点：变换与网格引用
  *
  * @author Chen Micheanl
  * @license MIT

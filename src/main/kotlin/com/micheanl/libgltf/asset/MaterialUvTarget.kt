@@ -1,11 +1,16 @@
 package com.micheanl.libgltf.asset
 
+
+
+
 /**
  * libgltf · MaterialUvTarget
  *
  * ```
- * return MaterialUvTarget(materialIndex, textureSlot, textureProperty)
+ * private fun materialUvTarget(target: JsonValue): MaterialUvTarget? {
  * ```
+ *
+ * 材质 UV 目标通道
  *
  * @author Chen Micheanl
  * @license MIT

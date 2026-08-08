@@ -3,23 +3,13 @@ package com.micheanl.libgltf.model
 import java.nio.ByteBuffer
 
 
+
+
 /**
  * libgltf · GltfPrimitive
  *
  * ```
- * return GltfPrimitive(
- * vertices,
- * skin,
- * lodIndices,
- * vertexCount,
- * JsonFields.int(value, "material", 0),
- * materialMappings,
- * mode,
- * bounds,
- * morphPositions,
- * morphNormals,
- * targetCount
- * )
+ * ): GltfPrimitive {
  * ```
  *
  * 网格基元与 LOD 索引

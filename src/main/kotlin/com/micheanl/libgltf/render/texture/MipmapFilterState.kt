@@ -3,12 +3,16 @@ package com.micheanl.libgltf.render.texture
 import com.micheanl.libgltf.material.TextureFilter
 
 
+
+
 /**
  * libgltf · MipmapFilterState
  *
  * ```
  * return MipmapFilterState.nearest() ? VK10.VK_SAMPLER_MIPMAP_MODE_NEAREST : original;
  * ```
+ *
+ * mipmap 过滤状态
  *
  * @author Chen Micheanl
  * @license MIT

@@ -1,5 +1,8 @@
 package com.micheanl.libgltf.material
 
+
+
+
 /**
  * libgltf · ClearcoatMaterial
  *
@@ -13,6 +16,8 @@ package com.micheanl.libgltf.material
  * JsonFields.float(JsonFields.value(it, "clearcoatNormalTexture"), "scale", 1.0f)
  * )
  * ```
+ *
+ * 清漆材质扩展
  *
  * @author Chen Micheanl
  * @license MIT

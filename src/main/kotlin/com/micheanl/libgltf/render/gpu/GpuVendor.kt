@@ -3,8 +3,14 @@ package com.micheanl.libgltf.render.gpu
 import com.mojang.renderpearl.api.device.DeviceInfo
 
 
+
+
 /**
  * libgltf · GpuVendor
+ *
+ * ```
+ * GpuVendor.UNKNOWN,
+ * ```
  *
  * 厂商识别与设备画像
  *

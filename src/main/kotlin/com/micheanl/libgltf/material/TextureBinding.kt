@@ -4,20 +4,16 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 
+
+
 /**
  * libgltf · TextureBinding
  *
  * ```
- * return TextureBinding(
- * JsonFields.int(value, "index"),
- * JsonFields.int(transform, "texCoord", JsonFields.int(value, "texCoord", 0)),
- * offset.getOrElse(0) { 0.0f },
- * offset.getOrElse(1) { 0.0f },
- * scale.getOrElse(0) { 1.0f },
- * scale.getOrElse(1) { 1.0f },
- * JsonFields.float(transform, "rotation")
- * )
+ * private fun parseBinding(value: JsonValue?): TextureBinding? {
  * ```
+ *
+ * 纹理绑定：贴图索引与 UV 通道
  *
  * @author Chen Micheanl
  * @license MIT

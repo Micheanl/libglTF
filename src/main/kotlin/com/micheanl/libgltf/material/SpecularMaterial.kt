@@ -1,5 +1,8 @@
 package com.micheanl.libgltf.material
 
+
+
+
 /**
  * libgltf · SpecularMaterial
  *
@@ -11,6 +14,8 @@ package com.micheanl.libgltf.material
  * parseBinding(JsonFields.value(it, "specularColorTexture"))
  * )
  * ```
+ *
+ * 高光材质扩展
  *
  * @author Chen Micheanl
  * @license MIT

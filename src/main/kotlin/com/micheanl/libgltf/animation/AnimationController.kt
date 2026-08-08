@@ -4,12 +4,16 @@ import com.micheanl.libgltf.model.GltfAsset
 import kotlin.math.abs
 
 
+
+
 /**
  * libgltf · AnimationController
  *
  * ```
  * val animator: AnimationController = AnimationController(handle.asset, animation)
  * ```
+ *
+ * 动画控制器：驱动播放与状态切换
  *
  * @author Chen Micheanl
  * @license MIT

@@ -9,8 +9,18 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = PBRTextureManager.class, remap = false)
+
+
+
+
 /**
  * libgltf · PbrTextureManagerMixin
+ *
+ * ```
+ * @Mixin(value = PBRTextureManager.class, remap = false)
+ * ```
+ *
+ * Iris PBR 纹理管理接入 mixin
  *
  * @author Chen Micheanl
  * @license MIT

@@ -15,8 +15,14 @@ import java.util.concurrent.CompletableFuture
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector
 
 
+
+
 /**
  * libgltf · GltfApiImpl
+ *
+ * ```
+ * object GltfApiImpl : GltfApi {
+ * ```
  *
  * GltfApi 的默认实现
  *

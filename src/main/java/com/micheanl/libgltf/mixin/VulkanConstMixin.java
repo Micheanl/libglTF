@@ -9,8 +9,18 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(VulkanConst.class)
+
+
+
+
 /**
  * libgltf · VulkanConstMixin
+ *
+ * ```
+ * @Mixin(VulkanConst.class)
+ * ```
+ *
+ * Vulkan 格式常量转换 mixin
  *
  * @author Chen Micheanl
  * @license MIT
