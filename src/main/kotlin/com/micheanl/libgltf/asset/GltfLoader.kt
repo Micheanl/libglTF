@@ -484,6 +484,7 @@ object GltfLoader {
                 val multiplier = if (interpolation == Interpolation.CUBIC_SPLINE) 3 else 1
                 val components = if (input.isEmpty()) 0 else output.size / input.size / multiplier
                 val materialTarget = materialUvTarget(target)
+                val materialFactorIndex = materialFactorTarget(target)
                 if (materialTarget != null) {
                     parsed += AnimationChannel(
                         -1,
@@ -495,6 +496,16 @@ object GltfLoader {
                         materialTarget.materialIndex,
                         materialTarget.textureSlot,
                         materialTarget.textureProperty
+                    )
+                } else if (materialFactorIndex >= 0) {
+                    parsed += AnimationChannel(
+                        -1,
+                        AnimationPath.MATERIAL_FACTOR,
+                        interpolation,
+                        input,
+                        output,
+                        components,
+                        materialFactorIndex
                     )
                 } else if (!hasAnimationPointer(target)) {
                     parsed += AnimationChannel(
@@ -544,6 +555,22 @@ object GltfLoader {
             else -> return null
         }
         return MaterialUvTarget(materialIndex, textureSlot, textureProperty)
+    }
+
+    private fun materialFactorTarget(target: JsonValue): Int {
+        val extension = JsonFields.value(JsonFields.value(target, "extensions"), "KHR_animation_pointer")
+        val pointer = JsonFields.string(extension, "pointer")
+        if (pointer.isEmpty()) return -1
+        val segments = pointer.split('/')
+        if (
+            segments.size != 5 ||
+            segments[1] != "materials" ||
+            segments[3] != "pbrMetallicRoughness" ||
+            segments[4] != "baseColorFactor"
+        ) {
+            return -1
+        }
+        return segments[2].toIntOrNull() ?: -1
     }
 
     private fun parentIndices(nodes: Array<GltfNode>): IntArray {

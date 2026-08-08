@@ -104,7 +104,9 @@ class GltfGeometryRenderer(
         val materialIndex = instance.resolvePrimitiveMaterial(sourceMaterialIndex, primitive.materialMappings)
         val material = asset.materials[materialIndex]
         val override = instance.materialOverrides[sourceMaterialIndex]
-        val factor = override?.baseColorFactor ?: material.baseColorFactor
+        val materialFactor = instance.animation.pose.materialFactor
+        val factor = override?.baseColorFactor
+            ?: if (materialFactor.animated[materialIndex]) materialFactor.baseColorFactor else material.baseColorFactor
         val redFactor = if (factor.isNotEmpty()) factor[0] else 1.0f
         val greenFactor = if (factor.size > 1) factor[1] else 1.0f
         val blueFactor = if (factor.size > 2) factor[2] else 1.0f

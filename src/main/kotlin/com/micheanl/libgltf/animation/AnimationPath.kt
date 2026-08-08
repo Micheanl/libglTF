@@ -5,5 +5,6 @@ enum class AnimationPath {
     ROTATION,
     SCALE,
     WEIGHTS,
-    MATERIAL_UV
+    MATERIAL_UV,
+    MATERIAL_FACTOR
 }
