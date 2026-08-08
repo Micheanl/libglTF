@@ -20,6 +20,7 @@ class GltfGpuDrivenBatch : AutoCloseable {
     private var commandCapacity = 0
     private var maxDrawCount = 0
     private var meshletCount = 0
+    private var useMeshlets = false
     private var metadata: GpuBuffer? = null
     private var meshlets: GltfMeshletLod? = null
     private var indexBuffer: GpuBuffer? = null
@@ -45,9 +46,8 @@ class GltfGpuDrivenBatch : AutoCloseable {
         }
         meshlets = meshletLod
         val profile = GltfGpuBackend.vendorProfile()
-        meshletCulling = profile.enableMeshletCulling &&
-            GltfGpuDrivenSettings.meshletCulling &&
-            meshletLod.meshletCount > 1
+        useMeshlets = profile.enableMeshletCulling && meshletLod.meshletCount > 1
+        meshletCulling = useMeshlets && GltfGpuDrivenSettings.meshletCulling
         meshletCount = if (meshletCulling) meshletLod.meshletCount else 1
         val workloadMeshletCount = if (meshShader) meshletLod.meshletCount else meshletCount
         if (!GltfGpuDrivenSettings.profitable(instanceCount, workloadMeshletCount)) {
@@ -55,7 +55,7 @@ class GltfGpuDrivenBatch : AutoCloseable {
             return false
         }
         maxDrawCount = instanceCount * meshletCount
-        if (!(meshShader && meshletCulling)) ensureCapacity(maxDrawCount * COMMAND_STRIDE)
+        if (!(meshShader && useMeshlets)) ensureCapacity(maxDrawCount * COMMAND_STRIDE)
         metadata = if (meshletCulling) meshletLod.metadataBuffer else meshletLod.wholeMetadataBuffer
         indexBuffer = if (meshletCulling) meshletLod.indexBuffer else primitive.indexBuffers[lod]
         active = true
@@ -82,7 +82,7 @@ class GltfGpuDrivenBatch : AutoCloseable {
         return true
     }
 
-    fun meshReady(driver: GltfGpuDriver): Boolean = active && meshletCulling && driver.meshSupported
+    fun meshReady(driver: GltfGpuDriver): Boolean = active && useMeshlets && driver.meshSupported
 
     fun currentMeshletCount(): Int = meshletCount
 
