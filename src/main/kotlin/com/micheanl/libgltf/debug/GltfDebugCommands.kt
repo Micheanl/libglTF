@@ -8,11 +8,11 @@ import com.micheanl.libgltf.api.GltfRenderMode
 import com.micheanl.libgltf.asset.GltfLoadFailure
 import com.micheanl.libgltf.asset.GltfLoadSuccess
 import com.micheanl.libgltf.LibGltf
-import com.micheanl.libgltf.render.GltfGpuBackendType
 import com.micheanl.libgltf.render.GltfRenderRegistry
 import com.micheanl.libgltf.render.feature.GltfGpuFeatureRenderer
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
 import com.mojang.brigadier.arguments.FloatArgumentType
+import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands
@@ -82,6 +82,16 @@ object GltfDebugCommands {
                                     }
                             )
                     )
+                    .then(
+                        ClientCommands.literal("lod")
+                            .then(
+                                ClientCommands.argument("level", IntegerArgumentType.integer(0))
+                                    .executes { context ->
+                                        lod(context.source, context.getArgument("level", Int::class.java))
+                                    }
+                            )
+                    )
+                    .then(ClientCommands.literal("info").executes { info(it.source) })
                     .then(ClientCommands.literal("mode").then(ClientCommands.literal("auto").executes { mode(it.source, GltfRenderMode.AUTO) }))
                     .then(ClientCommands.literal("mode").then(ClientCommands.literal("gpu").executes { mode(it.source, GltfRenderMode.GPU_PREFERRED) }))
                     .then(ClientCommands.literal("mode").then(ClientCommands.literal("cpu").executes { mode(it.source, GltfRenderMode.CPU) }))
@@ -156,7 +166,7 @@ object GltfDebugCommands {
                 val transform = current.transform
                 lines += "libgltf mode=${current.renderMode} " +
                     "pos=(${transform.m30()}, ${transform.m31()}, ${transform.m32()}) " +
-                    "scale=${transform.m00()} instances=${GltfRenderRegistry.instances().size}"
+                    "scale=${transform.m00()} lod=${current.lodLevel} instances=${GltfRenderRegistry.instances().size}"
             }
         }
         return lines
@@ -181,6 +191,42 @@ object GltfDebugCommands {
         }
         current.transform.scale(value)
         source.sendFeedback(Component.literal("Scale set to $value"))
+        return 0
+    }
+
+    private fun lod(source: FabricClientCommandSource, level: Int): Int {
+        val current = instance
+        if (current == null) {
+            source.sendError(Component.literal("No model loaded"))
+            return 1
+        }
+        current.lodLevel = level.coerceAtLeast(0)
+        source.sendFeedback(Component.literal("LOD set to ${current.lodLevel}"))
+        return 0
+    }
+
+    private fun info(source: FabricClientCommandSource): Int {
+        val current = instance
+        val currentHandle = handle
+        if (current == null || currentHandle == null) {
+            source.sendError(Component.literal("No model loaded"))
+            return 1
+        }
+        val asset = currentHandle.asset
+        source.sendFeedback(
+            Component.literal("nodes=${asset.nodes.size} meshes=${asset.meshes.size} lod=${current.lodLevel}")
+        )
+        for (nodeIndex in asset.topologicalOrder) {
+            val node = asset.nodes[nodeIndex]
+            if (node.meshIndex < 0) continue
+            val global = current.animation.pose.globalMatrices[nodeIndex]
+            source.sendFeedback(
+                Component.literal(
+                    "node[$nodeIndex] ${node.name} mesh=${node.meshIndex} " +
+                        "t=(${global.m30()}, ${global.m31()}, ${global.m32()})"
+                )
+            )
+        }
         return 0
     }
 
