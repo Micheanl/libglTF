@@ -107,6 +107,11 @@ object GltfDebugCommands {
                     .then(ClientCommands.literal("mode").then(ClientCommands.literal("auto").executes { mode(it.source, GltfRenderMode.AUTO) }))
                     .then(ClientCommands.literal("mode").then(ClientCommands.literal("gpu").executes { mode(it.source, GltfRenderMode.GPU_PREFERRED) }))
                     .then(ClientCommands.literal("mode").then(ClientCommands.literal("cpu").executes { mode(it.source, GltfRenderMode.CPU) }))
+                    .then(
+                        ClientCommands.literal("bones")
+                            .then(ClientCommands.literal("on").executes { bones(it.source, true) })
+                            .then(ClientCommands.literal("off").executes { bones(it.source, false) })
+                    )
             )
         }
     }
@@ -189,6 +194,7 @@ object GltfDebugCommands {
                     "scale=${transform.m00()} lod=${current.lodLevel} " +
                     "anim=${current.animation.clipIndex} " +
                     "uv=${if (current.animation.pose.materialUv.animated.any { it }) "on" else "off"} " +
+                    "bones=${if (current.showBones) "on" else "off"} " +
                     "instances=${GltfRenderRegistry.instances().size}"
             }
         }
@@ -289,6 +295,17 @@ object GltfDebugCommands {
         }
         current.renderMode = value
         source.sendFeedback(Component.literal("Render mode set to $value"))
+        return 0
+    }
+
+    private fun bones(source: FabricClientCommandSource, value: Boolean): Int {
+        val current = instance
+        if (current == null) {
+            source.sendError(Component.literal("No model loaded"))
+            return 1
+        }
+        current.showBones = value
+        source.sendFeedback(Component.literal("Bone debug set to $value"))
         return 0
     }
 }

@@ -7,6 +7,7 @@ import com.micheanl.libgltf.model.GltfPrimitive
 import com.micheanl.libgltf.model.PrimitiveMode
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
 import com.micheanl.libgltf.render.iris.IrisCompat
+import com.micheanl.libgltf.render.debug.GltfBoneDebugRenderer
 import com.mojang.blaze3d.vertex.PoseStack
 import java.util.function.Consumer
 import net.fabricmc.fabric.api.client.rendering.v1.SubmitRenderPhases
@@ -14,6 +15,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector
 import net.minecraft.client.renderer.state.level.CameraRenderState
 import net.minecraft.client.renderer.texture.OverlayTexture
+import net.minecraft.client.renderer.rendertype.RenderTypes
 import net.minecraft.world.phys.AABB
 import org.joml.Matrix4f
 import org.joml.Matrix4fc
@@ -109,6 +111,9 @@ object GltfSceneRenderer {
                 submitNodeCollector.submitCustomGeometry(poseStack, renderer.renderType(resource, textures), renderer)
                 poseStack.popPose()
             }
+        }
+        if (instance.showBones && asset.skins.isNotEmpty()) {
+            submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.lines(), GltfBoneDebugRenderer(instance))
         }
         poseStack.popPose()
     }
