@@ -12,8 +12,11 @@ import com.mojang.renderpearl.api.pipeline.UniformType
 import com.mojang.renderpearl.backend.vulkan.VulkanConst
 import com.mojang.renderpearl.backend.vulkan.VulkanDevice
 import com.mojang.renderpearl.backend.vulkan.VulkanGpuBuffer
+import com.mojang.renderpearl.backend.vulkan.VulkanGpuSampler
+import com.mojang.renderpearl.backend.vulkan.VulkanGpuTextureView
 import com.mojang.renderpearl.backend.vulkan.VulkanRenderPipeline
 import com.mojang.renderpearl.frontend.shaders.GlslCompiler
+import com.mojang.renderpearl.util.TextureViewAndSampler
 import it.unimi.dsi.fastutil.longs.LongArrayList
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.ShaderDefines
@@ -41,6 +44,11 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
             VK12.vkGetPhysicalDeviceProperties2(device.vkDevice().physicalDevice, root)
             maxDrawCount = minOf(mesh.maxTaskWorkGroupCount(0), GltfGpuBackend.vendorProfile().maxTaskGroupCount)
             maxPushDescriptors = push.maxPushDescriptors()
+            LOGGER.info(
+                "libgltf Vulkan mesh properties maxTaskWorkGroupCount={} maxPushDescriptors={}",
+                maxDrawCount,
+                maxPushDescriptors
+            )
             val preferredWorkgroupSize = GltfGpuBackend.vendorProfile().maxMeshWorkGroupSize
             meshWorkgroupSize = if (mesh.maxMeshWorkGroupInvocations() >= preferredWorkgroupSize) {
                 preferredWorkgroupSize
@@ -79,7 +87,8 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
         sphere: FloatArray,
         instanceCount: Int,
         instanceCulling: Boolean,
-        meshletCulling: Boolean
+        meshletCulling: Boolean,
+        sampler1: Any?
     ): Boolean {
         if (!supported || failed.contains(renderPipeline)) return false
         val pipeline = pipelines[renderPipeline] ?: try {
@@ -100,7 +109,8 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
             instanceCount,
             instanceCulling,
             meshletCulling,
-            maxDrawCount
+            maxDrawCount,
+            sampler1
         )
         return true
     }
@@ -149,7 +159,8 @@ private class GltfVulkanMeshPipeline(
         instanceCount: Int,
         instanceCulling: Boolean,
         meshletCulling: Boolean,
-        maxDrawCount: Int
+        maxDrawCount: Int,
+        sampler1: Any?
     ) {
         VK10.vkCmdBindPipeline(
             commandBuffer,
@@ -158,13 +169,25 @@ private class GltfVulkanMeshPipeline(
         )
         MemoryStack.stackPush().use { stack ->
             val buffers = arrayOf(geometry, instances, meshlets.metadataBuffer, meshlets.vertexBuffer, meshlets.triangleBuffer)
+            val descriptorCount = buffers.size + if (sampler1 != null) 1 else 0
             val infos = VkDescriptorBufferInfo.calloc(buffers.size, stack)
-            val writes = VkWriteDescriptorSet.calloc(buffers.size, stack)
+            val imageInfo = if (sampler1 != null) VkDescriptorImageInfo.calloc(1, stack) else null
+            val writes = VkWriteDescriptorSet.calloc(descriptorCount, stack)
             for (index in buffers.indices) {
                 infos[index].buffer((buffers[index] as VulkanGpuBuffer).vkBuffer()).offset(0L).range(buffers[index].size())
                 writes[index].`sType$Default`().dstBinding(index).descriptorCount(1)
                     .descriptorType(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
                     .pBufferInfo(VkDescriptorBufferInfo.create(infos[index].address(), 1))
+            }
+            if (sampler1 != null) {
+                val texture = sampler1 as TextureViewAndSampler
+                requireNotNull(imageInfo)
+                    .sampler((texture.sampler() as VulkanGpuSampler).vkSampler())
+                    .imageView((texture.view() as VulkanGpuTextureView).vkImageView())
+                    .imageLayout(VK10.VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+                writes[buffers.size].`sType$Default`().dstBinding(buffers.size).descriptorCount(1)
+                    .descriptorType(VK10.VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+                    .pImageInfo(VkDescriptorImageInfo.create(requireNotNull(imageInfo).address(), 1))
             }
             KHRPushDescriptor.vkCmdPushDescriptorSetKHR(
                 commandBuffer,
@@ -221,15 +244,24 @@ private class GltfVulkanMeshPipeline(
             meshWorkgroupSize: Int
         ): GltfVulkanMeshPipeline {
             val uniforms = original.uniforms()
-            require(uniforms.size <= maxPushDescriptors)
-            val sampler0Binding = uniforms.indexOfFirst { it.name() == "Sampler0" }
+            val meshUniforms = uniforms.filter { it.name() != "Sampler1" }
+            if (meshUniforms.size > maxPushDescriptors) {
+                LOGGER.warn(
+                    "libgltf Vulkan mesh descriptor set uniforms={} maxPushDescriptors={} names={}",
+                    meshUniforms.size,
+                    maxPushDescriptors,
+                    meshUniforms.joinToString { it.name() }
+                )
+                require(maxPushDescriptors == 0) { "Vulkan mesh descriptor set exceeds push descriptor limit" }
+            }
+            val sampler0Binding = meshUniforms.indexOfFirst { it.name() == "Sampler0" }
             require(sampler0Binding >= 0)
             val bindings = mapOf(
-                "PROJECTION_BINDING" to uniforms.indexOfFirst { it.name() == "Projection" },
-                "DYNAMIC_TRANSFORMS_BINDING" to uniforms.indexOfFirst { it.name() == "DynamicTransforms" },
-                "LIGHTING_BINDING" to uniforms.indexOfFirst { it.name() == "Lighting" },
-                "SAMPLER1_BINDING" to uniforms.indexOfFirst { it.name() == "Sampler1" },
-                "SAMPLER2_BINDING" to uniforms.indexOfFirst { it.name() == "Sampler2" },
+                "PROJECTION_BINDING" to meshUniforms.indexOfFirst { it.name() == "Projection" },
+                "DYNAMIC_TRANSFORMS_BINDING" to meshUniforms.indexOfFirst { it.name() == "DynamicTransforms" },
+                "LIGHTING_BINDING" to meshUniforms.indexOfFirst { it.name() == "Lighting" },
+                "SAMPLER1_BINDING" to STORAGE_BUFFER_COUNT,
+                "SAMPLER2_BINDING" to meshUniforms.indexOfFirst { it.name() == "Sampler2" },
                 "GEOMETRY_BINDING" to 0,
                 "INSTANCES_BINDING" to 1,
                 "MESHLETS_BINDING" to 2,
@@ -271,7 +303,7 @@ private class GltfVulkanMeshPipeline(
             meshModule: Long,
             fragmentModule: Long
         ): GltfVulkanMeshPipeline = MemoryStack.stackPush().use { stack ->
-            val uniforms = original.uniforms()
+            val uniforms = original.uniforms().filter { it.name() != "Sampler1" }
             val bindings = VkDescriptorSetLayoutBinding.calloc(uniforms.size, stack)
             for (index in uniforms.indices) {
                 bindings[index].binding(index).descriptorCount(1)
@@ -293,8 +325,20 @@ private class GltfVulkanMeshPipeline(
                 val storageBindings = VkDescriptorSetLayoutBinding.calloc(DESCRIPTOR_COUNT, stack)
                 for (index in 0 until DESCRIPTOR_COUNT) {
                     storageBindings[index].binding(index).descriptorCount(1)
-                        .descriptorType(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-                        .stageFlags(EXTMeshShader.VK_SHADER_STAGE_TASK_BIT_EXT or EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT)
+                        .descriptorType(
+                            if (index < STORAGE_BUFFER_COUNT) {
+                                VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
+                            } else {
+                                VK10.VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+                            }
+                        )
+                        .stageFlags(
+                            if (index < STORAGE_BUFFER_COUNT) {
+                                EXTMeshShader.VK_SHADER_STAGE_TASK_BIT_EXT or EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT
+                            } else {
+                                EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT
+                            }
+                        )
                 }
                 val storageInfo = VkDescriptorSetLayoutCreateInfo.calloc(stack).`sType$Default`()
                     .flags(KHRPushDescriptor.VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR)
@@ -560,8 +604,10 @@ private class GltfVulkanMeshPipeline(
 
         private const val TASK_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh.task"
         private const val MESH_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh.mesh"
-        private const val DESCRIPTOR_COUNT = 5
+        private const val STORAGE_BUFFER_COUNT = 5
+        private const val DESCRIPTOR_COUNT = 6
         private const val TASK_WORKGROUP = 32
         private const val PUSH_CONSTANT_SIZE = 36
+        private val LOGGER = LogUtils.getLogger()
     }
 }
