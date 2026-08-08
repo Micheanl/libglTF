@@ -282,16 +282,22 @@ object GltfDebugCommands {
         }
         val asset = currentHandle.asset
         source.sendFeedback(
-            Component.literal("nodes=${asset.nodes.size} meshes=${asset.meshes.size} lod=${current.lodLevel}")
+            Component.literal(
+                "nodes=${asset.nodes.size} meshes=${asset.meshes.size} lod=${current.lodLevel} " +
+                    "variants=${asset.materialVariantNames.size} scenes=${asset.sceneNames.size} " +
+                    "cameras=${asset.cameras.size} lights=${asset.lights.size}"
+            )
         )
         for (nodeIndex in asset.topologicalOrder) {
             val node = asset.nodes[nodeIndex]
             if (node.meshIndex < 0) continue
             val global = current.animation.pose.globalMatrices[nodeIndex]
+            val instanceCount = node.instanceMatrices.size / 16
             source.sendFeedback(
                 Component.literal(
                     "node[$nodeIndex] ${node.name} mesh=${node.meshIndex} " +
-                        "t=(${global.m30()}, ${global.m31()}, ${global.m32()})"
+                        "t=(${global.m30()}, ${global.m31()}, ${global.m32()})" +
+                        if (instanceCount > 0) " inst=$instanceCount" else ""
                 )
             )
         }
