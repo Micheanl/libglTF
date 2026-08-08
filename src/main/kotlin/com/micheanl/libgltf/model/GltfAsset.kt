@@ -14,6 +14,7 @@ data class GltfAsset(
     val materials: Array<GltfMaterial>,
     val materialVariantNames: Array<String>,
     val cameras: Array<GltfCamera>,
+    val lights: Array<GltfLight>,
     val textures: Array<GltfTexture>,
     val images: Array<GltfImage>,
     val bounds: FloatArray,

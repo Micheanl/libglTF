@@ -24,8 +24,10 @@ import com.micheanl.libgltf.model.CameraType
 import com.micheanl.libgltf.model.GltfAsset
 import com.micheanl.libgltf.model.GltfCamera
 import com.micheanl.libgltf.model.GltfImage
+import com.micheanl.libgltf.model.GltfLight
 import com.micheanl.libgltf.model.GltfMesh
 import com.micheanl.libgltf.model.GltfNode
+import com.micheanl.libgltf.model.LightType
 import com.micheanl.libgltf.model.GltfPrimitive
 import com.micheanl.libgltf.model.GltfSkin
 import com.micheanl.libgltf.model.GltfStats
@@ -95,6 +97,7 @@ object GltfLoader {
         val order = topologicalOrder(resolvedNodes, roots)
         val skins = parseSkins(root, decoder)
         val cameras = parseCameras(root)
+        val lights = parseLights(root)
         val animations = parseAnimations(root, decoder)
         val morphOffsets = IntArray(resolvedNodes.size)
         var totalMorphWeights = 0
@@ -136,6 +139,7 @@ object GltfLoader {
             materials,
             materialVariantNames,
             cameras,
+            lights,
             textures,
             images,
             bounds,
@@ -416,6 +420,7 @@ object GltfLoader {
         val values = JsonFields.value(root, "nodes") ?: return emptyArray()
         return Array(values.size()) { index ->
             val node = values[index]
+            val punctualLight = JsonFields.value(JsonFields.value(node, "extensions"), "KHR_lights_punctual")
             val instancing = JsonFields.value(JsonFields.value(node, "extensions"), "EXT_mesh_gpu_instancing")
             val attributes = JsonFields.value(instancing, "attributes")
             val translations = attributes?.let { attributeFloats(it, "TRANSLATION", decoder) } ?: FloatArray(0)
@@ -449,6 +454,7 @@ object GltfLoader {
                 JsonFields.int(node, "mesh"),
                 JsonFields.int(node, "skin"),
                 JsonFields.int(node, "camera"),
+                JsonFields.int(punctualLight, "light"),
                 instanceMatrices,
                 JsonFields.floats(node, "translation", floatArrayOf(0.0f, 0.0f, 0.0f)),
                 JsonFields.floats(node, "rotation", floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f)),
@@ -496,6 +502,27 @@ object GltfLoader {
                 JsonFields.float(perspective, "aspectRatio", -1.0f),
                 JsonFields.float(orthographic, "xmag", -1.0f),
                 JsonFields.float(orthographic, "ymag", -1.0f)
+            )
+        }
+    }
+
+    private fun parseLights(root: JsonValue): Array<GltfLight> {
+        val lights = JsonFields.value(
+            JsonFields.value(root, "extensions"),
+            "KHR_lights_punctual"
+        )
+        val values = JsonFields.value(lights, "lights") ?: return emptyArray()
+        return Array(values.size()) { index ->
+            val value = values[index]
+            val spot = JsonFields.value(value, "spot")
+            GltfLight(
+                JsonFields.string(value, "name", "light_$index"),
+                lightType(JsonFields.string(value, "type")),
+                JsonFields.floats(value, "color", floatArrayOf(1.0f, 1.0f, 1.0f)),
+                JsonFields.float(value, "intensity", 1.0f),
+                JsonFields.float(value, "range", -1.0f),
+                JsonFields.float(spot, "innerConeAngle", 0.0f),
+                JsonFields.float(spot, "outerConeAngle", 0.7853982f)
             )
         }
     }
@@ -786,6 +813,12 @@ object GltfLoader {
     private fun cameraType(value: String): CameraType = when (value) {
         "orthographic" -> CameraType.ORTHOGRAPHIC
         else -> CameraType.PERSPECTIVE
+    }
+
+    private fun lightType(value: String): LightType = when (value) {
+        "spot" -> LightType.SPOT
+        "directional" -> LightType.DIRECTIONAL
+        else -> LightType.POINT
     }
 
     private fun animationPath(value: String): AnimationPath = when (value) {
