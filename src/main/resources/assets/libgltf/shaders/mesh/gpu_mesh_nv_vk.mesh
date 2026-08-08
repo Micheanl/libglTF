@@ -19,24 +19,25 @@ layout(set = 1, binding = COUNTERS_BINDING, std430) buffer DebugCounters { uint 
 #endif
 #ifdef MESH_OCCLUSION_CULLING
 layout(set = 1, binding = DEPTH_BINDING) uniform sampler2D DepthSampler;
-float deviceToLinearDepth(float deviceDepth) {
-#ifndef RENDERPEARL_DEPTH_IS_ZERO_TO_ONE
-    deviceDepth = (deviceDepth - 0.5) * 2.0;
-#endif
-    return ProjMat[3][2] / (deviceDepth + ProjMat[2][2]);
-}
-bool occludedByDepth(vec4 sphere, mat4 transform) {
-    vec4 clip = transform * vec4(sphere.xyz, 1.0);
-    if (clip.w <= 0.0) return false;
-    vec2 ndc = clip.xy / clip.w;
+bool occludedByDepth(vec4 sphere, mat4 clipTransform, mat4 viewTransform) {
+    vec4 clipCenter = clipTransform * vec4(sphere.xyz, 1.0);
+    if (clipCenter.w <= 0.0) return false;
+    vec2 ndc = clipCenter.xy / clipCenter.w;
     vec2 uv = ndc * 0.5 + 0.5;
     if (any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)))) return false;
-    float viewDepth = -clip.w;
+    float viewDepth = -clipCenter.w;
     float nearView = viewDepth - sphere.w;
     if (nearView <= 0.0) return false;
     float focalPixels = ProjMat[1][1] * parameters.screenSizeAndFlags.y * 0.5;
     float radiusPx = max(sphere.w * focalPixels / viewDepth, 1.0);
     if (radiusPx < 3.0) return false;
+    vec3 viewCenter = (viewTransform * vec4(sphere.xyz, 1.0)).xyz;
+    vec3 viewFront = viewCenter * (1.0 - sphere.w / length(viewCenter));
+    vec4 clipFront = ProjMat * vec4(viewFront, 1.0);
+    float frontDevice = clipFront.z / clipFront.w;
+#ifndef RENDERPEARL_DEPTH_IS_ZERO_TO_ONE
+    frontDevice = frontDevice * 0.5 + 0.5;
+#endif
     vec2 step = vec2(radiusPx / parameters.screenSizeAndFlags.x, radiusPx / parameters.screenSizeAndFlags.y);
     float nearest = 1.0;
     nearest = min(nearest, texture(DepthSampler, uv).r);
@@ -44,8 +45,7 @@ bool occludedByDepth(vec4 sphere, mat4 transform) {
     nearest = min(nearest, texture(DepthSampler, uv - vec2(step.x, 0.0)).r);
     nearest = min(nearest, texture(DepthSampler, uv + vec2(0.0, step.y)).r);
     nearest = min(nearest, texture(DepthSampler, uv - vec2(0.0, step.y)).r);
-    float sampledView = deviceToLinearDepth(nearest);
-    return nearView > sampledView * 1.1 + 0.1;
+    return frontDevice > nearest + 0.001;
 }
 #endif
 layout(location = 0) out float sphericalVertexDistance[];
@@ -115,22 +115,32 @@ void main() {
     bool instanceVisible = parameters.instanceCulling == 0 || visibleSphere(parameters.primitiveSphere, clipTransform);
     bool meshletVisible = parameters.meshletCulling == 0 || visibleSphere(meshlets[meshletIndex].sphere, clipTransform);
     Meshlet meshlet = meshlets[meshletIndex];
-#ifdef MESH_CONE_CULLING
+#if defined(MESH_CONE_CULLING) || defined(MESH_OCCLUSION_CULLING)
     mat4 viewTransform = ModelViewMat * worldTransform;
+#endif
+#ifdef MESH_CONE_CULLING
     vec3 axisView = normalize(mat3(viewTransform) * meshlet.cone.xyz);
     vec3 apexView = (viewTransform * vec4(meshlet.coneApex.xyz, 1.0)).xyz;
     bool backfacing = dot(axisView, apexView) > meshlet.cone.w * length(apexView);
 #else
     bool backfacing = false;
 #endif
-    if (candidate >= candidateCount || !(instanceVisible && meshletVisible) || backfacing) {
+    if (candidate >= candidateCount) {
+        if (invocation == 0) gl_PrimitiveCountNV = 0;
+        return;
+    }
+    if (!(instanceVisible && meshletVisible) || backfacing) {
+#ifdef MESH_DEBUG_COUNTERS
+        if (invocation == 0) atomicAdd(counters[5], 1u);
+#endif
         if (invocation == 0) gl_PrimitiveCountNV = 0;
         return;
     }
 #ifdef MESH_OCCLUSION_CULLING
-    if (parameters.screenSizeAndFlags.z > 0.0 && occludedByDepth(meshlet.sphere, clipTransform)) {
+    if (parameters.screenSizeAndFlags.z > 0.0 && occludedByDepth(meshlet.sphere, clipTransform, viewTransform)) {
 #ifdef MESH_DEBUG_COUNTERS
         if (invocation == 0) atomicAdd(counters[4], 1u);
+        if (invocation == 0) atomicAdd(counters[5], 1u);
 #endif
         if (invocation == 0) gl_PrimitiveCountNV = 0;
         return;

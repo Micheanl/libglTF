@@ -32,11 +32,12 @@ class GltfVulkanMeshCounters : AutoCloseable {
                     val data = view.data().order(ByteOrder.nativeOrder())
                     val current = IntArray(COUNTER_COUNT) { data.getInt(it * Int.SIZE_BYTES) }
                     LOGGER.info(
-                        "libgltf Vulkan mesh counters tasks={} emitted={} meshes={} primitives={} occluded={}",
+                        "libgltf Vulkan mesh counters tasks={} emitted={} meshes={} primitives={} culled={} occluded={}",
                         current[0] - last[0],
                         current[1] - last[1],
                         current[2] - last[2],
                         current[3] - last[3],
+                        current[5] - last[5],
                         current[4] - last[4]
                     )
                     current.copyInto(last)
@@ -58,7 +59,7 @@ class GltfVulkanMeshCounters : AutoCloseable {
     }
 
     private companion object {
-        const val COUNTER_COUNT = 5
+        const val COUNTER_COUNT = 6
         const val COUNTER_SIZE = COUNTER_COUNT * Int.SIZE_BYTES
         val LOGGER = LogUtils.getLogger()
     }
