@@ -30,6 +30,8 @@ object GltfGpuFormats {
         .addAttribute("InstanceLight", GpuFormat.RG16_SINT)
         .addAttribute("InstanceOverlay", GpuFormat.RG16_SINT)
         .addAttribute("PaletteOffset", GpuFormat.R32_SINT)
+        .addAttribute("InstanceUvTransform0", GpuFormat.RGBA32_FLOAT)
+        .addAttribute("InstanceUvTransform1", GpuFormat.RG32_FLOAT)
         .build()
 
     val INSTANCE_STRIDE: Int = INSTANCE.vertexSize

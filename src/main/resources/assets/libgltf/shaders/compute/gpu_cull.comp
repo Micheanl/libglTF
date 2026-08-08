@@ -55,7 +55,7 @@ layout(push_constant) uniform Parameters {
 } parameters;
 
 mat4 instanceMatrix(uint instanceIndex) {
-    uint offset = instanceIndex * 35;
+    uint offset = instanceIndex * 41;
     return mat4(
         uintBitsToFloat(instanceWords[offset]),
         uintBitsToFloat(instanceWords[offset + 1]),

@@ -353,6 +353,12 @@ class GltfPreparedGpuBatch : AutoCloseable {
         data.putInt(offset + 128, submit.light)
         data.putInt(offset + 132, submit.overlay)
         data.putInt(offset + 136, paletteOffset)
+        data.putFloat(offset + 140, submit.uvTransform0[0])
+        data.putFloat(offset + 144, submit.uvTransform0[1])
+        data.putFloat(offset + 148, submit.uvTransform0[2])
+        data.putFloat(offset + 152, submit.uvTransform0[3])
+        data.putFloat(offset + 156, submit.uvTransform1[0])
+        data.putFloat(offset + 160, submit.uvTransform1[1])
     }
 
     private fun writePalettes(submits: List<GltfGpuSubmit>, fromIndex: Int, toIndex: Int) {

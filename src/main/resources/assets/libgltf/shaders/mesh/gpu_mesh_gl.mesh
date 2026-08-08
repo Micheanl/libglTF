@@ -42,13 +42,15 @@ void main() {
     Meshlet meshlet = meshlets[payload.meshletIndices[payloadIndex]];
     SetMeshOutputsEXT(meshlet.vertexCount, meshlet.triangleCount);
     uint invocation = gl_LocalInvocationIndex;
-    uint io = instanceIndex * 35;
+    uint io = instanceIndex * 41;
     for (uint vertex = invocation; vertex < meshlet.vertexCount; vertex += gl_WorkGroupSize.x) {
         uint vertexIndex = meshletVertices[meshlet.vertexOffset + vertex];
         uint vo = vertexIndex * 15;
         vec3 position = vec3(uintBitsToFloat(geometryWords[vo]), uintBitsToFloat(geometryWords[vo + 1]), uintBitsToFloat(geometryWords[vo + 2]));
         vec3 normal = vec3(uintBitsToFloat(geometryWords[vo + 3]), uintBitsToFloat(geometryWords[vo + 4]), uintBitsToFloat(geometryWords[vo + 5]));
         vec2 uv = vec2(uintBitsToFloat(geometryWords[vo + 10]), uintBitsToFloat(geometryWords[vo + 11]));
+        vec2 uv0 = vec2(uintBitsToFloat(instanceWords[io + 35]), uintBitsToFloat(instanceWords[io + 36])) +
+            mat2(uintBitsToFloat(instanceWords[io + 37]), uintBitsToFloat(instanceWords[io + 39]), uintBitsToFloat(instanceWords[io + 38]), uintBitsToFloat(instanceWords[io + 40])) * uv;
         vec4 color = unpackUnorm4x8(geometryWords[vo + 14]);
         mat4 transform = instanceMatrix(io);
         mat3 normalTransform = mat3(uintBitsToFloat(instanceWords[io + 16]), uintBitsToFloat(instanceWords[io + 17]), uintBitsToFloat(instanceWords[io + 18]), uintBitsToFloat(instanceWords[io + 20]), uintBitsToFloat(instanceWords[io + 21]), uintBitsToFloat(instanceWords[io + 22]), uintBitsToFloat(instanceWords[io + 24]), uintBitsToFloat(instanceWords[io + 25]), uintBitsToFloat(instanceWords[io + 26]));
@@ -63,7 +65,7 @@ void main() {
         vertexColor[vertex] = mixLight(worldNormal, color * instanceColor);
         lightMapColor[vertex] = sampleLightmap(ivec2(signed16(light), signed16(light >> 16)));
         overlayColor[vertex] = texelFetch(Sampler1, ivec2(signed16(overlay), signed16(overlay >> 16)), 0);
-        texCoord0[vertex] = uv;
+        texCoord0[vertex] = uv0;
     }
     for (uint triangle = invocation; triangle < meshlet.triangleCount; triangle += gl_WorkGroupSize.x) {
         uint offset = meshlet.triangleOffset + triangle * 3;

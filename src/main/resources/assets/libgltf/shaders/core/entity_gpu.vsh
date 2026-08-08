@@ -24,9 +24,11 @@ layout(location = 13) in vec4 InstanceColor;
 layout(location = 14) in ivec2 InstanceLight;
 layout(location = 15) in ivec2 InstanceOverlay;
 layout(location = 16) in int PaletteOffset;
+layout(location = 17) in vec4 InstanceUvTransform0;
+layout(location = 18) in vec2 InstanceUvTransform1;
 #ifdef SKINNED
-layout(location = 17) in uvec4 Joints;
-layout(location = 18) in vec4 Weights;
+layout(location = 19) in uvec4 Joints;
+layout(location = 20) in vec4 Weights;
 uniform samplerBuffer JointMatrices;
 #endif
 
@@ -78,5 +80,6 @@ void main() {
     lightMapColor = sample_lightmap(Sampler2, InstanceLight);
     overlayColor = texelFetch(Sampler1, InstanceOverlay, 0);
 #endif
-    texCoord0 = UV0;
+    texCoord0 = InstanceUvTransform0.xy +
+        mat2(InstanceUvTransform0.z, InstanceUvTransform1.x, InstanceUvTransform0.w, InstanceUvTransform1.y) * UV0;
 }

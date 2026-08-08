@@ -20,6 +20,8 @@ class GltfGpuSubmit(
 ) : BatchableSubmit, TranslucentSubmit {
     val modelMatrix: Matrix4f = Matrix4f()
     val normalMatrix: Matrix3f = Matrix3f()
+    val uvTransform0: FloatArray = FloatArray(4)
+    val uvTransform1: FloatArray = FloatArray(2)
     var red: Float = 1.0f
         private set
     var green: Float = 1.0f
@@ -84,6 +86,22 @@ class GltfGpuSubmit(
         modelMatrix.set(transform)
         if (skinIndex < 0) modelMatrix.mul(instance.animation.pose.globalMatrices[nodeIndex])
         normalMatrix.set(modelMatrix).invert().transpose()
+        val binding = material.baseColorTexture
+        if (binding != null && binding.texCoord == 0) {
+            uvTransform0[0] = binding.offsetX
+            uvTransform0[1] = binding.offsetY
+            uvTransform0[2] = binding.cosine * binding.scaleX
+            uvTransform0[3] = -binding.sine * binding.scaleY
+            uvTransform1[0] = binding.sine * binding.scaleX
+            uvTransform1[1] = binding.cosine * binding.scaleY
+        } else {
+            uvTransform0[0] = 0.0f
+            uvTransform0[1] = 0.0f
+            uvTransform0[2] = 1.0f
+            uvTransform0[3] = 0.0f
+            uvTransform1[0] = 0.0f
+            uvTransform1[1] = 1.0f
+        }
         updateDistance(primitive.bounds)
 
         val renderStateChanged =
