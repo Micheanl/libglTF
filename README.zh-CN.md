@@ -137,7 +137,7 @@ flowchart LR
 .\gradlew.bat build
 ```
 
-产物 → `build/libs/libgltf-0.01-fabric.jar`
+产物 → `build/libs/libgltf-0.10-fabric-26.3-snapshot-7.jar`
 
 > [!IMPORTANT]
 > 需要 Minecraft **26.3-snapshot-7**、Fabric Loader **0.19.3+**、Fabric API、Fabric Language Kotlin 与 Java **25**。

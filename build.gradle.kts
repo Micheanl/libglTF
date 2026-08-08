@@ -1,5 +1,6 @@
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.jvm.tasks.Jar
+import org.gradle.api.publish.maven.MavenPublication
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
@@ -80,4 +81,64 @@ java {
 
 kotlin {
     jvmToolchain(25)
+}
+
+val javadocJar = tasks.register<Jar>("javadocJar") {
+    archiveClassifier.set("javadoc")
+    from(rootProject.file("LICENSE")) {
+        into("META-INF")
+    }
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("mavenJava") {
+                groupId = mavenGroup
+                artifactId = archivesBaseName
+                version = modVersion
+                artifact(tasks.named("jar")) {
+                    classifier = ""
+                }
+                artifact(tasks.named("sourcesJar")) {
+                    classifier = "sources"
+                }
+                artifact(javadocJar) {
+                    classifier = "javadoc"
+                }
+                pom {
+                    name.set("libgltf")
+                    description.set("High-performance glTF 2.0 rendering library for Minecraft")
+                    url.set("https://github.com/Micheanl/libglTF")
+                    licenses {
+                        license {
+                            name.set("MIT")
+                            url.set("https://opensource.org/licenses/MIT")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set("Micheanl")
+                            name.set("Chen Micheanl")
+                        }
+                    }
+                    scm {
+                        connection.set("scm:git:https://github.com/Micheanl/libglTF.git")
+                        developerConnection.set("scm:git:git@github.com:Micheanl/libglTF.git")
+                        url.set("https://github.com/Micheanl/libglTF")
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/Micheanl/libgltf")
+                credentials {
+                    username = (project.findProperty("gpr.user") as String?) ?: System.getenv("GITHUB_ACTOR").orEmpty()
+                    password = (project.findProperty("gpr.key") as String?) ?: System.getenv("GITHUB_TOKEN").orEmpty()
+                }
+            }
+        }
+    }
 }
