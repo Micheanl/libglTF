@@ -8,6 +8,7 @@ package com.micheanl.libgltf.model
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
+
 enum class LightType {
     POINT,
     SPOT,

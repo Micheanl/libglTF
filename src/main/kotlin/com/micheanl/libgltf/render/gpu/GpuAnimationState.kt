@@ -3,12 +3,17 @@ package com.micheanl.libgltf.render.gpu
 /**
  * libgltf · GpuAnimationState
  *
+ * <pre>{@code
+ * val animationState: GpuAnimationState = GpuAnimationState(handle.asset)
+ * }</pre>
+ *
  * 动画姿态的 GPU 表示
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import com.micheanl.libgltf.animation.AnimationPose
 import com.micheanl.libgltf.model.GltfAsset

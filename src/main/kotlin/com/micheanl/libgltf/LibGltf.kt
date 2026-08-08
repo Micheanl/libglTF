@@ -3,12 +3,17 @@ package com.micheanl.libgltf
 /**
  * libgltf · LibGltf
  *
+ * <pre>{@code
+ * LibGltf.id("runtime/$resourceId/texture_$index")
+ * }</pre>
+ *
  * 模组主入口与资源 ID 定义
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import com.micheanl.libgltf.api.GltfApi
 import com.micheanl.libgltf.api.GltfApiImpl

@@ -3,10 +3,15 @@ package com.micheanl.libgltf.integration.block
 /**
  * libgltf · GltfBlockEntityRenderer
  *
+ * <pre>{@code
+ * ): GltfBlockEntityRenderer<T> = GltfBlockEntityRenderer(provider)
+ * }</pre>
+ *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import com.micheanl.libgltf.render.GltfSceneRenderer
 import com.mojang.blaze3d.vertex.PoseStack

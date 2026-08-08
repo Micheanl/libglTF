@@ -3,10 +3,23 @@ package com.micheanl.libgltf.animation
 /**
  * libgltf · AnimationStateMachine
  *
+ * <pre>{@code
+ * fun build(): AnimationStateMachine = AnimationStateMachine(
+ * parameters.toTypedArray(),
+ * states.toTypedArray(),
+ * transitions.toTypedArray(),
+ * initialState,
+ * floatCount,
+ * intCount,
+ * booleanCount
+ * )
+ * }</pre>
+ *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 class AnimationStateMachine(
     val parameters: Array<AnimationParameter>,

@@ -3,12 +3,22 @@ package com.micheanl.libgltf.render.gpu
 /**
  * libgltf · GpuMesh
  *
+ * <pre>{@code
+ * primitive = GpuMesh.create(
+ * RenderSystem.getDevice(),
+ * "libgltf $resourceId mesh $meshIndex primitive $primitiveIndex",
+ * asset.meshes[meshIndex].primitives[primitiveIndex],
+ * RenderConfig.enabled && GpuBackend.meshletBuilding()
+ * )
+ * }</pre>
+ *
  * 网格的 GPU 资源与 LOD 缓冲
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import com.micheanl.libgltf.model.GltfPrimitive
 import com.micheanl.libgltf.model.PrimitiveMode

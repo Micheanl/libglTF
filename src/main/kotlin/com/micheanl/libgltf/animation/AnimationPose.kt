@@ -3,10 +3,15 @@ package com.micheanl.libgltf.animation
 /**
  * libgltf · AnimationPose
  *
+ * <pre>{@code
+ * val pose: AnimationPose = AnimationPose(asset.nodes.size, asset.totalMorphWeights, asset.materials.size)
+ * }</pre>
+ *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import com.micheanl.libgltf.material.MaterialUvAnimationState
 import com.micheanl.libgltf.material.MaterialFactorAnimationState

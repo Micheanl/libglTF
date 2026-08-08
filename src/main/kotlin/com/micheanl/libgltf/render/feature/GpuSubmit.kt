@@ -3,12 +3,17 @@ package com.micheanl.libgltf.render.feature
 /**
  * libgltf · GpuSubmit
  *
+ * <pre>{@code
+ * Array(instanceCount) { GpuSubmit(this, nodeIndex, meshIndex, primitiveIndex) }
+ * }</pre>
+ *
  * 一次 GPU 提交：实例、材质与变换
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import com.micheanl.libgltf.api.GltfInstance
 import com.micheanl.libgltf.render.GltfRenderAsset

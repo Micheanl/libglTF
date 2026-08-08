@@ -3,10 +3,15 @@ package com.micheanl.libgltf.material
 /**
  * libgltf · MaterialUvAnimationState
  *
+ * <pre>{@code
+ * private val restMaterialUv = MaterialUvAnimationState(asset.materials.size)
+ * }</pre>
+ *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 class MaterialUvAnimationState(private val materialCount: Int) {
     val animated = BooleanArray(materialCount)

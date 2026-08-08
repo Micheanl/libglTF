@@ -8,6 +8,7 @@ package com.micheanl.libgltf.mixin;
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 

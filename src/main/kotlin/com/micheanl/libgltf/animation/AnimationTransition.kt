@@ -3,10 +3,23 @@ package com.micheanl.libgltf.animation
 /**
  * libgltf · AnimationTransition
  *
+ * <pre>{@code
+ * AnimationTransition(
+ * fromState,
+ * toState,
+ * conditions.copyOf(),
+ * fadeSeconds,
+ * minimumStateSeconds,
+ * exitTime,
+ * priority
+ * )
+ * }</pre>
+ *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 data class AnimationTransition(
     val fromState: Int,

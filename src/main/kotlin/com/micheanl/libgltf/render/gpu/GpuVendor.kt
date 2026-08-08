@@ -10,6 +10,7 @@ package com.micheanl.libgltf.render.gpu
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
+
 import com.mojang.renderpearl.api.device.DeviceInfo
 
 enum class GpuVendor {

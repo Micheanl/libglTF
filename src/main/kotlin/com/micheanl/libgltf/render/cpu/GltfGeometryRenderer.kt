@@ -3,12 +3,17 @@ package com.micheanl.libgltf.render.cpu
 /**
  * libgltf · GltfGeometryRenderer
  *
+ * <pre>{@code
+ * GltfGeometryRenderer(this, nodeIndex, handle.asset.meshes[meshIndex].primitives[primitiveIndex])
+ * }</pre>
+ *
  * CPU 渲染器
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import com.micheanl.libgltf.api.GltfInstance
 import com.micheanl.libgltf.render.GltfRenderAsset

@@ -3,12 +3,17 @@ package com.micheanl.libgltf.render.iris
 /**
  * libgltf · IrisCompat
  *
+ * <pre>{@code
+ * IrisCompat.registerPbr(albedo, normal, specular)
+ * }</pre>
+ *
  * Iris 兼容性检测
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.renderer.texture.AbstractTexture

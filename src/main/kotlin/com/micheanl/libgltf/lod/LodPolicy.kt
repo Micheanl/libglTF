@@ -10,6 +10,7 @@ package com.micheanl.libgltf.lod
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
+
 data class LodPolicy(
     val renderDistance: Float,
     val animationDistance: Float,

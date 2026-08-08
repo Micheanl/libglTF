@@ -8,6 +8,7 @@ package com.micheanl.libgltf.animation
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
+
 data class AnimationCondition(
     val parameter: AnimationParameter,
     val comparison: AnimationComparison,

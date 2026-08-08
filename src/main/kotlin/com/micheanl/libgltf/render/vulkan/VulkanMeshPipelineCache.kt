@@ -3,12 +3,17 @@ package com.micheanl.libgltf.render.vulkan
 /**
  * libgltf · VulkanMeshPipelineCache
  *
+ * <pre>{@code
+ * VulkanMeshPipelineCache(backend).takeIf { it.supported }
+ * }</pre>
+ *
  * Vulkan EXT mesh 管线缓存
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import com.micheanl.libgltf.render.gpu.MeshletStorage
 import com.micheanl.libgltf.render.gpu.GpuBackend

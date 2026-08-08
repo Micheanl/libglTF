@@ -8,6 +8,7 @@ package com.micheanl.libgltf.animation
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
+
 import com.micheanl.libgltf.model.GltfAsset
 
 class AnimationStateMachineBuilder(private val asset: GltfAsset) {

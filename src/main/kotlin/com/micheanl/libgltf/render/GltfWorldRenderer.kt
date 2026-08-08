@@ -10,6 +10,7 @@ package com.micheanl.libgltf.render
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
+
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext
 import net.minecraft.client.Minecraft
 import net.minecraft.client.multiplayer.ClientLevel

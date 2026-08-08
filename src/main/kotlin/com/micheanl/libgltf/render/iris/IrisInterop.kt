@@ -3,10 +3,15 @@ package com.micheanl.libgltf.render.iris
 /**
  * libgltf · IrisInterop
  *
+ * <pre>{@code
+ * fun shaderPackActive(): Boolean = loaded && IrisInterop.shaderPackActive()
+ * }</pre>
+ *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import com.mojang.renderpearl.backend.opengl.GlTexture
 import net.irisshaders.iris.api.v0.IrisApi

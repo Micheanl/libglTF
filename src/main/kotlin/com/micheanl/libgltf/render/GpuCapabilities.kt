@@ -3,12 +3,30 @@ package com.micheanl.libgltf.render
 /**
  * libgltf · GpuCapabilities
  *
+ * <pre>{@code
+ * private var capabilities = GpuCapabilities(
+ * GpuBackendType.UNKNOWN,
+ * false,
+ * false,
+ * false,
+ * false,
+ * false,
+ * false,
+ * false,
+ * false,
+ * false,
+ * false,
+ * false,
+ * GpuPath.CPU
+ * }</pre>
+ *
  * GPU 能力集合
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 data class GpuCapabilities(
     val backend: GpuBackendType,

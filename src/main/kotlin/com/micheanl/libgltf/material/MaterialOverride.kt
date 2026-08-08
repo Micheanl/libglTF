@@ -8,6 +8,7 @@ package com.micheanl.libgltf.material
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
+
 import net.minecraft.resources.Identifier
 
 data class MaterialOverride(

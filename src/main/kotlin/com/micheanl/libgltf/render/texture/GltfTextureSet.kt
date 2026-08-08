@@ -3,12 +3,23 @@ package com.micheanl.libgltf.render.texture
 /**
  * libgltf · GltfTextureSet
  *
+ * <pre>{@code
+ * GltfTextureSet(
+ * identifiers,
+ * Array(textures.size) { requireNotNull(textures[it]) },
+ * materialIdentifiers,
+ * materialTextures,
+ * fallback
+ * )
+ * }</pre>
+ *
  * 资源纹理集合
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import net.minecraft.client.Minecraft
 import net.minecraft.resources.Identifier

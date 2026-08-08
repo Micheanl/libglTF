@@ -3,10 +3,24 @@ package com.micheanl.libgltf.model
 /**
  * libgltf · GltfStats
  *
+ * <pre>{@code
+ * val stats = GltfStats(
+ * resolvedNodes.size,
+ * meshes.size,
+ * primitiveCount,
+ * triangleCount,
+ * materials.size,
+ * textures.size,
+ * skins.size,
+ * morphTargetCount
+ * )
+ * }</pre>
+ *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 data class GltfStats(
     val nodeCount: Int,

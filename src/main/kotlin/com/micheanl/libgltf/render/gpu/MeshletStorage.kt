@@ -3,12 +3,28 @@ package com.micheanl.libgltf.render.gpu
 /**
  * libgltf · MeshletStorage
  *
+ * <pre>{@code
+ * MeshletStorage.create(
+ * device,
+ * "$label lod $level",
+ * optimized[level],
+ * remappedPositions,
+ * remappedVertices,
+ * primitive.vertexCount,
+ * indexType,
+ * if (gl) 256 else 64,
+ * if (gl) 256 else 64,
+ * primitive.bounds
+ * )
+ * }</pre>
+ *
  * meshlet 的 GPU 缓冲：紧凑顶点、三角形与元数据
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import com.micheanl.libgltf.render.vulkan.VulkanUsage
 import com.micheanl.libgltf.model.VertexLayout

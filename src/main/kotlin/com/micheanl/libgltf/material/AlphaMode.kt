@@ -8,6 +8,7 @@ package com.micheanl.libgltf.material
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
+
 enum class AlphaMode {
     OPAQUE,
     MASK,

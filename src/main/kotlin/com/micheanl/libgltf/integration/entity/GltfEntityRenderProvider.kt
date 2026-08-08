@@ -8,6 +8,7 @@ package com.micheanl.libgltf.integration.entity
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
+
 import com.micheanl.libgltf.api.GltfInstance
 import net.minecraft.world.entity.Entity
 

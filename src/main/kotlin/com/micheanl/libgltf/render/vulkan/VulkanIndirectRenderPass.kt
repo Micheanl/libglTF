@@ -10,6 +10,7 @@ package com.micheanl.libgltf.render.vulkan
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
+
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice
 
 interface VulkanIndirectRenderPass {

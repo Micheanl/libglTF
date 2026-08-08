@@ -3,12 +3,17 @@ package com.micheanl.libgltf.render.gl
 /**
  * libgltf · GlMeshPipelineCache
  *
+ * <pre>{@code
+ * val cache = GlMeshPipelineCache()
+ * }</pre>
+ *
  * OpenGL mesh 管线缓存
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import com.micheanl.libgltf.render.gpu.MeshletStorage
 import com.micheanl.libgltf.render.gpu.GpuBackend

@@ -3,12 +3,17 @@ package com.micheanl.libgltf.lod
 /**
  * libgltf · LodSelector
  *
+ * <pre>{@code
+ * lodSelector = LodSelector(value)
+ * }</pre>
+ *
  * LOD 距离选择
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 class LodSelector(private val policy: LodPolicy) {
     fun select(distanceSquared: Float, previousLevel: Int): Int {

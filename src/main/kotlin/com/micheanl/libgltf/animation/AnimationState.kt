@@ -3,10 +3,15 @@ package com.micheanl.libgltf.animation
 /**
  * libgltf · AnimationState
  *
+ * <pre>{@code
+ * states.add(AnimationState(name, segment, looping, speed))
+ * }</pre>
+ *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 data class AnimationState(
     val name: String,

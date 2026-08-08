@@ -8,6 +8,7 @@ package com.micheanl.libgltf.mixin;
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
+
 import com.micheanl.libgltf.render.vulkan.RenderConfig;
 import com.mojang.renderpearl.api.device.GpuDebugOptions;
 import com.mojang.renderpearl.backend.vulkan.VulkanBackend;

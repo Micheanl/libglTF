@@ -3,12 +3,17 @@ package com.micheanl.libgltf.render.feature
 /**
  * libgltf · GpuBatch
  *
+ * <pre>{@code
+ * GpuBatch().also(batches::add)
+ * }</pre>
+ *
  * 单个提交组的 GPU 绘制批
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import com.micheanl.libgltf.api.GltfInstance
 import com.micheanl.libgltf.render.GpuBackendType

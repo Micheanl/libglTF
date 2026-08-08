@@ -3,10 +3,25 @@ package com.micheanl.libgltf.animation
 /**
  * libgltf · AnimationChannel
  *
+ * <pre>{@code
+ * parsed += AnimationChannel(
+ * -1,
+ * AnimationPath.MATERIAL_UV,
+ * interpolation,
+ * input,
+ * output,
+ * components,
+ * materialTarget.materialIndex,
+ * materialTarget.textureSlot,
+ * materialTarget.textureProperty
+ * )
+ * }</pre>
+ *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 data class AnimationChannel(
     val nodeIndex: Int,

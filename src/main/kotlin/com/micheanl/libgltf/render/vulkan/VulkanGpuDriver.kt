@@ -3,12 +3,17 @@ package com.micheanl.libgltf.render.vulkan
 /**
  * libgltf · VulkanGpuDriver
  *
+ * <pre>{@code
+ * gpuDriven = VulkanGpuDriver.create(RenderSystem.getDevice()) ?: GlGpuDriver.create()
+ * }</pre>
+ *
  * Vulkan 后端的 GPU 驱动
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import com.micheanl.libgltf.mixin.FrontendGpuDeviceAccessor
 import com.micheanl.libgltf.render.GpuBackendType

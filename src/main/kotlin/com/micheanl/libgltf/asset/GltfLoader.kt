@@ -3,12 +3,17 @@ package com.micheanl.libgltf.asset
 /**
  * libgltf · GltfLoader
  *
+ * <pre>{@code
+ * override fun load(path: Path, lodPolicy: LodPolicy): GltfLoadResult = GltfLoader.load(path, lodPolicy)
+ * }</pre>
+ *
  * glTF 解析入口
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import com.micheanl.libgltf.util.JsonValue
 import kotlinx.serialization.ExperimentalSerializationApi

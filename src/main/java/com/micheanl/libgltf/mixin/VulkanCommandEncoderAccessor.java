@@ -8,6 +8,7 @@ package com.micheanl.libgltf.mixin;
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
+
 import com.mojang.renderpearl.backend.vulkan.VulkanCommandEncoder;
 import org.lwjgl.vulkan.VkCommandBuffer;
 import org.spongepowered.asm.mixin.Mixin;

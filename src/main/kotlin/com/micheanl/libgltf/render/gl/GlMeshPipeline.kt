@@ -3,12 +3,17 @@ package com.micheanl.libgltf.render.gl
 /**
  * libgltf · GlMeshPipeline
  *
+ * <pre>{@code
+ * GlMeshPipeline.create(renderPipeline, useNv, meshWorkgroupSize).also { pipelines[renderPipeline] = it }
+ * }</pre>
+ *
  * OpenGL mesh 管线与绘制
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import com.micheanl.libgltf.mixin.GlBufferAccessor
 import com.micheanl.libgltf.mixin.GlSamplerAccessor

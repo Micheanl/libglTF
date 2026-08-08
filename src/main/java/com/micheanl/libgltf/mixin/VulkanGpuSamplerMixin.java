@@ -8,6 +8,7 @@ package com.micheanl.libgltf.mixin;
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
+
 import com.micheanl.libgltf.render.texture.MipmapFilterState;
 import com.mojang.renderpearl.backend.vulkan.VulkanGpuSampler;
 import org.lwjgl.vulkan.VK10;

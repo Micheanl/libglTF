@@ -3,12 +3,17 @@ package com.micheanl.libgltf.render
 /**
  * libgltf · GltfConfig
  *
+ * <pre>{@code
+ * GltfConfig.load()
+ * }</pre>
+ *
  * config 文件加载与默认生成
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import com.micheanl.libgltf.render.vulkan.RenderConfig
 import net.fabricmc.loader.api.FabricLoader

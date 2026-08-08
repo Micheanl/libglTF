@@ -3,12 +3,17 @@ package com.micheanl.libgltf.render.texture
 /**
  * libgltf · GltfTextureFactory
  *
+ * <pre>{@code
+ * textures = GltfTextureFactory.create(asset, id)
+ * }</pre>
+ *
  * 纹理创建
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import com.micheanl.libgltf.LibGltf
 import com.micheanl.libgltf.material.GltfMaterial

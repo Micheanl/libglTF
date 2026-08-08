@@ -3,12 +3,22 @@ package com.micheanl.libgltf.render.vulkan
 /**
  * libgltf · VulkanBufferRing
  *
+ * <pre>{@code
+ * commandRing = VulkanBufferRing(
+ * device,
+ * "libgltf indirect commands",
+ * GpuBuffer.USAGE_INDIRECT_PARAMETERS or VulkanUsage.STORAGE,
+ * commandCapacity
+ * )
+ * }</pre>
+ *
  * Vulkan 环形缓冲
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.device.GpuDevice

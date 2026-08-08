@@ -3,12 +3,25 @@ package com.micheanl.libgltf.render
 /**
  * libgltf · GltfRenderTypes
  *
+ * <pre>{@code
+ * val renderType = GltfRenderTypes.get(
+ * resource.id,
+ * materialIndex,
+ * textureIndex,
+ * alphaCutoff,
+ * primitive.mode,
+ * material,
+ * texture
+ * )
+ * }</pre>
+ *
  * 运行时 RenderType 构建
  *
  * @author Chen Micheanl
  * @license MIT
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
+
 
 import com.micheanl.libgltf.LibGltf
 import com.micheanl.libgltf.material.AlphaMode
