@@ -128,13 +128,13 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
 private class GltfVulkanMeshPipeline(
     private val device: VulkanDevice,
     private val descriptorSetLayout: Long,
+    private val storageSetLayout: Long,
     private val pipelineLayout: Long,
     private val withDepthPipeline: Long,
     private val withoutDepthPipeline: Long,
     private val taskModule: Long,
     private val meshModule: Long,
     private val fragmentModule: Long,
-    private val storageBinding: Int,
     private val descriptorPipeline: VulkanRenderPipeline
 ) : AutoCloseable {
     fun descriptorPipeline(): VulkanRenderPipeline = descriptorPipeline
@@ -162,7 +162,7 @@ private class GltfVulkanMeshPipeline(
             val writes = VkWriteDescriptorSet.calloc(buffers.size, stack)
             for (index in buffers.indices) {
                 infos[index].buffer((buffers[index] as VulkanGpuBuffer).vkBuffer()).offset(0L).range(buffers[index].size())
-                writes[index].`sType$Default`().dstBinding(storageBinding + index).descriptorCount(1)
+                writes[index].`sType$Default`().dstBinding(index).descriptorCount(1)
                     .descriptorType(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
                     .pBufferInfo(VkDescriptorBufferInfo.create(infos[index].address(), 1))
             }
@@ -170,7 +170,7 @@ private class GltfVulkanMeshPipeline(
                 commandBuffer,
                 VK10.VK_PIPELINE_BIND_POINT_GRAPHICS,
                 pipelineLayout,
-                0,
+                1,
                 writes
             )
             val candidateCount = instanceCount.toLong() * meshlets.meshletCount
@@ -206,6 +206,7 @@ private class GltfVulkanMeshPipeline(
         VK10.vkDestroyPipeline(device.vkDevice(), withDepthPipeline, null)
         VK10.vkDestroyPipelineLayout(device.vkDevice(), pipelineLayout, null)
         VK10.vkDestroyDescriptorSetLayout(device.vkDevice(), descriptorSetLayout, null)
+        VK10.vkDestroyDescriptorSetLayout(device.vkDevice(), storageSetLayout, null)
         VK10.vkDestroyShaderModule(device.vkDevice(), fragmentModule, null)
         VK10.vkDestroyShaderModule(device.vkDevice(), meshModule, null)
         VK10.vkDestroyShaderModule(device.vkDevice(), taskModule, null)
@@ -220,8 +221,7 @@ private class GltfVulkanMeshPipeline(
             meshWorkgroupSize: Int
         ): GltfVulkanMeshPipeline {
             val uniforms = original.uniforms()
-            val storageBinding = uniforms.size
-            require(storageBinding + DESCRIPTOR_COUNT <= maxPushDescriptors)
+            require(uniforms.size <= maxPushDescriptors)
             val sampler0Binding = uniforms.indexOfFirst { it.name() == "Sampler0" }
             require(sampler0Binding >= 0)
             val bindings = mapOf(
@@ -230,11 +230,11 @@ private class GltfVulkanMeshPipeline(
                 "LIGHTING_BINDING" to uniforms.indexOfFirst { it.name() == "Lighting" },
                 "SAMPLER1_BINDING" to uniforms.indexOfFirst { it.name() == "Sampler1" },
                 "SAMPLER2_BINDING" to uniforms.indexOfFirst { it.name() == "Sampler2" },
-                "GEOMETRY_BINDING" to storageBinding,
-                "INSTANCES_BINDING" to storageBinding + 1,
-                "MESHLETS_BINDING" to storageBinding + 2,
-                "MESHLET_VERTICES_BINDING" to storageBinding + 3,
-                "MESHLET_TRIANGLES_BINDING" to storageBinding + 4
+                "GEOMETRY_BINDING" to 0,
+                "INSTANCES_BINDING" to 1,
+                "MESHLETS_BINDING" to 2,
+                "MESHLET_VERTICES_BINDING" to 3,
+                "MESHLET_TRIANGLES_BINDING" to 4
             )
             require(bindings.values.none { it < 0 })
             val taskModule = compileModule(device, TASK_SHADER, Shaderc.shaderc_task_shader, bindings)
@@ -272,8 +272,7 @@ private class GltfVulkanMeshPipeline(
             fragmentModule: Long
         ): GltfVulkanMeshPipeline = MemoryStack.stackPush().use { stack ->
             val uniforms = original.uniforms()
-            val storageBinding = uniforms.size
-            val bindings = VkDescriptorSetLayoutBinding.calloc(storageBinding + DESCRIPTOR_COUNT, stack)
+            val bindings = VkDescriptorSetLayoutBinding.calloc(uniforms.size, stack)
             for (index in uniforms.indices) {
                 bindings[index].binding(index).descriptorCount(1)
                     .descriptorType(descriptorType(uniforms[index].type()))
@@ -284,11 +283,6 @@ private class GltfVulkanMeshPipeline(
                             EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT
                     )
             }
-            for (index in 0 until DESCRIPTOR_COUNT) {
-                bindings[storageBinding + index].binding(storageBinding + index).descriptorCount(1)
-                    .descriptorType(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
-                    .stageFlags(EXTMeshShader.VK_SHADER_STAGE_TASK_BIT_EXT or EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT)
-            }
             val descriptorInfo = VkDescriptorSetLayoutCreateInfo.calloc(stack).`sType$Default`()
                 .flags(KHRPushDescriptor.VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR)
                 .pBindings(bindings)
@@ -296,48 +290,64 @@ private class GltfVulkanMeshPipeline(
             checkVk(VK10.vkCreateDescriptorSetLayout(device.vkDevice(), descriptorInfo, null, pointer))
             val descriptorSetLayout = pointer[0]
             try {
-                val range = VkPushConstantRange.calloc(1, stack)
-                    .stageFlags(EXTMeshShader.VK_SHADER_STAGE_TASK_BIT_EXT)
-                    .offset(0)
-                    .size(PUSH_CONSTANT_SIZE)
-                val layoutInfo = VkPipelineLayoutCreateInfo.calloc(stack).`sType$Default`()
-                    .pSetLayouts(stack.longs(descriptorSetLayout))
-                    .pPushConstantRanges(range)
-                checkVk(VK10.vkCreatePipelineLayout(device.vkDevice(), layoutInfo, null, pointer))
-                val pipelineLayout = pointer[0]
+                val storageBindings = VkDescriptorSetLayoutBinding.calloc(DESCRIPTOR_COUNT, stack)
+                for (index in 0 until DESCRIPTOR_COUNT) {
+                    storageBindings[index].binding(index).descriptorCount(1)
+                        .descriptorType(VK10.VK_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+                        .stageFlags(EXTMeshShader.VK_SHADER_STAGE_TASK_BIT_EXT or EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT)
+                }
+                val storageInfo = VkDescriptorSetLayoutCreateInfo.calloc(stack).`sType$Default`()
+                    .flags(KHRPushDescriptor.VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR)
+                    .pBindings(storageBindings)
+                checkVk(VK10.vkCreateDescriptorSetLayout(device.vkDevice(), storageInfo, null, pointer))
+                val storageSetLayout = pointer[0]
                 try {
-                    val pipelines = createGraphicsPipelines(
-                        device,
-                        renderPipeline,
-                        taskModule,
-                        meshModule,
-                        fragmentModule,
-                        pipelineLayout,
-                        stack
-                    )
-                    val descriptorPipeline = VulkanRenderPipeline(
-                        device,
-                        original.withDepthPipeline(),
-                        original.withoutDepthPipeline(),
-                        pipelineLayout,
-                        descriptorSetLayout,
-                        LongArrayList(),
-                        uniforms
-                    )
-                    GltfVulkanMeshPipeline(
-                        device,
-                        descriptorSetLayout,
-                        pipelineLayout,
-                        pipelines[0],
-                        pipelines[1],
-                        taskModule,
-                        meshModule,
-                        fragmentModule,
-                        storageBinding,
-                        descriptorPipeline
-                    )
+                    val range = VkPushConstantRange.calloc(1, stack)
+                        .stageFlags(EXTMeshShader.VK_SHADER_STAGE_TASK_BIT_EXT)
+                        .offset(0)
+                        .size(PUSH_CONSTANT_SIZE)
+                    val layoutInfo = VkPipelineLayoutCreateInfo.calloc(stack).`sType$Default`()
+                        .pSetLayouts(stack.longs(descriptorSetLayout, storageSetLayout))
+                        .pPushConstantRanges(range)
+                    checkVk(VK10.vkCreatePipelineLayout(device.vkDevice(), layoutInfo, null, pointer))
+                    val pipelineLayout = pointer[0]
+                    try {
+                        val pipelines = createGraphicsPipelines(
+                            device,
+                            renderPipeline,
+                            taskModule,
+                            meshModule,
+                            fragmentModule,
+                            pipelineLayout,
+                            stack
+                        )
+                        val descriptorPipeline = VulkanRenderPipeline(
+                            device,
+                            original.withDepthPipeline(),
+                            original.withoutDepthPipeline(),
+                            pipelineLayout,
+                            descriptorSetLayout,
+                            LongArrayList(),
+                            uniforms
+                        )
+                        GltfVulkanMeshPipeline(
+                            device,
+                            descriptorSetLayout,
+                            storageSetLayout,
+                            pipelineLayout,
+                            pipelines[0],
+                            pipelines[1],
+                            taskModule,
+                            meshModule,
+                            fragmentModule,
+                            descriptorPipeline
+                        )
+                    } catch (error: RuntimeException) {
+                        VK10.vkDestroyPipelineLayout(device.vkDevice(), pipelineLayout, null)
+                        throw error
+                    }
                 } catch (error: RuntimeException) {
-                    VK10.vkDestroyPipelineLayout(device.vkDevice(), pipelineLayout, null)
+                    VK10.vkDestroyDescriptorSetLayout(device.vkDevice(), storageSetLayout, null)
                     throw error
                 }
             } catch (error: RuntimeException) {

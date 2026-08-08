@@ -7,12 +7,12 @@ layout(set = 0, binding = DYNAMIC_TRANSFORMS_BINDING, std140) uniform DynamicTra
 layout(set = 0, binding = LIGHTING_BINDING, std140) uniform Lighting { vec3 Light0_Direction; vec3 Light1_Direction; };
 layout(set = 0, binding = SAMPLER1_BINDING) uniform sampler2D Sampler1;
 layout(set = 0, binding = SAMPLER2_BINDING) uniform sampler2D Sampler2;
-layout(set = 0, binding = GEOMETRY_BINDING, std430) readonly buffer Geometry { uint geometryWords[]; };
-layout(set = 0, binding = INSTANCES_BINDING, std430) readonly buffer Instances { uint instanceWords[]; };
+layout(set = 1, binding = GEOMETRY_BINDING, std430) readonly buffer Geometry { uint geometryWords[]; };
+layout(set = 1, binding = INSTANCES_BINDING, std430) readonly buffer Instances { uint instanceWords[]; };
 struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint vertexCount; uint triangleCount; uint firstIndex; uint indexCount; uint padding0; uint padding1; };
-layout(set = 0, binding = MESHLETS_BINDING, std430) readonly buffer Meshlets { Meshlet meshlets[]; };
-layout(set = 0, binding = MESHLET_VERTICES_BINDING, std430) readonly buffer MeshletVertices { uint meshletVertices[]; };
-layout(set = 0, binding = MESHLET_TRIANGLES_BINDING, std430) readonly buffer MeshletTriangles { uint meshletTriangleWords[]; };
+layout(set = 1, binding = MESHLETS_BINDING, std430) readonly buffer Meshlets { Meshlet meshlets[]; };
+layout(set = 1, binding = MESHLET_VERTICES_BINDING, std430) readonly buffer MeshletVertices { uint meshletVertices[]; };
+layout(set = 1, binding = MESHLET_TRIANGLES_BINDING, std430) readonly buffer MeshletTriangles { uint meshletTriangleWords[]; };
 struct TaskPayload { uint instanceIndices[32]; uint meshletIndices[32]; };
 taskPayloadSharedEXT TaskPayload payload;
 layout(location = 0) out float sphericalVertexDistance[];
