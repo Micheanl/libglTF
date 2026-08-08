@@ -32,14 +32,18 @@ class GltfGlMeshPipelineCache : AutoCloseable {
         val meshInvocationTarget = if (useNv) NVMeshShader.GL_MAX_MESH_WORK_GROUP_INVOCATIONS_NV else EXTMeshShader.GL_MAX_MESH_WORK_GROUP_INVOCATIONS_EXT
         val maxMeshInvocations = if (extSupported || nvSupported) query(meshInvocationTarget) else 0
         val preferredWorkgroupSize = GltfGpuBackend.vendorProfile().maxMeshWorkGroupSize
-        meshWorkgroupSize = if (preferredWorkgroupSize >= 32 && maxMeshInvocations >= preferredWorkgroupSize) {
-            preferredWorkgroupSize
-        } else if (maxMeshInvocations >= 64) {
-            64
-        } else if (maxMeshInvocations >= 32) {
-            32
+        meshWorkgroupSize = if (useNv) {
+            if (maxMeshInvocations >= 32) 32 else 0
         } else {
-            0
+            if (preferredWorkgroupSize >= 32 && maxMeshInvocations >= preferredWorkgroupSize) {
+                preferredWorkgroupSize
+            } else if (maxMeshInvocations >= 64) {
+                64
+            } else if (maxMeshInvocations >= 32) {
+                32
+            } else {
+                0
+            }
         }
         val maxDrawCount = if (extSupported || nvSupported) {
             if (useNv) {

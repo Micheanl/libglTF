@@ -14,8 +14,7 @@ struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint verte
 layout(std430, binding = 8) readonly buffer Meshlets { Meshlet meshlets[]; };
 layout(std430, binding = 9) readonly buffer MeshletVertices { uint meshletVertices[]; };
 layout(std430, binding = 10) readonly buffer MeshletTriangles { uint meshletTriangleWords[]; };
-taskNV in uint payload[64];
-out gl_MeshVerticesNV { vec4 gl_Position; } gl_MeshVerticesNV[];
+taskNV in TaskPayload { uint words[64]; } payload;
 layout(location = 0) out float sphericalVertexDistance[];
 layout(location = 1) out float cylindricalVertexDistance[];
 layout(location = 2) out vec4 vertexColor[];
@@ -38,10 +37,10 @@ vec4 sampleLightmap(ivec2 uv) {
 }
 void main() {
     uint payloadIndex = gl_WorkGroupID.x;
-    uint instanceIndex = min(payload[payloadIndex * 2], max(instanceCount, 1) - 1);
-    uint meshletIndex = min(payload[payloadIndex * 2 + 1], max(meshletCount, 1) - 1);
+    uint instanceIndex = min(payload.words[payloadIndex * 2], max(instanceCount, 1) - 1);
+    uint meshletIndex = min(payload.words[payloadIndex * 2 + 1], max(meshletCount, 1) - 1);
     Meshlet meshlet = meshlets[meshletIndex];
-    SetMeshOutputsNV(meshlet.vertexCount, meshlet.triangleCount);
+    if (gl_LocalInvocationIndex == 0) gl_PrimitiveCountNV = meshlet.triangleCount;
     uint invocation = gl_LocalInvocationIndex;
     uint io = instanceIndex * 41;
     for (uint vertex = invocation; vertex < meshlet.vertexCount; vertex += gl_WorkGroupSize.x) {

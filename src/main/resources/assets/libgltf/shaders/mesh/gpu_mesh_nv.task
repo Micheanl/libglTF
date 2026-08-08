@@ -7,7 +7,7 @@ layout(std430, binding = 7) readonly buffer Instances { uint instanceWords[]; };
 struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint vertexCount; uint triangleCount; uint firstIndex; uint indexCount; uint padding0; uint padding1; };
 layout(std430, binding = 8) readonly buffer Meshlets { Meshlet meshlets[]; };
 layout(std140, binding = 5) uniform MeshParams { vec4 primitiveSphere; uint instanceCount; uint meshletCount; uint instanceCulling; uint meshletCulling; uint baseCandidate; };
-taskNV out uint payload[64];
+taskNV out TaskPayload { uint words[64]; } payload;
 shared uint visibleCount;
 mat4 instanceMatrix(uint instanceIndex) {
     uint o = instanceIndex * 41;
@@ -36,10 +36,10 @@ void main() {
         bool meshletVisible = meshletCulling == 0 || visibleSphere(meshlets[meshletIndex].sphere, transform);
         if (instanceVisible && meshletVisible) {
             uint slot = atomicAdd(visibleCount, 1);
-            payload[slot * 2] = instanceIndex;
-            payload[slot * 2 + 1] = meshletIndex;
+            payload.words[slot * 2] = instanceIndex;
+            payload.words[slot * 2 + 1] = meshletIndex;
         }
     }
     barrier();
-    EmitMeshTasksNV(visibleCount, 1, 1);
+    if (gl_LocalInvocationIndex == 0) gl_TaskCountNV = visibleCount;
 }

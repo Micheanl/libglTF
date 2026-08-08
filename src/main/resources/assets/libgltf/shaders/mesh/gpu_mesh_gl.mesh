@@ -15,7 +15,6 @@ layout(std430, binding = 8) readonly buffer Meshlets { Meshlet meshlets[]; };
 layout(std430, binding = 9) readonly buffer MeshletVertices { uint meshletVertices[]; };
 layout(std430, binding = 10) readonly buffer MeshletTriangles { uint meshletTriangleWords[]; };
 taskPayloadSharedEXT uint payload[64];
-out gl_MeshVerticesEXT { vec4 gl_Position; } gl_MeshVerticesEXT[];
 layout(location = 0) out float sphericalVertexDistance[];
 layout(location = 1) out float cylindricalVertexDistance[];
 layout(location = 2) out vec4 vertexColor[];
