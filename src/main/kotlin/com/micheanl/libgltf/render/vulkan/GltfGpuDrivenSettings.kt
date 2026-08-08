@@ -20,7 +20,7 @@ object GltfGpuDrivenSettings {
     var debugMeshFlat: Boolean = booleanProperty("libgltf.vulkan.meshShader.debugFlat", false)
 
     @Volatile
-    var meshGroupLimit: Int = intProperty("libgltf.vulkan.meshShader.groupLimit", 1024)
+    var meshGroupLimit: Int = intProperty("libgltf.vulkan.meshShader.groupLimit", 65535)
 
     fun meshShaderEnabled(): Boolean = meshShaderOverride ?: meshShader
 
