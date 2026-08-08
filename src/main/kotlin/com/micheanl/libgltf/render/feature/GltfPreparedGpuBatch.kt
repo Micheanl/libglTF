@@ -1,6 +1,7 @@
 package com.micheanl.libgltf.render.feature
 
 import com.micheanl.libgltf.render.GltfGpuBackendType
+import com.micheanl.libgltf.render.gpu.GltfGpuDriver
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
 import com.micheanl.libgltf.render.gpu.GltfGpuFormats
 import com.micheanl.libgltf.render.gpu.GltfGpuPrimitive
@@ -27,7 +28,7 @@ class GltfPreparedGpuBatch : AutoCloseable {
     private var paletteBuffer: MappableRingBuffer? = null
     private var sortedIndexBuffer: MappableRingBuffer? = null
     private val gpuDriven = GltfGpuDrivenBatch()
-    private var gpuDrivenDriver: GltfVulkanGpuDriven? = null
+    private var gpuDrivenDriver: GltfGpuDriver? = null
     private var storageInstances = false
     private var instanceCapacity = 0
     private var paletteCapacity = 0
@@ -42,7 +43,7 @@ class GltfPreparedGpuBatch : AutoCloseable {
     private var useSortedIndexBuffer = false
     private var active = false
 
-    fun prepare(submits: List<GltfGpuSubmit>, fromIndex: Int, toIndex: Int, driver: GltfVulkanGpuDriven?) {
+    fun prepare(submits: List<GltfGpuSubmit>, fromIndex: Int, toIndex: Int, driver: GltfGpuDriver?) {
         val first = submits[fromIndex]
         gpuDrivenDriver = driver
         val gpu = first.resource.gpu()
@@ -68,7 +69,7 @@ class GltfPreparedGpuBatch : AutoCloseable {
                 instanceCount,
                 skinned,
                 first.renderType.hasBlending(),
-                driver?.meshPipelines?.supported == true
+                driver?.meshSupported == true
             )
             active = true
         } catch (error: RuntimeException) {
@@ -123,7 +124,8 @@ class GltfPreparedGpuBatch : AutoCloseable {
                 primitive,
                 instanceGpuBuffer,
                 instanceCount,
-                preparedRenderType.pipeline()
+                preparedRenderType.pipeline(),
+                preparedRenderType
             )
             if (!meshDrawn) {
                 renderPass.setIndexBuffer(primitive.indexBuffers[lod], primitive.indexType)

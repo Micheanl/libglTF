@@ -2,6 +2,8 @@ package com.micheanl.libgltf.render.feature
 
 import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenBenchmark
 import com.micheanl.libgltf.render.vulkan.GltfVulkanGpuDriven
+import com.micheanl.libgltf.render.gl.GltfGlGpuDriven
+import com.micheanl.libgltf.render.gpu.GltfGpuDriver
 import com.mojang.renderpearl.api.commands.RenderPass
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.logging.LogUtils
@@ -15,14 +17,14 @@ class GltfGpuFeatureRenderer : FeatureRenderer<GltfGpuSubmit> {
     private var groupCounts = IntArray(INITIAL_GROUP_CAPACITY)
     private var preparedBatchCount = 0
     private var preparedGroupCount = 0
-    private var gpuDriven: GltfVulkanGpuDriven? = null
+    private var gpuDriven: GltfGpuDriver? = null
     private var gpuDrivenAttempted = false
 
     override fun beginPrepare(context: FeatureFrameContext) {
         if (!gpuDrivenAttempted) {
             gpuDrivenAttempted = true
             try {
-                gpuDriven = GltfVulkanGpuDriven.create(RenderSystem.getDevice())
+                gpuDriven = GltfVulkanGpuDriven.create(RenderSystem.getDevice()) ?: GltfGlGpuDriven.create()
             } catch (error: RuntimeException) {
                 LOGGER.error("libgltf Vulkan GPU-driven initialization failed", error)
             }

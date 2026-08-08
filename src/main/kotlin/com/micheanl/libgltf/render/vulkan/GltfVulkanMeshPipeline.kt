@@ -1,6 +1,7 @@
 package com.micheanl.libgltf.render.vulkan
 
 import com.micheanl.libgltf.render.gpu.GltfMeshletLod
+import com.micheanl.libgltf.render.gpu.GltfGpuBackend
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.pipeline.BlendFunction
 import com.mojang.renderpearl.api.pipeline.RenderPipeline
@@ -36,7 +37,7 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
             mesh.pNext(push.address())
             val root = VkPhysicalDeviceProperties2.calloc(stack).`sType$Default`().pNext(mesh)
             VK12.vkGetPhysicalDeviceProperties2(device.vkDevice().physicalDevice, root)
-            maxDrawCount = mesh.maxTaskWorkGroupCount(0)
+            maxDrawCount = minOf(mesh.maxTaskWorkGroupCount(0), GltfGpuBackend.vendorProfile().maxTaskGroupCount)
             maxPushDescriptors = push.maxPushDescriptors()
             supported = mesh.maxMeshOutputVertices() >= 64 &&
                 mesh.maxMeshOutputPrimitives() >= 124 &&

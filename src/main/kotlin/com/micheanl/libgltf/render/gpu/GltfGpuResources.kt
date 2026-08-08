@@ -26,7 +26,7 @@ class GltfGpuResources(
                     RenderSystem.getDevice(),
                     "libgltf $resourceId mesh $meshIndex primitive $primitiveIndex",
                     asset.meshes[meshIndex].primitives[primitiveIndex],
-                    GltfGpuDrivenSettings.enabled && GltfGpuBackend.capabilities().backend == GltfGpuBackendType.VULKAN
+                    GltfGpuDrivenSettings.enabled && GltfGpuBackend.meshletBuilding()
                 )
                 primitives[meshIndex][primitiveIndex] = primitive
             } catch (error: RuntimeException) {

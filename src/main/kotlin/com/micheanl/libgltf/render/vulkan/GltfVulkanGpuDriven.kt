@@ -2,6 +2,7 @@ package com.micheanl.libgltf.render.vulkan
 
 import com.micheanl.libgltf.mixin.FrontendGpuDeviceAccessor
 import com.micheanl.libgltf.render.GltfGpuBackendType
+import com.micheanl.libgltf.render.gpu.GltfGpuDriver
 import com.micheanl.libgltf.render.gpu.GltfGpuBackend
 import com.mojang.renderpearl.api.device.GpuDevice
 import com.mojang.renderpearl.backend.vulkan.VulkanDevice
@@ -9,7 +10,10 @@ import com.mojang.renderpearl.backend.vulkan.VulkanDevice
 class GltfVulkanGpuDriven private constructor(
     val pipeline: GltfVulkanComputePipeline,
     val meshPipelines: GltfVulkanMeshPipelineCache?
-) : AutoCloseable {
+) : GltfGpuDriver {
+    override val meshSupported: Boolean
+        get() = meshPipelines?.supported == true
+
     override fun close() {
         meshPipelines?.close()
         pipeline.close()
@@ -25,7 +29,12 @@ class GltfVulkanGpuDriven private constructor(
                 !capabilities.nonZeroFirstInstance
             ) return null
             val backend = (device as FrontendGpuDeviceAccessor).libgltfBackend as? VulkanDevice ?: return null
-            val mesh = if (GltfGpuDrivenSettings.meshShader && backend.vkDevice().capabilities.VK_EXT_mesh_shader) {
+            val profile = GltfGpuBackend.vendorProfile()
+            val mesh = if (
+                profile.preferMeshShader &&
+                GltfGpuDrivenSettings.meshShader &&
+                backend.vkDevice().capabilities.VK_EXT_mesh_shader
+            ) {
                 GltfVulkanMeshPipelineCache(backend).takeIf { it.supported }
             } else {
                 null

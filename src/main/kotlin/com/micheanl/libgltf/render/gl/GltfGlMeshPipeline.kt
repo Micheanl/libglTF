@@ -1,0 +1,223 @@
+package com.micheanl.libgltf.render.gl
+
+import com.micheanl.libgltf.mixin.GlBufferAccessor
+import com.micheanl.libgltf.mixin.GlSamplerAccessor
+import com.micheanl.libgltf.render.gpu.GltfMeshletLod
+import com.mojang.blaze3d.systems.RenderSystem
+import com.mojang.renderpearl.api.buffers.GpuBuffer
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice
+import com.mojang.renderpearl.api.pipeline.RenderPipeline
+import com.mojang.renderpearl.backend.opengl.GlTexture
+import net.minecraft.client.renderer.rendertype.PreparedRenderType
+import org.lwjgl.opengl.EXTMeshShader
+import org.lwjgl.opengl.GL33C
+import org.lwjgl.opengl.GL43C
+import org.lwjgl.system.MemoryStack
+
+class GltfGlMeshPipeline private constructor(
+    private val programId: Int,
+    private val paramsUbo: Int
+) : AutoCloseable {
+    fun draw(
+        preparedRenderType: PreparedRenderType,
+        geometry: GpuBuffer,
+        instances: GpuBuffer,
+        meshlets: GltfMeshletLod,
+        sphere: FloatArray,
+        instanceCount: Int,
+        instanceCulling: Boolean,
+        meshletCulling: Boolean,
+        maxDrawCount: Int
+    ) {
+        GL33C.glUseProgram(programId)
+        bindUbo(BINDING_PROJECTION, RenderSystem.getProjectionMatrixBuffer() ?: return)
+        bindUbo(BINDING_DYNAMIC_TRANSFORMS, preparedRenderType.dynamicTransforms())
+        RenderSystem.getShaderFog()?.let { bindUbo(BINDING_FOG, it) }
+        RenderSystem.getShaderLights()?.let { bindUbo(BINDING_LIGHTING, it) }
+        bindSsbo(BINDING_GEOMETRY, geometry)
+        bindSsbo(BINDING_INSTANCES, instances)
+        bindSsbo(BINDING_MESHLETS, meshlets.metadataBuffer)
+        bindSsbo(BINDING_MESHLET_VERTICES, meshlets.vertexBuffer)
+        bindSsbo(BINDING_MESHLET_TRIANGLES, meshlets.triangleBuffer)
+        bindTextures(preparedRenderType)
+        val candidateCount = instanceCount.toLong() * meshlets.meshletCount
+        var baseCandidate = 0L
+        while (baseCandidate < candidateCount) {
+            val groups = minOf(
+                maxDrawCount.toLong(),
+                (candidateCount - baseCandidate + TASK_WORKGROUP - 1) / TASK_WORKGROUP
+            ).toInt()
+            writeParams(sphere, instanceCount, meshlets.meshletCount, instanceCulling, meshletCulling, baseCandidate.toInt())
+            EXTMeshShader.glDrawMeshTasksEXT(0, groups, 1)
+            baseCandidate += groups.toLong() * TASK_WORKGROUP
+        }
+        GL33C.glUseProgram(0)
+    }
+
+    override fun close() {
+        GL33C.glDeleteProgram(programId)
+        GL33C.glDeleteBuffers(paramsUbo)
+    }
+
+    private fun bindUbo(binding: Int, slice: GpuBufferSlice) {
+        GL33C.glBindBufferRange(
+            GL33C.GL_UNIFORM_BUFFER,
+            binding,
+            (slice.buffer() as GlBufferAccessor).`libgltf$handle`(),
+            slice.offset(),
+            slice.length()
+        )
+    }
+
+    private fun bindSsbo(binding: Int, buffer: GpuBuffer) {
+        GL33C.glBindBufferBase(
+            GL43C.GL_SHADER_STORAGE_BUFFER,
+            binding,
+            (buffer as GlBufferAccessor).`libgltf$handle`()
+        )
+    }
+
+    private fun bindTextures(preparedRenderType: PreparedRenderType) {
+        for (texture in preparedRenderType.textures()) {
+            val unit = when (texture.name) {
+                "Sampler0" -> 0
+                "Sampler1" -> 1
+                "Sampler2" -> 2
+                else -> continue
+            }
+            GL33C.glActiveTexture(GL33C.GL_TEXTURE0 + unit)
+            GL33C.glBindTexture(GL33C.GL_TEXTURE_2D, (texture.textureView.texture() as GlTexture).glId())
+            GL33C.glBindSampler(unit, (texture.sampler as GlSamplerAccessor).`libgltf$getId`())
+        }
+    }
+
+    private fun writeParams(
+        sphere: FloatArray,
+        instanceCount: Int,
+        meshletCount: Int,
+        instanceCulling: Boolean,
+        meshletCulling: Boolean,
+        baseCandidate: Int
+    ) {
+        MemoryStack.stackPush().use { stack ->
+            val data = stack.malloc(PARAM_SIZE)
+            for (index in sphere.indices) data.putFloat(index * Float.SIZE_BYTES, sphere[index])
+            data.putInt(16, instanceCount)
+            data.putInt(20, meshletCount)
+            data.putInt(24, if (instanceCulling) 1 else 0)
+            data.putInt(28, if (meshletCulling) 1 else 0)
+            data.putInt(32, baseCandidate)
+            data.position(0).limit(PARAM_SIZE)
+            GL33C.glBindBuffer(GL33C.GL_UNIFORM_BUFFER, paramsUbo)
+            GL33C.glBufferData(GL33C.GL_UNIFORM_BUFFER, data, GL33C.GL_STREAM_DRAW)
+            GL33C.glBindBufferBase(GL33C.GL_UNIFORM_BUFFER, BINDING_PARAMS, paramsUbo)
+        }
+    }
+
+    companion object {
+        fun create(renderPipeline: RenderPipeline): GltfGlMeshPipeline {
+            val task = compile(EXTMeshShader.GL_TASK_SHADER_EXT, shader("/assets/libgltf/shaders/mesh/gpu_mesh_gl.task"))
+            try {
+                val mesh = compile(EXTMeshShader.GL_MESH_SHADER_EXT, shader("/assets/libgltf/shaders/mesh/gpu_mesh_gl.mesh"))
+                try {
+                    val fragment = compile(GL33C.GL_FRAGMENT_SHADER, shader("/assets/libgltf/shaders/core/entity_gl.fsh"))
+                    try {
+                        val program = link(task, mesh, fragment)
+                        setup(program)
+                        return GltfGlMeshPipeline(program, GL33C.glGenBuffers())
+                    } catch (error: RuntimeException) {
+                        GL33C.glDeleteShader(fragment)
+                        throw error
+                    }
+                } catch (error: RuntimeException) {
+                    GL33C.glDeleteShader(mesh)
+                    throw error
+                }
+            } catch (error: RuntimeException) {
+                GL33C.glDeleteShader(task)
+                throw error
+            }
+        }
+
+        private fun shader(path: String): String =
+            requireNotNull(GltfGlMeshPipeline::class.java.getResourceAsStream(path))
+                .bufferedReader()
+                .use { it.readText() }
+
+        private fun compile(type: Int, source: String): Int {
+            val shader = GL33C.glCreateShader(type)
+            GL33C.glShaderSource(shader, source)
+            GL33C.glCompileShader(shader)
+            check(GL33C.glGetShaderi(shader, GL33C.GL_COMPILE_STATUS) != GL33C.GL_FALSE) {
+                GL33C.glGetShaderInfoLog(shader, 4096)
+            }
+            return shader
+        }
+
+        private fun link(task: Int, mesh: Int, fragment: Int): Int {
+            val program = GL33C.glCreateProgram()
+            GL33C.glAttachShader(program, task)
+            GL33C.glAttachShader(program, mesh)
+            GL33C.glAttachShader(program, fragment)
+            GL33C.glLinkProgram(program)
+            check(GL33C.glGetProgrami(program, GL33C.GL_LINK_STATUS) != GL33C.GL_FALSE) {
+                GL33C.glGetProgramInfoLog(program, 4096)
+            }
+            GL33C.glDetachShader(program, task)
+            GL33C.glDetachShader(program, mesh)
+            GL33C.glDetachShader(program, fragment)
+            GL33C.glDeleteShader(task)
+            GL33C.glDeleteShader(mesh)
+            GL33C.glDeleteShader(fragment)
+            return program
+        }
+
+        private fun setup(program: Int) {
+            GL33C.glUseProgram(program)
+            bindBlock(program, "Projection", BINDING_PROJECTION)
+            bindBlock(program, "DynamicTransforms", BINDING_DYNAMIC_TRANSFORMS)
+            bindBlock(program, "Fog", BINDING_FOG)
+            bindBlock(program, "Lighting", BINDING_LIGHTING)
+            bindBlock(program, "MeshParams", BINDING_PARAMS)
+            bindStorageBlock(program, "Geometry", BINDING_GEOMETRY)
+            bindStorageBlock(program, "Instances", BINDING_INSTANCES)
+            bindStorageBlock(program, "Meshlets", BINDING_MESHLETS)
+            bindStorageBlock(program, "MeshletVertices", BINDING_MESHLET_VERTICES)
+            bindStorageBlock(program, "MeshletTriangles", BINDING_MESHLET_TRIANGLES)
+            setSampler(program, "Sampler0", 0)
+            setSampler(program, "Sampler1", 1)
+            setSampler(program, "Sampler2", 2)
+            GL33C.glUseProgram(0)
+        }
+
+        private fun bindBlock(program: Int, name: String, binding: Int) {
+            val index = GL33C.glGetUniformBlockIndex(program, name)
+            if (index != GL33C.GL_INVALID_INDEX) GL33C.glUniformBlockBinding(program, index, binding)
+        }
+
+        private fun bindStorageBlock(program: Int, name: String, binding: Int) {
+            val index = GL43C.glGetProgramResourceIndex(program, GL43C.GL_SHADER_STORAGE_BLOCK, name)
+            if (index != GL33C.GL_INVALID_INDEX) {
+                GL43C.glShaderStorageBlockBinding(program, index, binding)
+            }
+        }
+
+        private fun setSampler(program: Int, name: String, unit: Int) {
+            val location = GL33C.glGetUniformLocation(program, name)
+            if (location >= 0) GL33C.glUniform1i(location, unit)
+        }
+
+        private const val BINDING_PROJECTION = 0
+        private const val BINDING_DYNAMIC_TRANSFORMS = 1
+        private const val BINDING_FOG = 2
+        private const val BINDING_LIGHTING = 3
+        private const val BINDING_PARAMS = 5
+        private const val BINDING_GEOMETRY = 6
+        private const val BINDING_INSTANCES = 7
+        private const val BINDING_MESHLETS = 8
+        private const val BINDING_MESHLET_VERTICES = 9
+        private const val BINDING_MESHLET_TRIANGLES = 10
+        private const val PARAM_SIZE = 36
+        private const val TASK_WORKGROUP = 32
+    }
+}

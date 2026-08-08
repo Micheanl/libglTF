@@ -19,6 +19,9 @@ object GltfGpuBackend {
     private var cachedInfo: DeviceInfo? = null
 
     @Volatile
+    private var vendorProfile: GltfGpuVendorProfile? = null
+
+    @Volatile
     private var capabilities = GltfGpuCapabilities(
         GltfGpuBackendType.UNKNOWN,
         false,
@@ -38,6 +41,7 @@ object GltfGpuBackend {
         val device = RenderSystem.tryGetDevice() ?: return
         val info = device.deviceInfo
         cachedInfo = info
+        vendorProfile = GltfGpuVendors.profile(info)
         val backend = when (info.backendName()) {
             "OpenGL" -> GltfGpuBackendType.OPENGL
             "Vulkan" -> GltfGpuBackendType.VULKAN
@@ -83,4 +87,24 @@ object GltfGpuBackend {
     fun capabilities(): GltfGpuCapabilities = capabilities
 
     fun deviceInfo(): DeviceInfo? = cachedInfo
+
+    fun vendorProfile(): GltfGpuVendorProfile = vendorProfile ?: DEFAULT_VENDOR_PROFILE
+
+    fun meshletBuilding(): Boolean = when (capabilities.backend) {
+        GltfGpuBackendType.VULKAN -> true
+        GltfGpuBackendType.OPENGL -> capabilities.meshShaderExtensionPresent &&
+            vendorProfile().glMeshExtension == "EXT"
+        GltfGpuBackendType.UNKNOWN -> false
+    }
+
+    private val DEFAULT_VENDOR_PROFILE = GltfGpuVendorProfile(
+        GltfGpuVendor.UNKNOWN,
+        true,
+        true,
+        true,
+        true,
+        65535,
+        128,
+        "EXT"
+    )
 }
