@@ -92,8 +92,7 @@ object GltfGpuBackend {
 
     fun meshletBuilding(): Boolean = when (capabilities.backend) {
         GltfGpuBackendType.VULKAN -> true
-        GltfGpuBackendType.OPENGL -> capabilities.meshShaderExtensionPresent &&
-            vendorProfile().glMeshExtension == "EXT"
+        GltfGpuBackendType.OPENGL -> capabilities.meshShaderExtensionPresent
         GltfGpuBackendType.UNKNOWN -> false
     }
 
@@ -102,9 +101,7 @@ object GltfGpuBackend {
         true,
         true,
         true,
-        true,
         65535,
-        128,
-        "EXT"
+        128
     )
 }

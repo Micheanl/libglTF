@@ -1,6 +1,7 @@
 package com.micheanl.libgltf.render.gl
 
 import com.micheanl.libgltf.render.gpu.GltfMeshletLod
+import com.micheanl.libgltf.render.gpu.GltfGpuBackend
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.pipeline.RenderPipeline
 import com.mojang.logging.LogUtils
@@ -30,7 +31,10 @@ class GltfGlMeshPipelineCache : AutoCloseable {
         val taskInvocationTarget = if (useNv) NVMeshShader.GL_MAX_TASK_WORK_GROUP_INVOCATIONS_NV else EXTMeshShader.GL_MAX_TASK_WORK_GROUP_INVOCATIONS_EXT
         val meshInvocationTarget = if (useNv) NVMeshShader.GL_MAX_MESH_WORK_GROUP_INVOCATIONS_NV else EXTMeshShader.GL_MAX_MESH_WORK_GROUP_INVOCATIONS_EXT
         val maxMeshInvocations = if (extSupported || nvSupported) query(meshInvocationTarget) else 0
-        meshWorkgroupSize = if (maxMeshInvocations >= 64) {
+        val preferredWorkgroupSize = GltfGpuBackend.vendorProfile().maxMeshWorkGroupSize
+        meshWorkgroupSize = if (preferredWorkgroupSize >= 32 && maxMeshInvocations >= preferredWorkgroupSize) {
+            preferredWorkgroupSize
+        } else if (maxMeshInvocations >= 64) {
             64
         } else if (maxMeshInvocations >= 32) {
             32

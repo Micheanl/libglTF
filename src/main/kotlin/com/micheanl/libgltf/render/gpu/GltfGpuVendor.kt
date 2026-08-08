@@ -13,12 +13,10 @@ enum class GltfGpuVendor {
 data class GltfGpuVendorProfile(
     val vendor: GltfGpuVendor,
     val preferMeshShader: Boolean,
-    val preferIndirect: Boolean,
     val enableInstanceCulling: Boolean,
     val enableMeshletCulling: Boolean,
     val maxTaskGroupCount: Int,
-    val maxMeshWorkGroupSize: Int,
-    val glMeshExtension: String?
+    val maxMeshWorkGroupSize: Int
 )
 
 object GltfGpuVendors {
@@ -30,50 +28,40 @@ object GltfGpuVendors {
                 true,
                 true,
                 true,
-                true,
                 65535,
-                128,
-                "EXT"
+                128
             )
             GltfGpuVendor.AMD -> GltfGpuVendorProfile(
                 vendor,
                 true,
                 true,
                 true,
-                true,
                 65535,
-                128,
-                "EXT"
+                128
             )
             GltfGpuVendor.INTEL -> GltfGpuVendorProfile(
                 vendor,
                 false,
                 true,
-                true,
                 false,
                 65535,
-                64,
-                "EXT"
+                64
             )
             GltfGpuVendor.APPLE -> GltfGpuVendorProfile(
                 vendor,
                 false,
                 false,
                 false,
-                false,
                 0,
-                0,
-                null
+                0
             )
             GltfGpuVendor.UNKNOWN -> GltfGpuVendorProfile(
                 vendor,
                 true,
                 true,
                 true,
-                true,
                 65535,
-                128,
-                "EXT"
+                128
             )
         }
     }
