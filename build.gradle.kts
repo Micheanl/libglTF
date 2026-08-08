@@ -9,7 +9,6 @@ plugins {
     id("org.jetbrains.kotlin.jvm")
     `maven-publish`
     signing
-    id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
 }
 
 val minecraftVersion = providers.gradleProperty("minecraft_version").get()
@@ -152,21 +151,23 @@ afterEvaluate {
                     password = (project.findProperty("gpr.key") as String?) ?: System.getenv("GITHUB_TOKEN").orEmpty()
                 }
             }
+            maven {
+                name = "SonatypeCentral"
+                val centralUrl = providers.gradleProperty("centralDeployUrl")
+                    .orElse(providers.environmentVariable("CENTRAL_DEPLOY_URL"))
+                    .getOrElse("https://central.sonatype.com/repository/maven-releases/")
+                url = uri(centralUrl)
+                credentials {
+                    username = ossrhUsername.getOrNull()
+                    password = ossrhPassword.getOrNull()
+                }
+            }
         }
         if (signingKey.isPresent && signingPassword.isPresent) {
             signing {
                 useInMemoryPgpKeys(signingKey.get(), signingPassword.get())
                 sign(publishing.publications["mavenJava"])
             }
-        }
-    }
-}
-
-nexusPublishing {
-    repositories {
-        sonatype {
-            username.set(ossrhUsername)
-            password.set(ossrhPassword)
         }
     }
 }
