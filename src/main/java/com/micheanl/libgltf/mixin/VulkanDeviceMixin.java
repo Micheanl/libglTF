@@ -19,7 +19,15 @@ public abstract class VulkanDeviceMixin implements VertexAttributeLimitProvider 
     @Unique
     private int libgltf$maxVertexAttributes = VertexFormat.MAX_VERTEX_ELEMENTS;
 
-    @Inject(method = "<init>", at = @At("HEAD"), require = 1)
+    @Inject(
+            method = "<init>",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lcom/mojang/renderpearl/backend/vulkan/VulkanPhysicalDevice;close()V",
+                    shift = At.Shift.BEFORE
+            ),
+            require = 1
+    )
     private void libgltf$captureVertexAttributeLimit(
             VulkanInstance instance,
             VulkanPhysicalDevice physicalDevice,
