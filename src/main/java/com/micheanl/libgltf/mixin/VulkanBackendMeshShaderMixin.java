@@ -1,6 +1,7 @@
 package com.micheanl.libgltf.mixin;
 
 import com.micheanl.libgltf.render.vulkan.GltfGpuDrivenSettings;
+import com.mojang.renderpearl.api.device.GpuDebugOptions;
 import com.mojang.renderpearl.backend.vulkan.VulkanBackend;
 import com.mojang.renderpearl.backend.vulkan.VulkanFeatureSets;
 import com.mojang.renderpearl.backend.vulkan.init.FeatureSet;
@@ -45,7 +46,8 @@ public abstract class VulkanBackendMeshShaderMixin {
             ),
             require = 1
     )
-    private Set<FeatureSet> libgltf$enableMeshShader(Set<FeatureSet> original) {
+    private Set<FeatureSet> libgltf$enableMeshShader(long window, GpuDebugOptions debugOptions) {
+        Set<FeatureSet> original = VulkanFeatureSets.optionalFeatureSets();
         if (!GltfGpuDrivenSettings.INSTANCE.getMeshShader()) {
             return original;
         }
