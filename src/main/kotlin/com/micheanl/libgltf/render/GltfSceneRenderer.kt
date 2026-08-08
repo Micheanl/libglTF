@@ -270,6 +270,7 @@ object GltfSceneRenderer {
 
     private fun gpuCompatible(instance: GltfInstance, nodeIndex: Int, primitive: GltfPrimitive): Boolean {
         if (primitive.mode != PrimitiveMode.TRIANGLES || primitive.morphTargetCount > 0) return false
+        if (GltfGpuBackend.capabilities().backend == GltfGpuBackendType.OPENGL && primitive.skin != null) return false
         val asset = instance.handle.asset
         val node = asset.nodes[nodeIndex]
         if (primitive.skin != null && node.skinIndex < 0) return false

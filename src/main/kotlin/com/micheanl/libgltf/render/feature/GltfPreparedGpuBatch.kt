@@ -59,7 +59,7 @@ class GltfPreparedGpuBatch : AutoCloseable {
             lod = first.lod
             instanceCount = toIndex - fromIndex
             skinned = first.skinIndex >= 0
-            ensureInstanceCapacity(instanceCount * GltfGpuFormats.INSTANCE_STRIDE, driver != null)
+            ensureInstanceCapacity(instanceCount * instanceStride(), driver != null)
             writeInstances(submits, fromIndex, toIndex)
             if (skinned) writePalettes(submits, fromIndex, toIndex)
             useSortedIndexBuffer = first.renderType.hasBlending() &&
@@ -313,9 +313,11 @@ class GltfPreparedGpuBatch : AutoCloseable {
     }
 
     private fun writeInstances(submits: List<GltfGpuSubmit>, fromIndex: Int, toIndex: Int) {
+        val stride = instanceStride()
+        val gl = GltfGpuBackend.capabilities().backend == GltfGpuBackendType.OPENGL
         val view = requireNotNull(instanceBuffer)
             .currentBuffer()
-            .slice(0L, (instanceCount * GltfGpuFormats.INSTANCE_STRIDE).toLong())
+            .slice(0L, (instanceCount * stride).toLong())
             .map(false, true)
         view.use { mapped ->
             val data = mapped.data().order(ByteOrder.nativeOrder())
@@ -333,10 +335,50 @@ class GltfPreparedGpuBatch : AutoCloseable {
                 } else {
                     0
                 }
-                writeInstance(data, destinationIndex * GltfGpuFormats.INSTANCE_STRIDE, submit, instancePaletteOffset)
+                if (gl) {
+                    writeInstanceGl(data, destinationIndex * stride, submit, instancePaletteOffset)
+                } else {
+                    writeInstance(data, destinationIndex * stride, submit, instancePaletteOffset)
+                }
                 destinationIndex++
             }
         }
+    }
+
+    private fun instanceStride(): Int = if (GltfGpuBackend.capabilities().backend == GltfGpuBackendType.OPENGL) {
+        GltfGpuFormats.INSTANCE_STRIDE_GL
+    } else {
+        GltfGpuFormats.INSTANCE_STRIDE
+    }
+
+    private fun writeInstanceGl(data: ByteBuffer, offset: Int, submit: GltfGpuSubmit, paletteOffset: Int) {
+        submit.modelMatrix.get(offset, data)
+        val normal = submit.normalMatrix
+        data.putFloat(offset + 64, normal.m00())
+        data.putFloat(offset + 68, normal.m01())
+        data.putFloat(offset + 72, normal.m02())
+        data.putFloat(offset + 76, 0.0f)
+        data.putFloat(offset + 80, normal.m10())
+        data.putFloat(offset + 84, normal.m11())
+        data.putFloat(offset + 88, normal.m12())
+        data.putFloat(offset + 92, 0.0f)
+        data.putFloat(offset + 96, normal.m20())
+        data.putFloat(offset + 100, normal.m21())
+        data.putFloat(offset + 104, normal.m22())
+        data.putFloat(offset + 108, 0.0f)
+        data.putFloat(offset + 112, submit.red)
+        data.putFloat(offset + 116, submit.green)
+        data.putFloat(offset + 120, submit.blue)
+        data.putFloat(offset + 124, submit.alpha)
+        data.putInt(offset + 128, submit.light)
+        data.putInt(offset + 132, submit.overlay)
+        data.putInt(offset + 140, paletteOffset)
+        data.putFloat(offset + 144, submit.uvTransform0[0])
+        data.putFloat(offset + 148, submit.uvTransform0[1])
+        data.putFloat(offset + 152, submit.uvTransform0[2])
+        data.putFloat(offset + 156, submit.uvTransform0[3])
+        data.putFloat(offset + 160, submit.uvTransform1[0])
+        data.putFloat(offset + 164, submit.uvTransform1[1])
     }
 
     private fun writeInstance(data: ByteBuffer, offset: Int, submit: GltfGpuSubmit, paletteOffset: Int) {

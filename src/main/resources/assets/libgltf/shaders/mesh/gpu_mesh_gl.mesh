@@ -47,14 +47,14 @@ void main() {
     Meshlet meshlet = meshlets[meshletIndex];
     SetMeshOutputsEXT(meshlet.vertexCount, meshlet.triangleCount);
     uint invocation = gl_LocalInvocationIndex;
-    uint io = instanceIndex * 41;
+    uint io = instanceIndex * 48;
     mat4 transform = instanceMatrix(io);
     mat3 normalTransform = mat3(uintBitsToFloat(instanceWords[io + 16]), uintBitsToFloat(instanceWords[io + 17]), uintBitsToFloat(instanceWords[io + 18]), uintBitsToFloat(instanceWords[io + 20]), uintBitsToFloat(instanceWords[io + 21]), uintBitsToFloat(instanceWords[io + 22]), uintBitsToFloat(instanceWords[io + 24]), uintBitsToFloat(instanceWords[io + 25]), uintBitsToFloat(instanceWords[io + 26]));
     vec4 instanceColor = vec4(uintBitsToFloat(instanceWords[io + 28]), uintBitsToFloat(instanceWords[io + 29]), uintBitsToFloat(instanceWords[io + 30]), uintBitsToFloat(instanceWords[io + 31]));
     uint light = instanceWords[io + 32];
     uint overlay = instanceWords[io + 33];
-    vec2 uvOffset = vec2(uintBitsToFloat(instanceWords[io + 35]), uintBitsToFloat(instanceWords[io + 36]));
-    mat2 uvTransform = mat2(uintBitsToFloat(instanceWords[io + 37]), uintBitsToFloat(instanceWords[io + 39]), uintBitsToFloat(instanceWords[io + 38]), uintBitsToFloat(instanceWords[io + 40]));
+    vec2 uvOffset = vec2(uintBitsToFloat(instanceWords[io + 36]), uintBitsToFloat(instanceWords[io + 37]));
+    mat2 uvTransform = mat2(uintBitsToFloat(instanceWords[io + 38]), uintBitsToFloat(instanceWords[io + 40]), uintBitsToFloat(instanceWords[io + 39]), uintBitsToFloat(instanceWords[io + 41]));
     vec4 lightMapColorValue = sampleLightmap(ivec2(signed16(light), signed16(light >> 16)));
     vec4 overlayColorValue = texelFetch(Sampler1, ivec2(signed16(overlay), signed16(overlay >> 16)), 0);
     for (uint vertex = invocation; vertex < meshlet.vertexCount; vertex += gl_WorkGroupSize.x) {

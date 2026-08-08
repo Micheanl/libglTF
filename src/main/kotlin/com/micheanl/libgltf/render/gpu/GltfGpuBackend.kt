@@ -61,8 +61,13 @@ object GltfGpuBackend {
         val limit = ((device as FrontendGpuDeviceAccessor).libgltfBackend as? VertexAttributeLimitProvider)
             ?.maxVertexAttributes
             ?: VertexFormat.MAX_VERTEX_ELEMENTS
+        val requiredAttributes = if (backend == GltfGpuBackendType.OPENGL) {
+            GltfGpuFormats.REQUIRED_GL_VERTEX_ATTRIBUTES
+        } else {
+            GltfGpuFormats.REQUIRED_VERTEX_ATTRIBUTES
+        }
         val instancing = backend != GltfGpuBackendType.UNKNOWN &&
-            GltfGpuFormats.REQUIRED_VERTEX_ATTRIBUTES <= limit
+            requiredAttributes <= limit
         val nativeMeshShader = backend == GltfGpuBackendType.VULKAN &&
             meshShader &&
             ((device as FrontendGpuDeviceAccessor).libgltfBackend as? VulkanDevice)?.vkDevice()?.capabilities?.VK_EXT_mesh_shader == true
