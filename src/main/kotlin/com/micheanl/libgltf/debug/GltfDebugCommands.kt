@@ -95,6 +95,11 @@ object GltfDebugCommands {
                     )
                     .then(ClientCommands.literal("info").executes { info(it.source) })
                     .then(
+                        ClientCommands.literal("benchmark")
+                            .then(ClientCommands.literal("on").executes { benchmark(it.source, true) })
+                            .then(ClientCommands.literal("off").executes { benchmark(it.source, false) })
+                    )
+                    .then(
                         ClientCommands.literal("anim")
                             .executes { playAnim(it.source, 0) }
                             .then(
@@ -263,6 +268,7 @@ object GltfDebugCommands {
             "limit=${GltfGpuDrivenSettings.meshGroupLimit} " +
             "cull=${if (GltfGpuDrivenSettings.instanceCulling && GltfGpuDrivenSettings.meshletCulling) "on" else "off"} " +
             "occlusion=${if (GltfGpuDrivenSettings.occlusionCulling) "on" else "off"} " +
+            "bench=${if (GltfGpuDrivenSettings.benchmark) "on" else "off"} " +
             "oit=${if (oit) "on" else "off"}"
         lines += "libgltf gpu=${GltfSceneRenderer.lastGpuSubmits} " +
             "cpu=${GltfSceneRenderer.lastCpuSubmits} " +
@@ -515,6 +521,12 @@ object GltfDebugCommands {
     private fun meshLimit(source: FabricClientCommandSource, groups: Int): Int {
         GltfGpuDrivenSettings.meshGroupLimit = groups
         source.sendFeedback(Component.literal("Mesh group limit set to $groups"))
+        return 0
+    }
+
+    private fun benchmark(source: FabricClientCommandSource, value: Boolean): Int {
+        GltfGpuDrivenSettings.benchmark = value
+        source.sendFeedback(Component.literal("Benchmark set to $value"))
         return 0
     }
 
