@@ -19,6 +19,7 @@ class GltfInstance internal constructor(val handle: GltfHandle) {
     val animationState: GpuAnimationState = GpuAnimationState(handle.asset)
     val materialOverrides: Array<MaterialOverride?> = arrayOfNulls(handle.asset.materials.size)
     private val materialMappings: IntArray = IntArray(handle.asset.materials.size) { it }
+    internal var sceneMask: BooleanArray = handle.asset.sceneNodeMasks[handle.asset.defaultScene]
     internal val geometryRenderers: Array<Array<GltfGeometryRenderer>> = createRenderers()
     internal val gpuSubmits: Array<Array<Array<GltfGpuSubmit>>> = createGpuSubmits()
 
@@ -26,6 +27,8 @@ class GltfInstance internal constructor(val handle: GltfHandle) {
     var automaticAnimation: Boolean = true
     var showBones: Boolean = false
     var materialVariant: Int = -1
+    var sceneIndex: Int = handle.asset.defaultScene
+        private set
 
     @Volatile
     var visible: Boolean = true
@@ -122,6 +125,15 @@ class GltfInstance internal constructor(val handle: GltfHandle) {
         if (materialVariant != clamped) {
             materialVariant = clamped
             materialRevision++
+        }
+        return this
+    }
+
+    fun selectScene(index: Int): GltfInstance {
+        val clamped = index.coerceIn(0, handle.asset.sceneNodeMasks.lastIndex)
+        if (sceneIndex != clamped) {
+            sceneIndex = clamped
+            sceneMask = handle.asset.sceneNodeMasks[clamped]
         }
         return this
     }

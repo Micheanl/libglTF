@@ -95,6 +95,27 @@ object GltfLoader {
         val resolvedNodes = Array(nodes.size) { index -> nodes[index].copy(parentIndex = parents[index]) }
         val roots = sceneRoots(root, parents)
         val order = topologicalOrder(resolvedNodes, roots)
+        val scenes = JsonFields.value(root, "scenes")
+        val sceneNames: Array<String>
+        val sceneNodeMasks: Array<BooleanArray>
+        val defaultScene: Int
+        if (scenes == null || scenes.size() == 0) {
+            sceneNames = emptyArray()
+            sceneNodeMasks = arrayOf(BooleanArray(resolvedNodes.size) { true })
+            defaultScene = 0
+        } else {
+            defaultScene = JsonFields.int(root, "scene", 0).coerceIn(0, scenes.size() - 1)
+            sceneNames = Array(scenes.size()) { sceneIndex ->
+                JsonFields.string(scenes[sceneIndex], "name", "scene_$sceneIndex")
+            }
+            sceneNodeMasks = Array(scenes.size()) { sceneIndex ->
+                val mask = BooleanArray(resolvedNodes.size)
+                for (root in JsonFields.ints(scenes[sceneIndex], "nodes")) {
+                    markSceneMask(root, mask, resolvedNodes)
+                }
+                mask
+            }
+        }
         val skins = parseSkins(root, decoder)
         val cameras = parseCameras(root)
         val lights = parseLights(root)
@@ -133,6 +154,9 @@ object GltfLoader {
             resolvedNodes,
             order,
             roots,
+            sceneNames,
+            sceneNodeMasks,
+            defaultScene,
             meshes,
             skins,
             animations,
@@ -665,6 +689,17 @@ object GltfLoader {
             if (roots.isNotEmpty()) return roots
         }
         return parents.indices.filter { parents[it] < 0 }.toIntArray()
+    }
+
+    private fun markSceneMask(root: Int, mask: BooleanArray, nodes: Array<GltfNode>) {
+        val stack = IntArray(nodes.size)
+        var size = 0
+        stack[size++] = root
+        while (size > 0) {
+            val node = stack[--size]
+            mask[node] = true
+            for (child in nodes[node].children) stack[size++] = child
+        }
     }
 
     private fun topologicalOrder(nodes: Array<GltfNode>, roots: IntArray): IntArray {

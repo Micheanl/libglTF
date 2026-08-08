@@ -124,6 +124,18 @@ object GltfDebugCommands {
                                     }
                             )
                     )
+                    .then(
+                        ClientCommands.literal("scene")
+                            .then(
+                                ClientCommands.argument("index", IntegerArgumentType.integer(0))
+                                    .executes { context ->
+                                        scene(
+                                            context.source,
+                                            context.getArgument("index", Int::class.java)
+                                        )
+                                    }
+                            )
+                    )
             )
         }
     }
@@ -208,6 +220,7 @@ object GltfDebugCommands {
                     "uv=${if (current.animation.pose.materialUv.animated.any { it }) "on" else "off"} " +
                     "bones=${if (current.showBones) "on" else "off"} " +
                     "variant=${variantLabel(current)} " +
+                    "scene=${sceneLabel(current)} " +
                     "instances=${GltfRenderRegistry.instances().size}"
             }
         }
@@ -347,5 +360,31 @@ object GltfDebugCommands {
         val names = current.handle.asset.materialVariantNames
         val index = current.materialVariant
         return if (index in names.indices) "${names[index]} ($index)" else "default"
+    }
+
+    private fun scene(source: FabricClientCommandSource, index: Int): Int {
+        val current = instance
+        if (current == null) {
+            source.sendError(Component.literal("No model loaded"))
+            return 1
+        }
+        val names = current.handle.asset.sceneNames
+        if (names.isEmpty()) {
+            source.sendError(Component.literal("Model has no scenes"))
+            return 1
+        }
+        if (index !in names.indices) {
+            source.sendError(Component.literal("Scene index must be in 0..${names.lastIndex}"))
+            return 1
+        }
+        current.selectScene(index)
+        source.sendFeedback(Component.literal("Scene set to ${names[index]} ($index)"))
+        return 0
+    }
+
+    private fun sceneLabel(current: GltfInstance): String {
+        val names = current.handle.asset.sceneNames
+        val index = current.sceneIndex
+        return if (names.isEmpty()) "default" else "${names[index]} ($index)"
     }
 }

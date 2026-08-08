@@ -69,6 +69,7 @@ object GltfSceneRenderer {
         poseStack.pushPose()
         poseStack.mulPose(transform)
         for (nodeIndex in asset.topologicalOrder) {
+            if (!instance.sceneMask[nodeIndex]) continue
             val node = asset.nodes[nodeIndex]
             val meshIndex = node.meshIndex
             if (meshIndex < 0) continue
@@ -213,6 +214,7 @@ object GltfSceneRenderer {
         poseStack.pushPose()
         poseStack.mulPose(transform)
         for (nodeIndex in asset.topologicalOrder) {
+            if (!instance.sceneMask[nodeIndex]) continue
             val node = asset.nodes[nodeIndex]
             if (node.meshIndex < 0) continue
             val renderers = instance.geometryRenderers[nodeIndex]
