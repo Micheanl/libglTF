@@ -1,4 +1,5 @@
 #version 330
+#extension GL_ARB_separate_shader_objects : require
 
 #include <minecraft:light.glsl>
 #include <minecraft:fog.glsl>
