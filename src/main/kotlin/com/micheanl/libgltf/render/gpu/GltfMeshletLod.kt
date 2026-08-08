@@ -35,6 +35,7 @@ class GltfMeshletLod private constructor(
             label: String,
             indices: IntBuffer,
             positions: FloatBuffer,
+            normals: FloatBuffer,
             vertexCount: Int,
             indexType: IndexType,
             bounds: FloatArray
@@ -96,12 +97,17 @@ class GltfMeshletLod private constructor(
                         MeshOptimizer.meshopt_computeMeshletBounds(
                             vertices, triangles, positions, vertexCount.toLong(), POSITION_STRIDE.toLong(), meshletBounds
                         )
+                        val cone = coneAxis(normals, meshletVertices, vertexOffset, meshlet.vertex_count())
                         putMetadata(
                             metadata,
                             meshletBounds.center(0),
                             meshletBounds.center(1),
                             meshletBounds.center(2),
                             meshletBounds.radius(),
+                            cone[0],
+                            cone[1],
+                            cone[2],
+                            coneCutoff(normals, meshletVertices, vertexOffset, meshlet.vertex_count()),
                             vertexOffset,
                             triangleOffset,
                             meshlet.vertex_count(),
@@ -127,6 +133,10 @@ class GltfMeshletLod private constructor(
                     centerY,
                     centerZ,
                     kotlin.math.sqrt(extentX * extentX + extentY * extentY + extentZ * extentZ),
+                    0.0f,
+                    0.0f,
+                    0.0f,
+                    0.0f,
                     0,
                     0,
                     0,
@@ -169,6 +179,10 @@ class GltfMeshletLod private constructor(
             centerY: Float,
             centerZ: Float,
             radius: Float,
+            coneAxisX: Float,
+            coneAxisY: Float,
+            coneAxisZ: Float,
+            coneCutoff: Float,
             vertexOffset: Int,
             triangleOffset: Int,
             vertexCount: Int,
@@ -179,6 +193,54 @@ class GltfMeshletLod private constructor(
             buffer.putFloat(centerX).putFloat(centerY).putFloat(centerZ).putFloat(radius)
             buffer.putInt(vertexOffset).putInt(triangleOffset).putInt(vertexCount).putInt(triangleCount)
             buffer.putInt(firstIndex).putInt(indexCount).putLong(0L)
+            buffer.putFloat(coneAxisX).putFloat(coneAxisY).putFloat(coneAxisZ).putFloat(coneCutoff)
+        }
+
+        private fun coneAxis(normals: FloatBuffer, meshletVertices: IntBuffer, vertexOffset: Int, vertexCount: Int): FloatArray {
+            var axisX = 0.0f
+            var axisY = 0.0f
+            var axisZ = 0.0f
+            for (vertex in 0 until vertexCount) {
+                val index = meshletVertices[vertexOffset + vertex] * 3
+                var normalX = normals[index]
+                var normalY = normals[index + 1]
+                var normalZ = normals[index + 2]
+                val length = kotlin.math.sqrt(normalX * normalX + normalY * normalY + normalZ * normalZ)
+                if (length > 1.0e-6f) {
+                    normalX /= length
+                    normalY /= length
+                    normalZ /= length
+                }
+                axisX += normalX
+                axisY += normalY
+                axisZ += normalZ
+            }
+            val length = kotlin.math.sqrt(axisX * axisX + axisY * axisY + axisZ * axisZ)
+            if (length > 1.0e-6f) {
+                axisX /= length
+                axisY /= length
+                axisZ /= length
+            }
+            return floatArrayOf(axisX, axisY, axisZ)
+        }
+
+        private fun coneCutoff(normals: FloatBuffer, meshletVertices: IntBuffer, vertexOffset: Int, vertexCount: Int): Float {
+            val axis = coneAxis(normals, meshletVertices, vertexOffset, vertexCount)
+            var cutoff = 1.0f
+            for (vertex in 0 until vertexCount) {
+                val index = meshletVertices[vertexOffset + vertex] * 3
+                var normalX = normals[index]
+                var normalY = normals[index + 1]
+                var normalZ = normals[index + 2]
+                val length = kotlin.math.sqrt(normalX * normalX + normalY * normalY + normalZ * normalZ)
+                if (length > 1.0e-6f) {
+                    normalX /= length
+                    normalY /= length
+                    normalZ /= length
+                }
+                cutoff = minOf(cutoff, axis[0] * normalX + axis[1] * normalY + axis[2] * normalZ)
+            }
+            return maxOf(cutoff, 0.0f)
         }
 
         private fun align4(value: Int): Int = (value + 3) and -4
@@ -186,6 +248,6 @@ class GltfMeshletLod private constructor(
         private const val MAX_VERTICES = 256
         private const val MAX_TRIANGLES = 256
         private const val POSITION_STRIDE = 12
-        private const val METADATA_STRIDE = 48
+        private const val METADATA_STRIDE = 64
     }
 }

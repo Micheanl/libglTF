@@ -45,6 +45,7 @@ class GltfGpuPrimitive private constructor(
             val remappedVertices = MemoryUtil.memAlloc(primitive.vertexCount * VertexLayout.STRIDE)
             val remappedSkin = sourceSkin?.let { MemoryUtil.memAlloc(primitive.vertexCount * VertexLayout.SKIN_STRIDE) }
             var remappedPositions: FloatBuffer? = null
+            var remappedNormals: FloatBuffer? = null
             try {
                 optimized[0].position(0)
                 MeshOptimizer.meshopt_optimizeVertexFetchRemap(remap, optimized[0])
@@ -72,6 +73,7 @@ class GltfGpuPrimitive private constructor(
                     optimized[level] = destination
                 }
                 remappedPositions = extractPositions(remappedVertices, primitive.vertexCount)
+                remappedNormals = extractNormals(remappedVertices, primitive.vertexCount)
                 val indexType = IndexType.least((primitive.vertexCount - 1).coerceAtLeast(0))
                 val indices = Array(optimized.size) { copyIndices(optimized[it]) }
                 val triangleCenters = if (primitive.mode == PrimitiveMode.TRIANGLES) {
@@ -109,6 +111,7 @@ class GltfGpuPrimitive private constructor(
                             "$label lod $level",
                             optimized[level],
                             remappedPositions,
+                            remappedNormals,
                             primitive.vertexCount,
                             indexType,
                             primitive.bounds
@@ -132,6 +135,7 @@ class GltfGpuPrimitive private constructor(
                 )
             } finally {
                 for (buffer in optimized) MemoryUtil.memFree(buffer)
+                MemoryUtil.memFree(remappedNormals)
                 MemoryUtil.memFree(remappedPositions)
                 MemoryUtil.memFree(remappedSkin)
                 MemoryUtil.memFree(remappedVertices)
@@ -184,6 +188,17 @@ class GltfGpuPrimitive private constructor(
                 positions.put(vertices.getFloat(base + 8))
             }
             return positions.flip()
+        }
+
+        private fun extractNormals(vertices: ByteBuffer, vertexCount: Int): FloatBuffer {
+            val normals = MemoryUtil.memAllocFloat(vertexCount * 3)
+            for (vertex in 0 until vertexCount) {
+                val base = vertex * VertexLayout.STRIDE + VertexLayout.NORMAL
+                normals.put(vertices.getFloat(base))
+                normals.put(vertices.getFloat(base + 4))
+                normals.put(vertices.getFloat(base + 8))
+            }
+            return normals.flip()
         }
 
         private fun copyPositions(positions: FloatBuffer): FloatArray {

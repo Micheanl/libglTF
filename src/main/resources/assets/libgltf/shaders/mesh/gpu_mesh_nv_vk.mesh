@@ -10,7 +10,7 @@ layout(set = 0, binding = SAMPLER2_BINDING) uniform sampler2D Sampler2;
 layout(push_constant) uniform Parameters { vec4 primitiveSphere; uint instanceCount; uint meshletCount; uint instanceCulling; uint meshletCulling; uint baseCandidate; } parameters;
 layout(set = 1, binding = GEOMETRY_BINDING, std430) readonly buffer Geometry { uint geometryWords[]; };
 layout(set = 1, binding = INSTANCES_BINDING, std430) readonly buffer Instances { uint instanceWords[]; };
-struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint vertexCount; uint triangleCount; uint firstIndex; uint indexCount; uint padding0; uint padding1; };
+struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint vertexCount; uint triangleCount; uint firstIndex; uint indexCount; uint padding0; uint padding1; vec4 cone; };
 layout(set = 1, binding = MESHLETS_BINDING, std430) readonly buffer Meshlets { Meshlet meshlets[]; };
 layout(set = 1, binding = MESHLET_VERTICES_BINDING, std430) readonly buffer MeshletVertices { uint meshletVertices[]; };
 layout(set = 1, binding = MESHLET_TRIANGLES_BINDING, std430) readonly buffer MeshletTriangles { uint meshletTriangleWords[]; };
@@ -83,11 +83,18 @@ void main() {
     mat4 clipTransform = ProjMat * ModelViewMat * worldTransform;
     bool instanceVisible = parameters.instanceCulling == 0 || visibleSphere(parameters.primitiveSphere, clipTransform);
     bool meshletVisible = parameters.meshletCulling == 0 || visibleSphere(meshlets[meshletIndex].sphere, clipTransform);
-    if (candidate >= candidateCount || !(instanceVisible && meshletVisible)) {
+    Meshlet meshlet = meshlets[meshletIndex];
+#ifdef MESH_CONE_CULLING
+    vec3 axisView = normalize(mat3(ModelViewMat) * meshlet.cone.xyz);
+    vec3 apexView = (ModelViewMat * vec4(meshlet.sphere.xyz, 1.0)).xyz;
+    bool backfacing = meshlet.cone.w > 0.7071 && dot(axisView, apexView) > meshlet.cone.w * length(apexView);
+#else
+    bool backfacing = false;
+#endif
+    if (candidate >= candidateCount || !(instanceVisible && meshletVisible) || backfacing) {
         if (invocation == 0) gl_PrimitiveCountNV = 0;
         return;
     }
-    Meshlet meshlet = meshlets[meshletIndex];
     if (invocation == 0) gl_PrimitiveCountNV = meshlet.triangleCount;
     mat3 normalTransform = mat3(uintBitsToFloat(instanceWords[io + 16]), uintBitsToFloat(instanceWords[io + 17]), uintBitsToFloat(instanceWords[io + 18]), uintBitsToFloat(instanceWords[io + 20]), uintBitsToFloat(instanceWords[io + 21]), uintBitsToFloat(instanceWords[io + 22]), uintBitsToFloat(instanceWords[io + 24]), uintBitsToFloat(instanceWords[io + 25]), uintBitsToFloat(instanceWords[io + 26]));
     vec4 instanceColor = vec4(uintBitsToFloat(instanceWords[io + 28]), uintBitsToFloat(instanceWords[io + 29]), uintBitsToFloat(instanceWords[io + 30]), uintBitsToFloat(instanceWords[io + 31]));

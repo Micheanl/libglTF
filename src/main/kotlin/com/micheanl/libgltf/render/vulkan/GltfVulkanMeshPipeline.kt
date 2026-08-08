@@ -297,7 +297,8 @@ private class GltfVulkanMeshPipeline(
                 MESH_SHADER,
                 Shaderc.shaderc_mesh_shader,
                 debugMacros + ("MESH_WORKGROUP_SIZE" to meshWorkgroupSize.toString()) +
-                    (if (renderPipeline.getShaderDefines().flags().contains("OIT_ALPHA_ONLY")) mapOf("OIT_ALPHA_ONLY" to "") else emptyMap())
+                    (if (renderPipeline.getShaderDefines().flags().contains("OIT_ALPHA_ONLY")) mapOf("OIT_ALPHA_ONLY" to "") else emptyMap()) +
+                    (if (renderPipeline.isCull()) mapOf("MESH_CONE_CULLING" to "") else emptyMap())
             )
             try {
                 val fragmentModule = compileFragment(device, renderPipeline, bindings)
