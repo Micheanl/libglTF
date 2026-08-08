@@ -20,5 +20,18 @@ data class GltfMaterial(
     val unlit: Boolean,
     val specular: SpecularMaterial?,
     val clearcoat: ClearcoatMaterial?,
-    val sheen: SheenMaterial?
-)
+    val sheen: SheenMaterial?,
+    val transmissionFactor: Float,
+    val transmissionTexture: TextureBinding?,
+    val thicknessFactor: Float,
+    val thicknessTexture: TextureBinding?,
+    val attenuationDistance: Float,
+    val attenuationColor: FloatArray,
+    val ior: Float
+) {
+    val hasTransmission: Boolean
+        get() = transmissionFactor > 0.0f || transmissionTexture != null
+
+    val effectiveAlphaMode: AlphaMode
+        get() = if (alphaMode == AlphaMode.OPAQUE && hasTransmission) AlphaMode.BLEND else alphaMode
+}

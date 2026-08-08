@@ -210,6 +210,9 @@ object GltfLoader {
             val specularExtension = JsonFields.value(extensions, "KHR_materials_specular")
             val clearcoatExtension = JsonFields.value(extensions, "KHR_materials_clearcoat")
             val sheenExtension = JsonFields.value(extensions, "KHR_materials_sheen")
+            val transmissionExtension = JsonFields.value(extensions, "KHR_materials_transmission")
+            val volumeExtension = JsonFields.value(extensions, "KHR_materials_volume")
+            val iorExtension = JsonFields.value(extensions, "KHR_materials_ior")
             GltfMaterial(
                 JsonFields.string(value, "name", "material_$index"),
                 JsonFields.floats(pbr, "baseColorFactor", floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f)),
@@ -253,7 +256,14 @@ object GltfLoader {
                         JsonFields.float(it, "sheenRoughnessFactor"),
                         parseBinding(JsonFields.value(it, "sheenRoughnessTexture"))
                     )
-                }
+                },
+                JsonFields.float(transmissionExtension, "transmissionFactor"),
+                parseBinding(JsonFields.value(transmissionExtension, "transmissionTexture")),
+                JsonFields.float(volumeExtension, "thicknessFactor"),
+                parseBinding(JsonFields.value(volumeExtension, "thicknessTexture")),
+                JsonFields.float(volumeExtension, "attenuationDistance", Float.POSITIVE_INFINITY),
+                JsonFields.floats(volumeExtension, "attenuationColor", floatArrayOf(1.0f, 1.0f, 1.0f)),
+                JsonFields.float(iorExtension, "ior", 1.5f)
             )
         }
     }
@@ -801,7 +811,14 @@ object GltfLoader {
         false,
         null,
         null,
-        null
+        null,
+        0.0f,
+        null,
+        0.0f,
+        null,
+        Float.POSITIVE_INFINITY,
+        floatArrayOf(1.0f, 1.0f, 1.0f),
+        1.5f
     )
 
     private fun alphaMode(value: String): AlphaMode = when (value) {

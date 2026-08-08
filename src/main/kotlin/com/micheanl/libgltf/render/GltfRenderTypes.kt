@@ -113,7 +113,8 @@ object GltfRenderTypes {
             .withVertexBinding(0, DefaultVertexFormat.ENTITY)
             .withPrimitiveTopology(topology(mode))
             .withCull(!material.doubleSided)
-        val oitPipelineSet = if (material.alphaMode == AlphaMode.BLEND) buildOitPipelineSet(suffix, builder) else null
+        val oitPipelineSet =
+            if (material.effectiveAlphaMode == AlphaMode.BLEND) buildOitPipelineSet(suffix, builder) else null
         applyMaterial(builder, material, alphaCutoff)
         val pipeline = builder.build()
         return createRenderType("libgltf_$suffix", pipeline, oitPipelineSet, texture)
@@ -145,7 +146,8 @@ object GltfRenderTypes {
                 .withVertexBinding(2, GltfGpuFormats.SKIN)
                 .withShaderDefine("SKINNED")
         }
-        val oitPipelineSet = if (material.alphaMode == AlphaMode.BLEND) buildOitPipelineSet(suffix, builder) else null
+        val oitPipelineSet =
+            if (material.effectiveAlphaMode == AlphaMode.BLEND) buildOitPipelineSet(suffix, builder) else null
         applyMaterial(builder, material, alphaCutoff)
         val pipeline = builder.build()
         return createRenderType("libgltf_$suffix", pipeline, oitPipelineSet, texture)
@@ -181,7 +183,7 @@ object GltfRenderTypes {
     }
 
     private fun applyMaterial(builder: RenderPipeline.Builder, material: GltfMaterial, alphaCutoff: Float) {
-        when (material.alphaMode) {
+        when (material.effectiveAlphaMode) {
             AlphaMode.MASK -> builder
                 .withShaderDefine("ALPHA_CUTOUT", alphaCutoff)
                 .withColorTargetState(ColorTargetState.DEFAULT)
