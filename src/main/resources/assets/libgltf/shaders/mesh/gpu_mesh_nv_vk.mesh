@@ -129,6 +129,9 @@ void main() {
     }
 #ifdef MESH_OCCLUSION_CULLING
     if (parameters.screenSizeAndFlags.z > 0.0 && occludedByDepth(meshlet.sphere, clipTransform)) {
+#ifdef MESH_DEBUG_COUNTERS
+        if (invocation == 0) atomicAdd(counters[4], 1u);
+#endif
         if (invocation == 0) gl_PrimitiveCountNV = 0;
         return;
     }
