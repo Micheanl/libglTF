@@ -16,7 +16,7 @@ import java.util.IdentityHashMap
 class GltfGlMeshPipelineCache : AutoCloseable {
     private val pipelines = Collections.synchronizedMap(IdentityHashMap<RenderPipeline, GltfGlMeshPipeline>())
     private val failed = Collections.newSetFromMap(IdentityHashMap<RenderPipeline, Boolean>())
-    private val maxDrawCount: Int
+    private val maxTaskGroups: Int
     private val useNv: Boolean
     private val meshWorkgroupSize: Int
     val supported: Boolean
@@ -41,7 +41,7 @@ class GltfGlMeshPipelineCache : AutoCloseable {
         } else {
             0
         }
-        maxDrawCount = if (extSupported || nvSupported) {
+        val maxDrawCount = if (extSupported || nvSupported) {
             if (useNv) {
                 query(NVMeshShader.GL_MAX_DRAW_MESH_TASKS_COUNT_NV)
             } else {
@@ -50,15 +50,21 @@ class GltfGlMeshPipelineCache : AutoCloseable {
         } else {
             0
         }
+        maxTaskGroups = if (extSupported && !useNv) {
+            val maxMeshTotalCount = query(EXTMeshShader.GL_MAX_MESH_WORK_GROUP_TOTAL_COUNT_EXT)
+            if (maxMeshTotalCount > 0) minOf(maxDrawCount, maxMeshTotalCount / TASK_WORKGROUP) else maxDrawCount
+        } else {
+            maxDrawCount
+        }
         supported = (extSupported || nvSupported) &&
             query(outputVerticesTarget) >= 64 &&
             query(outputPrimitivesTarget) >= 124 &&
             query(taskInvocationTarget) >= 32 &&
             meshWorkgroupSize >= 32 &&
-            maxDrawCount > 0
+            maxTaskGroups > 0
         if (!supported) {
             LOGGER.info(
-                "libgltf GL mesh limits nv={} ext={} maxMeshOutputVertices={} maxMeshOutputPrimitives={} maxTaskInvocations={} maxMeshInvocations={} meshWorkgroupSize={} maxDrawCount={}",
+                "libgltf GL mesh limits nv={} ext={} maxMeshOutputVertices={} maxMeshOutputPrimitives={} maxTaskInvocations={} maxMeshInvocations={} meshWorkgroupSize={} maxDrawCount={} maxTaskGroups={}",
                 nvSupported,
                 extSupported,
                 query(outputVerticesTarget),
@@ -66,7 +72,8 @@ class GltfGlMeshPipelineCache : AutoCloseable {
                 query(taskInvocationTarget),
                 query(meshInvocationTarget),
                 meshWorkgroupSize,
-                maxDrawCount
+                maxDrawCount,
+                maxTaskGroups
             )
         }
     }
@@ -99,7 +106,7 @@ class GltfGlMeshPipelineCache : AutoCloseable {
             instanceCount,
             instanceCulling,
             meshletCulling,
-            maxDrawCount
+            maxTaskGroups
         )
     }
 
@@ -122,6 +129,8 @@ class GltfGlMeshPipelineCache : AutoCloseable {
     }
 
     private companion object {
+        const val TASK_WORKGROUP = 32
+
         val LOGGER = LogUtils.getLogger()
     }
 }

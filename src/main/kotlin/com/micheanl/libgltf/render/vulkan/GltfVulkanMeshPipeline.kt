@@ -22,7 +22,7 @@ import java.util.IdentityHashMap
 class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoCloseable {
     private val pipelines = Collections.synchronizedMap(IdentityHashMap<RenderPipeline, GltfVulkanMeshPipeline>())
     private val failed = Collections.newSetFromMap(IdentityHashMap<RenderPipeline, Boolean>())
-    private val maxDrawCount: Int
+    private val maxTaskGroups: Int
     private val maxPushDescriptors: Int
     private val meshWorkgroupSize: Int
     val supported: Boolean
@@ -34,11 +34,19 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
             mesh.pNext(push.address())
             val root = VkPhysicalDeviceProperties2.calloc(stack).`sType$Default`().pNext(mesh)
             VK12.vkGetPhysicalDeviceProperties2(device.vkDevice().physicalDevice, root)
-            maxDrawCount = minOf(mesh.maxTaskWorkGroupCount(0), GltfGpuBackend.vendorProfile().maxTaskGroupCount)
+            val maxTaskCount = minOf(mesh.maxTaskWorkGroupCount(0), GltfGpuBackend.vendorProfile().maxTaskGroupCount)
+            val maxMeshTotalCount = mesh.maxMeshWorkGroupTotalCount()
+            maxTaskGroups = if (maxMeshTotalCount > 0) {
+                minOf(maxTaskCount, maxMeshTotalCount / TASK_WORKGROUP)
+            } else {
+                maxTaskCount
+            }
             maxPushDescriptors = push.maxPushDescriptors()
             LOGGER.info(
-                "libgltf Vulkan mesh properties maxTaskWorkGroupCount={} maxPushDescriptors={}",
-                maxDrawCount,
+                "libgltf Vulkan mesh properties maxTaskWorkGroupCount={} maxMeshWorkGroupTotalCount={} maxTaskGroups={} maxPushDescriptors={}",
+                maxTaskCount,
+                maxMeshTotalCount,
+                maxTaskGroups,
                 maxPushDescriptors
             )
             val preferredWorkgroupSize = GltfGpuBackend.vendorProfile().maxMeshWorkGroupSize
@@ -59,7 +67,7 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
                 mesh.maxMeshWorkGroupSize(0) >= 64 &&
                 mesh.maxMeshWorkGroupCount(0) >= 32 &&
                 mesh.maxMeshWorkGroupTotalCount() >= 32 &&
-                maxDrawCount > 0
+                maxTaskGroups > 0
         }
     }
 
@@ -100,7 +108,7 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
             instanceCount,
             instanceCulling,
             meshletCulling,
-            maxDrawCount
+            maxTaskGroups
         )
         return true
     }
@@ -121,6 +129,8 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
     }
 
     companion object {
+        const val TASK_WORKGROUP = 32
+
         private val LOGGER = LogUtils.getLogger()
     }
 }
@@ -149,7 +159,7 @@ private class GltfVulkanMeshPipeline(
         instanceCount: Int,
         instanceCulling: Boolean,
         meshletCulling: Boolean,
-        maxDrawCount: Int
+        maxTaskGroups: Int
     ) {
         VK10.vkCmdBindPipeline(
             commandBuffer,
@@ -177,7 +187,7 @@ private class GltfVulkanMeshPipeline(
             var baseCandidate = 0L
             while (baseCandidate < candidateCount) {
                 val groups = minOf(
-                    maxDrawCount.toLong(),
+                    maxTaskGroups.toLong(),
                     (candidateCount - baseCandidate + TASK_WORKGROUP - 1) / TASK_WORKGROUP
                 ).toInt()
                 val parameters = stack.malloc(PUSH_CONSTANT_SIZE)
