@@ -179,9 +179,12 @@ class GltfGlMeshPipeline private constructor(
             val meshType = if (useNv) NVMeshShader.GL_MESH_SHADER_NV else EXTMeshShader.GL_MESH_SHADER_EXT
             val meshPath = if (useNv) "/assets/libgltf/shaders/mesh/gpu_mesh_nv.mesh" else "/assets/libgltf/shaders/mesh/gpu_mesh_gl.mesh"
             val taskPath = if (useNv) "/assets/libgltf/shaders/mesh/gpu_mesh_nv.task" else "/assets/libgltf/shaders/mesh/gpu_mesh_gl.task"
-            val task = compile(taskType, shader(taskPath))
+            val task = compile(taskType, withConeCulling(shader(taskPath), renderPipeline))
             try {
-                val mesh = compile(meshType, withMeshWorkgroupSize(shader(meshPath), meshWorkgroupSize))
+                val mesh = compile(
+                    meshType,
+                    withMeshWorkgroupSize(withConeCulling(shader(meshPath), renderPipeline), meshWorkgroupSize)
+                )
                 try {
                     val defines = renderPipeline.getShaderDefines()
                     val oit = defines.flags().contains("OIT")
@@ -237,6 +240,12 @@ class GltfGlMeshPipeline private constructor(
         private fun withMeshWorkgroupSize(source: String, size: Int): String {
             val versionEnd = source.indexOf('\n') + 1
             return source.substring(0, versionEnd) + "#define MESH_WORKGROUP_SIZE $size\n" + source.substring(versionEnd)
+        }
+
+        private fun withConeCulling(source: String, renderPipeline: RenderPipeline): String {
+            if (!renderPipeline.isCull()) return source
+            val versionEnd = source.indexOf('\n') + 1
+            return source.substring(0, versionEnd) + "#define MESH_CONE_CULLING\n" + source.substring(versionEnd)
         }
 
         private fun compile(type: Int, source: String): Int {

@@ -35,7 +35,6 @@ class GltfMeshletLod private constructor(
             label: String,
             indices: IntBuffer,
             positions: FloatBuffer,
-            normals: FloatBuffer,
             vertexCount: Int,
             indexType: IndexType,
             bounds: FloatArray
@@ -97,7 +96,17 @@ class GltfMeshletLod private constructor(
                         MeshOptimizer.meshopt_computeMeshletBounds(
                             vertices, triangles, positions, vertexCount.toLong(), POSITION_STRIDE.toLong(), meshletBounds
                         )
-                        val cone = coneAxis(normals, meshletVertices, vertexOffset, meshlet.vertex_count())
+                        val cone = coneData(
+                            positions,
+                            meshletVertices,
+                            meshletTriangles,
+                            vertexOffset,
+                            triangleOffset,
+                            triangleCount,
+                            meshletBounds.center(0),
+                            meshletBounds.center(1),
+                            meshletBounds.center(2)
+                        )
                         putMetadata(
                             metadata,
                             meshletBounds.center(0),
@@ -107,7 +116,10 @@ class GltfMeshletLod private constructor(
                             cone[0],
                             cone[1],
                             cone[2],
-                            coneCutoff(normals, meshletVertices, vertexOffset, meshlet.vertex_count()),
+                            cone[3],
+                            cone[4],
+                            cone[5],
+                            cone[6],
                             vertexOffset,
                             triangleOffset,
                             meshlet.vertex_count(),
@@ -133,6 +145,9 @@ class GltfMeshletLod private constructor(
                     centerY,
                     centerZ,
                     kotlin.math.sqrt(extentX * extentX + extentY * extentY + extentZ * extentZ),
+                    0.0f,
+                    0.0f,
+                    0.0f,
                     0.0f,
                     0.0f,
                     0.0f,
@@ -183,6 +198,9 @@ class GltfMeshletLod private constructor(
             coneAxisY: Float,
             coneAxisZ: Float,
             coneCutoff: Float,
+            coneApexX: Float,
+            coneApexY: Float,
+            coneApexZ: Float,
             vertexOffset: Int,
             triangleOffset: Int,
             vertexCount: Int,
@@ -194,53 +212,92 @@ class GltfMeshletLod private constructor(
             buffer.putInt(vertexOffset).putInt(triangleOffset).putInt(vertexCount).putInt(triangleCount)
             buffer.putInt(firstIndex).putInt(indexCount).putLong(0L)
             buffer.putFloat(coneAxisX).putFloat(coneAxisY).putFloat(coneAxisZ).putFloat(coneCutoff)
+            buffer.putFloat(coneApexX).putFloat(coneApexY).putFloat(coneApexZ).putFloat(0.0f)
         }
 
-        private fun coneAxis(normals: FloatBuffer, meshletVertices: IntBuffer, vertexOffset: Int, vertexCount: Int): FloatArray {
+        private fun coneData(
+            positions: FloatBuffer,
+            meshletVertices: IntBuffer,
+            meshletTriangles: ByteBuffer,
+            vertexOffset: Int,
+            triangleOffset: Int,
+            triangleCount: Int,
+            centerX: Float,
+            centerY: Float,
+            centerZ: Float
+        ): FloatArray {
+            val normals = FloatArray(triangleCount * 3)
+            val corners = FloatArray(triangleCount * 3)
+            var validCount = 0
+            for (triangle in 0 until triangleCount) {
+                val triangleBase = triangleOffset + triangle * 3
+                val local0 = meshletTriangles[triangleBase].toInt() and 0xFF
+                val local1 = meshletTriangles[triangleBase + 1].toInt() and 0xFF
+                val local2 = meshletTriangles[triangleBase + 2].toInt() and 0xFF
+                val index0 = meshletVertices[vertexOffset + local0] * 3
+                val index1 = meshletVertices[vertexOffset + local1] * 3
+                val index2 = meshletVertices[vertexOffset + local2] * 3
+                val edge1X = positions[index1] - positions[index0]
+                val edge1Y = positions[index1 + 1] - positions[index0 + 1]
+                val edge1Z = positions[index1 + 2] - positions[index0 + 2]
+                val edge2X = positions[index2] - positions[index0]
+                val edge2Y = positions[index2 + 1] - positions[index0 + 1]
+                val edge2Z = positions[index2 + 2] - positions[index0 + 2]
+                var normalX = edge1Y * edge2Z - edge1Z * edge2Y
+                var normalY = edge1Z * edge2X - edge1X * edge2Z
+                var normalZ = edge1X * edge2Y - edge1Y * edge2X
+                val length = kotlin.math.sqrt(normalX * normalX + normalY * normalY + normalZ * normalZ)
+                if (length <= 1.0e-8f) continue
+                val offset = validCount * 3
+                normalX /= length
+                normalY /= length
+                normalZ /= length
+                normals[offset] = normalX
+                normals[offset + 1] = normalY
+                normals[offset + 2] = normalZ
+                corners[offset] = positions[index0]
+                corners[offset + 1] = positions[index0 + 1]
+                corners[offset + 2] = positions[index0 + 2]
+                validCount++
+            }
+            if (validCount == 0) return floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f)
             var axisX = 0.0f
             var axisY = 0.0f
             var axisZ = 0.0f
-            for (vertex in 0 until vertexCount) {
-                val index = meshletVertices[vertexOffset + vertex] * 3
-                var normalX = normals[index]
-                var normalY = normals[index + 1]
-                var normalZ = normals[index + 2]
-                val length = kotlin.math.sqrt(normalX * normalX + normalY * normalY + normalZ * normalZ)
-                if (length > 1.0e-6f) {
-                    normalX /= length
-                    normalY /= length
-                    normalZ /= length
-                }
-                axisX += normalX
-                axisY += normalY
-                axisZ += normalZ
+            for (offset in 0 until validCount * 3 step 3) {
+                axisX += normals[offset]
+                axisY += normals[offset + 1]
+                axisZ += normals[offset + 2]
             }
-            val length = kotlin.math.sqrt(axisX * axisX + axisY * axisY + axisZ * axisZ)
-            if (length > 1.0e-6f) {
-                axisX /= length
-                axisY /= length
-                axisZ /= length
+            val axisLength = kotlin.math.sqrt(axisX * axisX + axisY * axisY + axisZ * axisZ)
+            if (axisLength <= 1.0e-6f) return floatArrayOf(0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f)
+            axisX /= axisLength
+            axisY /= axisLength
+            axisZ /= axisLength
+            var minDot = 1.0f
+            for (offset in 0 until validCount * 3 step 3) {
+                val dot = axisX * normals[offset] + axisY * normals[offset + 1] + axisZ * normals[offset + 2]
+                minDot = minOf(minDot, dot)
             }
-            return floatArrayOf(axisX, axisY, axisZ)
-        }
-
-        private fun coneCutoff(normals: FloatBuffer, meshletVertices: IntBuffer, vertexOffset: Int, vertexCount: Int): Float {
-            val axis = coneAxis(normals, meshletVertices, vertexOffset, vertexCount)
-            var cutoff = 1.0f
-            for (vertex in 0 until vertexCount) {
-                val index = meshletVertices[vertexOffset + vertex] * 3
-                var normalX = normals[index]
-                var normalY = normals[index + 1]
-                var normalZ = normals[index + 2]
-                val length = kotlin.math.sqrt(normalX * normalX + normalY * normalY + normalZ * normalZ)
-                if (length > 1.0e-6f) {
-                    normalX /= length
-                    normalY /= length
-                    normalZ /= length
-                }
-                cutoff = minOf(cutoff, axis[0] * normalX + axis[1] * normalY + axis[2] * normalZ)
+            if (minDot <= 0.1f) return floatArrayOf(axisX, axisY, axisZ, 1.0f, 0.0f, 0.0f, 0.0f)
+            var maxT = 0.0f
+            for (offset in 0 until validCount * 3 step 3) {
+                val planeDistance = (centerX - corners[offset]) * normals[offset] +
+                    (centerY - corners[offset + 1]) * normals[offset + 1] +
+                    (centerZ - corners[offset + 2]) * normals[offset + 2]
+                val axisDot = axisX * normals[offset] + axisY * normals[offset + 1] + axisZ * normals[offset + 2]
+                maxT = maxOf(maxT, planeDistance / axisDot)
             }
-            return maxOf(cutoff, 0.0f)
+            val cutoff = kotlin.math.sqrt(maxOf(1.0f - minDot * minDot, 0.0f))
+            return floatArrayOf(
+                axisX,
+                axisY,
+                axisZ,
+                cutoff,
+                centerX - axisX * maxT,
+                centerY - axisY * maxT,
+                centerZ - axisZ * maxT
+            )
         }
 
         private fun align4(value: Int): Int = (value + 3) and -4
@@ -248,6 +305,6 @@ class GltfMeshletLod private constructor(
         private const val MAX_VERTICES = 256
         private const val MAX_TRIANGLES = 256
         private const val POSITION_STRIDE = 12
-        private const val METADATA_STRIDE = 64
+        private const val METADATA_STRIDE = 80
     }
 }

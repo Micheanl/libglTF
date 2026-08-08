@@ -4,7 +4,7 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(std140, binding = 0) uniform Projection { mat4 ProjMat; };
 layout(std140, binding = 1) uniform DynamicTransforms { mat4 ModelViewMat; mat4 TextureMat; vec4 ColorModulator; vec3 ModelOffset; };
 layout(std430, binding = 7) readonly buffer Instances { uint instanceWords[]; };
-struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint vertexCount; uint triangleCount; uint firstIndex; uint indexCount; uint padding0; uint padding1; vec4 cone; };
+struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint vertexCount; uint triangleCount; uint firstIndex; uint indexCount; uint padding0; uint padding1; vec4 cone; vec4 coneApex; };
 layout(std430, binding = 8) readonly buffer Meshlets { Meshlet meshlets[]; };
 layout(std140, binding = 5) uniform MeshParams { vec4 primitiveSphere; uint instanceCount; uint meshletCount; uint instanceCulling; uint meshletCulling; uint baseCandidate; };
 taskNV out TaskPayload { uint words[2]; } payload;
@@ -34,7 +34,16 @@ void main() {
     mat4 transform = ProjMat * ModelViewMat * instanceMatrix(instanceIndex);
     bool instanceVisible = instanceCulling == 0 || visibleSphere(primitiveSphere, transform);
     bool meshletVisible = meshletCulling == 0 || visibleSphere(meshlets[meshletIndex].sphere, transform);
-    if (!(instanceVisible && meshletVisible)) {
+#ifdef MESH_CONE_CULLING
+    mat4 viewTransform = ModelViewMat * instanceMatrix(instanceIndex);
+    Meshlet meshlet = meshlets[meshletIndex];
+    vec3 axisView = normalize(mat3(viewTransform) * meshlet.cone.xyz);
+    vec3 apexView = (viewTransform * vec4(meshlet.coneApex.xyz, 1.0)).xyz;
+    bool backfacing = dot(axisView, apexView) > meshlet.cone.w * length(apexView);
+#else
+    bool backfacing = false;
+#endif
+    if (!(instanceVisible && meshletVisible) || backfacing) {
         gl_TaskCountNV = 0;
         return;
     }
