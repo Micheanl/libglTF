@@ -4,9 +4,6 @@ import com.micheanl.libgltf.material.MaterialUvAnimationState
 import com.micheanl.libgltf.material.MaterialFactorAnimationState
 import org.joml.Matrix4f
 
-
-
-
 /**
  * libgltf · AnimationPose
  *

@@ -8,9 +8,6 @@ import net.minecraft.client.renderer.SubmitNodeCollector
 import net.minecraft.client.renderer.special.NoDataSpecialModelRenderer
 import org.joml.Vector3fc
 
-
-
-
 /**
  * libgltf · GltfBlockRenderer
  *

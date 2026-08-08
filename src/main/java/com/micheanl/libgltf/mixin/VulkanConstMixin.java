@@ -10,9 +10,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(VulkanConst.class)
 
-
-
-
 /**
  * libgltf · VulkanConstMixin
  *

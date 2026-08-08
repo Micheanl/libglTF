@@ -14,9 +14,6 @@ import net.minecraft.client.renderer.texture.AbstractTexture
 import java.util.OptionalDouble
 import kotlin.math.max
 
-
-
-
 /**
  * libgltf · GltfDynamicTexture
  *

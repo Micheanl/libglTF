@@ -1,8 +1,5 @@
 package com.micheanl.libgltf.asset
 
-
-
-
 /**
  * libgltf · MaterialUvTarget
  *

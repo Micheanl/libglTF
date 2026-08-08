@@ -2,9 +2,6 @@ package com.micheanl.libgltf.asset
 
 import com.micheanl.libgltf.model.GltfAsset
 
-
-
-
 /**
  * libgltf · GltfLoadSuccess
  *

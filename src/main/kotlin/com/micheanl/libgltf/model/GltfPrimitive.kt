@@ -2,9 +2,6 @@ package com.micheanl.libgltf.model
 
 import java.nio.ByteBuffer
 
-
-
-
 /**
  * libgltf · GltfPrimitive
  *

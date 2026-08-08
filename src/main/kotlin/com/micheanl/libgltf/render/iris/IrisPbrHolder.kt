@@ -3,9 +3,6 @@ package com.micheanl.libgltf.render.iris
 import net.irisshaders.iris.pbr.texture.PBRTextureHolder
 import net.minecraft.client.renderer.texture.AbstractTexture
 
-
-
-
 /**
  * libgltf · IrisPbrHolder
  *

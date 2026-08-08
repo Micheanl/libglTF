@@ -3,9 +3,6 @@ package com.micheanl.libgltf
 import com.micheanl.libgltf.render.GltfRenderSystem
 import net.fabricmc.api.ClientModInitializer
 
-
-
-
 /**
  * libgltf · LibGltfClient
  *

@@ -6,9 +6,6 @@ import com.micheanl.libgltf.render.vulkan.RenderConfig
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.logging.LogUtils
 
-
-
-
 /**
  * libgltf · GpuResources
  *

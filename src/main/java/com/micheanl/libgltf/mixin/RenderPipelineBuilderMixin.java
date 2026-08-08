@@ -12,9 +12,6 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 @Mixin(RenderPipeline.Builder.class)
 
-
-
-
 /**
  * libgltf · RenderPipelineBuilderMixin
  *

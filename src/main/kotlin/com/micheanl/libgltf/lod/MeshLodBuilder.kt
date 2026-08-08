@@ -5,9 +5,6 @@ import org.lwjgl.util.meshoptimizer.MeshOptimizer
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
 
-
-
-
 /**
  * libgltf · MeshLodBuilder
  *

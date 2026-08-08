@@ -20,9 +20,6 @@ import org.lwjgl.opengl.GL43C
 import org.lwjgl.opengl.NVMeshShader
 import org.lwjgl.system.MemoryStack
 
-
-
-
 /**
  * libgltf · GlMeshPipeline
  *

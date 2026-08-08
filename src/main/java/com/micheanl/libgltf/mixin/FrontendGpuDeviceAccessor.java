@@ -7,9 +7,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(FrontendGpuDevice.class)
 
-
-
-
 /**
  * libgltf · FrontendGpuDeviceAccessor
  *

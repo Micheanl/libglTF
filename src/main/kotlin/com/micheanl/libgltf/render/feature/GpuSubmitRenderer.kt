@@ -12,9 +12,6 @@ import net.minecraft.client.renderer.feature.FeatureFrameContext
 import net.minecraft.client.renderer.feature.FeatureRenderer
 import net.minecraft.client.renderer.oit.OitStage
 
-
-
-
 /**
  * libgltf · GpuSubmitRenderer
  *

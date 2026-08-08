@@ -19,9 +19,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(VulkanBackend.class)
 
-
-
-
 /**
  * libgltf · VulkanBackendMeshShaderMixin
  *

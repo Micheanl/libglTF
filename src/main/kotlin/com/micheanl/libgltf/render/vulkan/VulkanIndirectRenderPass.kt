@@ -2,9 +2,6 @@ package com.micheanl.libgltf.render.vulkan
 
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice
 
-
-
-
 /**
  * libgltf · VulkanIndirectRenderPass
  *

@@ -20,9 +20,6 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(VulkanRenderPass.class)
 
-
-
-
 /**
  * libgltf · VulkanRenderPassIndirectMixin
  *

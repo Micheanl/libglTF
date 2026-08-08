@@ -12,9 +12,6 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(targets = "com.mojang.renderpearl.backend.opengl.GlRenderPass")
 
-
-
-
 /**
  * libgltf · GlRenderPassMeshMixin
  *

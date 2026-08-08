@@ -3,9 +3,6 @@ package com.micheanl.libgltf.render.gpu
 import com.mojang.renderpearl.api.GpuFormat
 import com.mojang.renderpearl.api.vertex.VertexFormat
 
-
-
-
 /**
  * libgltf · GpuFormats
  *

@@ -3,9 +3,6 @@ package com.micheanl.libgltf.render.iris
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.renderer.texture.AbstractTexture
 
-
-
-
 /**
  * libgltf · IrisCompat
  *

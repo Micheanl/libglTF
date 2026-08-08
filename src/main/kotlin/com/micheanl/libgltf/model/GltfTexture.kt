@@ -2,9 +2,6 @@ package com.micheanl.libgltf.model
 
 import com.micheanl.libgltf.material.TextureSampler
 
-
-
-
 /**
  * libgltf · GltfTexture
  *

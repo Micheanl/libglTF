@@ -1,8 +1,5 @@
 package com.micheanl.libgltf.lod
 
-
-
-
 /**
  * libgltf · LodSelector
  *

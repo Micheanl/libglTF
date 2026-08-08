@@ -9,9 +9,6 @@ import net.minecraft.util.Mth
 import net.minecraft.world.level.chunk.status.ChunkStatus
 import org.joml.Matrix4f
 
-
-
-
 /**
  * libgltf · GltfWorldRenderer
  *

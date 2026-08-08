@@ -2,9 +2,6 @@ package com.micheanl.libgltf.render.texture
 
 import com.micheanl.libgltf.material.TextureFilter
 
-
-
-
 /**
  * libgltf · MipmapFilterState
  *

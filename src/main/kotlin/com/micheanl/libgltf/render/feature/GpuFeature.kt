@@ -3,9 +3,6 @@ package com.micheanl.libgltf.render.feature
 import net.fabricmc.fabric.api.client.rendering.v1.FeatureRendererRegistry
 import net.minecraft.client.renderer.feature.FeatureRendererType
 
-
-
-
 /**
  * libgltf · GpuFeature
  *

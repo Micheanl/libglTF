@@ -3,9 +3,6 @@ package com.micheanl.libgltf.material
 import kotlin.math.cos
 import kotlin.math.sin
 
-
-
-
 /**
  * libgltf · TextureBinding
  *

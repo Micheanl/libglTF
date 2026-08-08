@@ -1,8 +1,5 @@
 package com.micheanl.libgltf.api
 
-
-
-
 /**
  * libgltf · GltfInstanceId
  *

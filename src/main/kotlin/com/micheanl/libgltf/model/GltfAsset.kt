@@ -3,9 +3,6 @@ package com.micheanl.libgltf.model
 import com.micheanl.libgltf.animation.AnimationClip
 import com.micheanl.libgltf.material.GltfMaterial
 
-
-
-
 /**
  * libgltf · GltfAsset
  *

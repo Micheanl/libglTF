@@ -9,9 +9,6 @@ import net.minecraft.client.renderer.state.level.CameraRenderState
 import net.minecraft.client.renderer.texture.OverlayTexture
 import net.minecraft.world.entity.Entity
 
-
-
-
 /**
  * libgltf · GltfEntityRenderer
  *

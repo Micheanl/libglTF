@@ -3,9 +3,6 @@ package com.micheanl.libgltf.render.vulkan
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.device.GpuDevice
 
-
-
-
 /**
  * libgltf · VulkanBufferRing
  *

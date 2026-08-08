@@ -9,9 +9,6 @@ import com.mojang.renderpearl.api.textures.GpuTexture
 import com.mojang.renderpearl.api.textures.GpuTextureView
 import net.minecraft.client.Minecraft
 
-
-
-
 /**
  * libgltf · OcclusionDepth
  *

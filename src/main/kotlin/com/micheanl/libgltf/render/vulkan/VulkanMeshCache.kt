@@ -6,9 +6,6 @@ import com.mojang.renderpearl.api.pipeline.RenderPipeline
 import com.mojang.renderpearl.backend.vulkan.VulkanRenderPipeline
 import org.lwjgl.vulkan.VkCommandBuffer
 
-
-
-
 /**
  * libgltf · VulkanMeshCache
  *

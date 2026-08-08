@@ -3,9 +3,6 @@ package com.micheanl.libgltf.animation
 import com.micheanl.libgltf.model.GltfAsset
 import kotlin.math.abs
 
-
-
-
 /**
  * libgltf · AnimationController
  *

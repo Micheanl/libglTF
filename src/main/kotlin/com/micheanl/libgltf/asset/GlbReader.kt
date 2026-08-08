@@ -3,9 +3,6 @@ package com.micheanl.libgltf.asset
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-
-
-
 /**
  * libgltf · GlbReader
  *

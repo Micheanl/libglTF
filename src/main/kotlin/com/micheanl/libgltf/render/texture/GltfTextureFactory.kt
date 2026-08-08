@@ -10,9 +10,6 @@ import com.mojang.blaze3d.platform.NativeImage
 import net.minecraft.client.Minecraft
 import net.minecraft.resources.Identifier
 
-
-
-
 /**
  * libgltf · GltfTextureFactory
  *

@@ -4,9 +4,6 @@ import com.micheanl.libgltf.model.GltfAsset
 import com.micheanl.libgltf.render.GltfRenderSystem
 import java.util.concurrent.atomic.AtomicBoolean
 
-
-
-
 /**
  * libgltf · GltfHandle
  *

@@ -12,9 +12,6 @@ import com.micheanl.libgltf.render.gpu.GpuAnimationState
 import org.joml.Matrix4f
 import org.joml.Matrix4fc
 
-
-
-
 /**
  * libgltf · GltfInstance
  *

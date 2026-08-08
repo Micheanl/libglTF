@@ -2,9 +2,6 @@ package com.micheanl.libgltf.animation
 
 import com.micheanl.libgltf.model.GltfAsset
 
-
-
-
 /**
  * libgltf · AnimationStateMachineBuilder
  *

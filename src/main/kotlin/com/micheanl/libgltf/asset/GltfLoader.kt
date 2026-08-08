@@ -47,9 +47,6 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import org.joml.Matrix4f
 
-
-
-
 /**
  * libgltf · GltfLoader
  *

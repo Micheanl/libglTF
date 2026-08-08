@@ -3,9 +3,6 @@ package com.micheanl.libgltf.render.texture
 import com.micheanl.libgltf.render.iris.IrisCompat
 import net.minecraft.resources.Identifier
 
-
-
-
 /**
  * libgltf · GltfMaterialTexture
  *

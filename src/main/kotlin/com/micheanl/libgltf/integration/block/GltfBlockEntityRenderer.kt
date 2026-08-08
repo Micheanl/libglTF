@@ -10,9 +10,6 @@ import net.minecraft.client.renderer.texture.OverlayTexture
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.phys.Vec3
 
-
-
-
 /**
  * libgltf · GltfBlockEntityRenderer
  *

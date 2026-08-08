@@ -9,9 +9,6 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @Mixin(VulkanGpuSampler.class)
 
-
-
-
 /**
  * libgltf · VulkanGpuSamplerMixin
  *

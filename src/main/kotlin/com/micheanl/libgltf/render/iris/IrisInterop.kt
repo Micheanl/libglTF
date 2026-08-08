@@ -4,9 +4,6 @@ import com.mojang.renderpearl.backend.opengl.GlTexture
 import net.irisshaders.iris.api.v0.IrisApi
 import net.minecraft.client.renderer.texture.AbstractTexture
 
-
-
-
 /**
  * libgltf · IrisInterop
  *

@@ -8,9 +8,6 @@ import com.micheanl.libgltf.render.gpu.OcclusionDepth
 import com.mojang.renderpearl.api.device.GpuDevice
 import com.mojang.renderpearl.backend.vulkan.VulkanDevice
 
-
-
-
 /**
  * libgltf · VulkanGpuDriver
  *

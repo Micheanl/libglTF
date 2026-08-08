@@ -6,9 +6,6 @@ import com.micheanl.libgltf.material.MaterialUvAnimationState
 import org.joml.Quaternionf
 import kotlin.math.abs
 
-
-
-
 /**
  * libgltf · AnimationPlayer
  *

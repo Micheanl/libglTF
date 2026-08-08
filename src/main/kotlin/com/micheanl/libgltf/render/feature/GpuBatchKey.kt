@@ -2,9 +2,6 @@ package com.micheanl.libgltf.render.feature
 
 import net.minecraft.client.renderer.rendertype.RenderType
 
-
-
-
 /**
  * libgltf · GpuBatchKey
  *

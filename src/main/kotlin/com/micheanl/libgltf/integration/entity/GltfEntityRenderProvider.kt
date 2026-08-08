@@ -3,9 +3,6 @@ package com.micheanl.libgltf.integration.entity
 import com.micheanl.libgltf.api.GltfInstance
 import net.minecraft.world.entity.Entity
 
-
-
-
 /**
  * libgltf · GltfEntityRenderProvider
  *

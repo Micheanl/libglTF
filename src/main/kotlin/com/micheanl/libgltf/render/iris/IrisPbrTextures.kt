@@ -4,9 +4,6 @@ import net.irisshaders.iris.pbr.texture.PBRTextureHolder
 import net.minecraft.client.renderer.texture.AbstractTexture
 import java.util.concurrent.ConcurrentHashMap
 
-
-
-
 /**
  * libgltf · IrisPbrTextures
  *

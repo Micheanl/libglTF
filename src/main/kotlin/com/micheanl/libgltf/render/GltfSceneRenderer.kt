@@ -23,9 +23,6 @@ import org.joml.Matrix4fc
 import org.joml.Vector3f
 import org.joml.Vector3fc
 
-
-
-
 /**
  * libgltf · GltfSceneRenderer
  *

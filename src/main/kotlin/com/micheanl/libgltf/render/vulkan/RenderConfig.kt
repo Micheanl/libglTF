@@ -2,8 +2,6 @@ package com.micheanl.libgltf.render.vulkan
 
 import java.util.Properties
 
-
-
 /**
  * libgltf · RenderConfig
  *

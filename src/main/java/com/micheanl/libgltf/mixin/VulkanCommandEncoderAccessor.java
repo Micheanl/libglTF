@@ -7,9 +7,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(VulkanCommandEncoder.class)
 
-
-
-
 /**
  * libgltf · VulkanCommandEncoderAccessor
  *

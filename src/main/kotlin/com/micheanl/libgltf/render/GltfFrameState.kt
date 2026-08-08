@@ -2,9 +2,6 @@ package com.micheanl.libgltf.render
 
 import com.micheanl.libgltf.api.GltfInstance
 
-
-
-
 /**
  * libgltf · GltfFrameState
  *

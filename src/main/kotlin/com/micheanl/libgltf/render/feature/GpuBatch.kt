@@ -23,9 +23,6 @@ import net.minecraft.client.renderer.rendertype.PreparedRenderType
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-
-
-
 /**
  * libgltf · GpuBatch
  *

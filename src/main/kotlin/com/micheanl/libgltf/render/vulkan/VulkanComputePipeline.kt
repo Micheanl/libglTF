@@ -12,9 +12,6 @@ import org.lwjgl.util.shaderc.Shaderc
 import org.lwjgl.vulkan.*
 import java.nio.ByteBuffer
 
-
-
-
 /**
  * libgltf · VulkanComputePipeline
  *

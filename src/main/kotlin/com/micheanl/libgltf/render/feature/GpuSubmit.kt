@@ -14,9 +14,6 @@ import org.joml.Matrix4fc
 import kotlin.math.cos
 import kotlin.math.sin
 
-
-
-
 /**
  * libgltf · GpuSubmit
  *

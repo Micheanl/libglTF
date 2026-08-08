@@ -11,9 +11,6 @@ import com.mojang.renderpearl.api.device.DeviceInfo
 import com.mojang.renderpearl.backend.vulkan.VulkanDevice
 import org.lwjgl.opengl.GL
 
-
-
-
 /**
  * libgltf · GpuBackend
  *

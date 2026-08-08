@@ -26,9 +26,6 @@ private const val DEFORMED_VERTEX_STRIDE: Int = 6
 private val EMPTY_DEFORMED_VERTICES: FloatArray = FloatArray(0)
 private val EMPTY_DEFORMED_REVISIONS: LongArray = LongArray(0)
 
-
-
-
 /**
  * libgltf · GltfGeometryRenderer
  *

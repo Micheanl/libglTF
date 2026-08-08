@@ -13,9 +13,6 @@ import org.lwjgl.opengl.NVMeshShader
 import java.util.Collections
 import java.util.IdentityHashMap
 
-
-
-
 /**
  * libgltf · GlMeshPipelineCache
  *

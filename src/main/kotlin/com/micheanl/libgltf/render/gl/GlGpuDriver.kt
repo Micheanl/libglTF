@@ -5,9 +5,6 @@ import com.micheanl.libgltf.render.gpu.GpuDriver
 import com.micheanl.libgltf.render.vulkan.RenderConfig
 import org.lwjgl.opengl.GL
 
-
-
-
 /**
  * libgltf · GlGpuDriver
  *

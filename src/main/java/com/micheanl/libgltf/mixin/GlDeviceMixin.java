@@ -7,9 +7,6 @@ import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(targets = "com.mojang.renderpearl.backend.opengl.GlDevice")
 
-
-
-
 /**
  * libgltf · GlDeviceMixin
  *

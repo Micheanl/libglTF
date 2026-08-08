@@ -29,9 +29,6 @@ private val JOINT_MATRICES_LAYOUT = BindGroupLayout.builder()
     .withUniform("JointMatrices", UniformType.TEXEL_BUFFER, GpuFormat.RGBA32_FLOAT)
     .build()
 
-
-
-
 /**
  * libgltf · GltfRenderTypes
  *

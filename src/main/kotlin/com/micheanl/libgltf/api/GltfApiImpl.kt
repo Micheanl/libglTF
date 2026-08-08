@@ -14,9 +14,6 @@ import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector
 
-
-
-
 /**
  * libgltf · GltfApiImpl
  *

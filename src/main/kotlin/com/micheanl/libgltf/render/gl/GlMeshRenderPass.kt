@@ -5,9 +5,6 @@ import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.pipeline.RenderPipeline
 import net.minecraft.client.renderer.rendertype.PreparedRenderType
 
-
-
-
 /**
  * libgltf · GlMeshRenderPass
  *

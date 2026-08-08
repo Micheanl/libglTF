@@ -3,9 +3,6 @@ package com.micheanl.libgltf.render.texture
 import net.minecraft.client.Minecraft
 import net.minecraft.resources.Identifier
 
-
-
-
 /**
  * libgltf · GltfTextureSet
  *

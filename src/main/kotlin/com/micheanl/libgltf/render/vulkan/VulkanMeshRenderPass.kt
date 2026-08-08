@@ -4,9 +4,6 @@ import com.micheanl.libgltf.render.gpu.MeshletStorage
 import com.mojang.renderpearl.api.pipeline.RenderPipeline
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 
-
-
-
 /**
  * libgltf · VulkanMeshRenderPass
  *

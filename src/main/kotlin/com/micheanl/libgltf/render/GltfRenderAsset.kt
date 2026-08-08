@@ -5,9 +5,6 @@ import com.micheanl.libgltf.render.gpu.GpuResources
 import com.micheanl.libgltf.render.texture.GltfTextureFactory
 import com.micheanl.libgltf.render.texture.GltfTextureSet
 
-
-
-
 /**
  * libgltf · GltfRenderAsset
  *

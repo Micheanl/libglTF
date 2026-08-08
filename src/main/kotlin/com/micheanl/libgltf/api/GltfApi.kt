@@ -10,9 +10,6 @@ import java.util.concurrent.CompletableFuture
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector
 import net.minecraft.client.renderer.texture.OverlayTexture
 
-
-
-
 /**
  * libgltf · GltfApi
  *

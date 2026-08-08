@@ -2,9 +2,6 @@ package com.micheanl.libgltf.material
 
 import net.minecraft.resources.Identifier
 
-
-
-
 /**
  * libgltf · MaterialOverride
  *

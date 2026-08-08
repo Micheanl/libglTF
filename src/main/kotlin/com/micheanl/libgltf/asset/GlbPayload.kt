@@ -2,9 +2,6 @@ package com.micheanl.libgltf.asset
 
 import java.nio.ByteBuffer
 
-
-
-
 /**
  * libgltf · GlbPayload
  *

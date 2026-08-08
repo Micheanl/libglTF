@@ -2,9 +2,6 @@ package com.micheanl.libgltf.animation
 
 import kotlin.math.floor
 
-
-
-
 /**
  * libgltf · AnimationSegment
  *
