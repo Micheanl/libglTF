@@ -44,6 +44,7 @@ class GltfPreparedGpuBatch : AutoCloseable {
     private var active = false
     private var frameUsed = false
     private var frameIndirect = false
+    private var lastPaletteRevision = Long.MIN_VALUE
 
     fun prepare(submits: List<GltfGpuSubmit>, fromIndex: Int, toIndex: Int, driver: GltfGpuDriver?) {
         val first = submits[fromIndex]
@@ -217,6 +218,7 @@ class GltfPreparedGpuBatch : AutoCloseable {
         sortingCenters = null
         useSortedIndexBuffer = false
         active = false
+        lastPaletteRevision = Long.MIN_VALUE
     }
 
     private fun prepareSortedIndices(submit: GltfGpuSubmit) {
@@ -354,6 +356,12 @@ class GltfPreparedGpuBatch : AutoCloseable {
     }
 
     private fun writePalettes(submits: List<GltfGpuSubmit>, fromIndex: Int, toIndex: Int) {
+        if (
+            lastPaletteRevision != Long.MIN_VALUE &&
+            submits.all { it.instance.animationRevision == lastPaletteRevision }
+        ) {
+            return
+        }
         var floatCount = 0
         for (index in fromIndex until toIndex) {
             val submit = submits[index]
@@ -368,6 +376,12 @@ class GltfPreparedGpuBatch : AutoCloseable {
                 val submit = submits[index]
                 data.put(submit.instance.animationState.jointPalettes[submit.skinIndex])
             }
+        }
+        val revision = submits[fromIndex].instance.animationRevision
+        lastPaletteRevision = if (submits.all { it.instance.animationRevision == revision }) {
+            revision
+        } else {
+            Long.MIN_VALUE
         }
     }
 
