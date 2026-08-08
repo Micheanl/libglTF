@@ -14,7 +14,7 @@ struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint verte
 layout(set = 1, binding = MESHLETS_BINDING, std430) readonly buffer Meshlets { Meshlet meshlets[]; };
 layout(set = 1, binding = MESHLET_VERTICES_BINDING, std430) readonly buffer MeshletVertices { uint meshletVertices[]; };
 layout(set = 1, binding = MESHLET_TRIANGLES_BINDING, std430) readonly buffer MeshletTriangles { uint meshletTriangleWords[]; };
-taskPayloadSharedEXT uint payload[64];
+taskPayloadSharedEXT uint payload[2];
 layout(location = 0) out float sphericalVertexDistance[];
 layout(location = 1) out float cylindricalVertexDistance[];
 layout(location = 2) out vec4 vertexColor[];
@@ -36,9 +36,8 @@ vec4 sampleLightmap(ivec2 uv) {
     return texture(Sampler2, coord);
 }
 void main() {
-    uint payloadIndex = gl_WorkGroupID.x;
-    uint instanceIndex = min(payload[payloadIndex * 2], max(parameters.instanceCount, 1) - 1);
-    uint meshletIndex = min(payload[payloadIndex * 2 + 1], max(parameters.meshletCount, 1) - 1);
+    uint instanceIndex = min(payload[0], max(parameters.instanceCount, 1) - 1);
+    uint meshletIndex = min(payload[1], max(parameters.meshletCount, 1) - 1);
     Meshlet meshlet = meshlets[meshletIndex];
     SetMeshOutputsEXT(meshlet.vertexCount, meshlet.triangleCount);
     uint invocation = gl_LocalInvocationIndex;

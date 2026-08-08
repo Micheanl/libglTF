@@ -166,7 +166,7 @@ class GltfPreparedGpuBatch : AutoCloseable {
                         lod = lod,
                         skinned = false,
                         transparent = false,
-                        taskGroupCount = (instanceCount * meshlets.meshletCount + 31) / 32
+                        taskGroupCount = instanceCount * meshlets.meshletCount
                     )
                 )
             } else if (indirect) {

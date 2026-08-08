@@ -3,6 +3,7 @@ package com.micheanl.libgltf.render.gl
 import com.micheanl.libgltf.mixin.GlBufferAccessor
 import com.micheanl.libgltf.mixin.GlSamplerAccessor
 import com.micheanl.libgltf.render.gpu.GltfMeshletLod
+import com.mojang.logging.LogUtils
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.renderpearl.api.buffers.GpuBuffer
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice
@@ -28,6 +29,8 @@ class GltfGlMeshPipeline private constructor(
     private val transmittance: Boolean,
     private val accumulate: Boolean
 ) : AutoCloseable {
+    private var diagnosticsLogged = false
+
     fun draw(
         preparedRenderType: PreparedRenderType,
         geometry: GpuBuffer,
@@ -53,6 +56,15 @@ class GltfGlMeshPipeline private constructor(
         bindTextures(preparedRenderType)
         bindOitSamplers()
         val candidateCount = instanceCount.toLong() * meshlets.meshletCount
+        if (!diagnosticsLogged) {
+            diagnosticsLogged = true
+            LOGGER.info(
+                "libgltf GL mesh draw instanceCount={} meshletCount={} candidates={}",
+                instanceCount,
+                meshlets.meshletCount,
+                candidateCount
+            )
+        }
         var baseCandidate = 0L
         while (baseCandidate < candidateCount) {
             val groups = minOf(
@@ -309,6 +321,7 @@ class GltfGlMeshPipeline private constructor(
         private const val BINDING_MESHLET_VERTICES = 9
         private const val BINDING_MESHLET_TRIANGLES = 10
         private const val PARAM_SIZE = 36
-        private const val TASK_WORKGROUP = 32
+        private const val TASK_WORKGROUP = 1
+        private val LOGGER = LogUtils.getLogger()
     }
 }

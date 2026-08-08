@@ -133,7 +133,7 @@ class GltfGlMeshPipelineCache : AutoCloseable {
     }
 
     private companion object {
-        const val TASK_WORKGROUP = 32
+        const val TASK_WORKGROUP = 1
 
         val LOGGER = LogUtils.getLogger()
     }

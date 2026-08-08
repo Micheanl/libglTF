@@ -1,14 +1,13 @@
 #version 460
 #extension GL_NV_mesh_shader : require
-layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(std140, binding = 0) uniform Projection { mat4 ProjMat; };
 layout(std140, binding = 1) uniform DynamicTransforms { mat4 ModelViewMat; mat4 TextureMat; vec4 ColorModulator; vec3 ModelOffset; };
 layout(std430, binding = 7) readonly buffer Instances { uint instanceWords[]; };
 struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint vertexCount; uint triangleCount; uint firstIndex; uint indexCount; uint padding0; uint padding1; };
 layout(std430, binding = 8) readonly buffer Meshlets { Meshlet meshlets[]; };
 layout(std140, binding = 5) uniform MeshParams { vec4 primitiveSphere; uint instanceCount; uint meshletCount; uint instanceCulling; uint meshletCulling; uint baseCandidate; };
-taskNV out TaskPayload { uint words[64]; } payload;
-shared uint visibleCount;
+taskNV out TaskPayload { uint words[2]; } payload;
 mat4 instanceMatrix(uint instanceIndex) {
     uint o = instanceIndex * 41;
     return mat4(uintBitsToFloat(instanceWords[o]), uintBitsToFloat(instanceWords[o + 1]), uintBitsToFloat(instanceWords[o + 2]), uintBitsToFloat(instanceWords[o + 3]), uintBitsToFloat(instanceWords[o + 4]), uintBitsToFloat(instanceWords[o + 5]), uintBitsToFloat(instanceWords[o + 6]), uintBitsToFloat(instanceWords[o + 7]), uintBitsToFloat(instanceWords[o + 8]), uintBitsToFloat(instanceWords[o + 9]), uintBitsToFloat(instanceWords[o + 10]), uintBitsToFloat(instanceWords[o + 11]), uintBitsToFloat(instanceWords[o + 12]), uintBitsToFloat(instanceWords[o + 13]), uintBitsToFloat(instanceWords[o + 14]), uintBitsToFloat(instanceWords[o + 15]));
@@ -24,22 +23,22 @@ bool visibleSphere(vec4 sphere, mat4 transform) {
     return true;
 }
 void main() {
-    if (gl_LocalInvocationIndex == 0) visibleCount = 0;
-    barrier();
-    uint candidate = baseCandidate + gl_WorkGroupID.x * 32 + gl_LocalInvocationIndex;
+    uint candidate = baseCandidate + gl_WorkGroupID.x;
     uint candidateCount = instanceCount * meshletCount;
-    if (candidate < candidateCount) {
-        uint instanceIndex = candidate / meshletCount;
-        uint meshletIndex = candidate - instanceIndex * meshletCount;
-        mat4 transform = ProjMat * ModelViewMat * instanceMatrix(instanceIndex);
-        bool instanceVisible = instanceCulling == 0 || visibleSphere(primitiveSphere, transform);
-        bool meshletVisible = meshletCulling == 0 || visibleSphere(meshlets[meshletIndex].sphere, transform);
-        if (instanceVisible && meshletVisible) {
-            uint slot = atomicAdd(visibleCount, 1);
-            payload.words[slot * 2] = instanceIndex;
-            payload.words[slot * 2 + 1] = meshletIndex;
-        }
+    if (candidate >= candidateCount) {
+        gl_TaskCountNV = 0;
+        return;
     }
-    barrier();
-    if (gl_LocalInvocationIndex == 0) gl_TaskCountNV = visibleCount;
+    uint instanceIndex = candidate / meshletCount;
+    uint meshletIndex = candidate - instanceIndex * meshletCount;
+    mat4 transform = ProjMat * ModelViewMat * instanceMatrix(instanceIndex);
+    bool instanceVisible = instanceCulling == 0 || visibleSphere(primitiveSphere, transform);
+    bool meshletVisible = meshletCulling == 0 || visibleSphere(meshlets[meshletIndex].sphere, transform);
+    if (!(instanceVisible && meshletVisible)) {
+        gl_TaskCountNV = 0;
+        return;
+    }
+    payload.words[0] = instanceIndex;
+    payload.words[1] = meshletIndex;
+    gl_TaskCountNV = 1;
 }

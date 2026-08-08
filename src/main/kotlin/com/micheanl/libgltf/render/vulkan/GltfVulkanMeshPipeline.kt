@@ -129,7 +129,7 @@ class GltfVulkanMeshPipelineCache(private val device: VulkanDevice) : AutoClosea
     }
 
     companion object {
-        const val TASK_WORKGROUP = 32
+        const val TASK_WORKGROUP = 1
 
         private val LOGGER = LogUtils.getLogger()
     }
@@ -147,6 +147,8 @@ private class GltfVulkanMeshPipeline(
     private val fragmentModule: Long,
     private val descriptorPipeline: VulkanRenderPipeline
 ) : AutoCloseable {
+    private var diagnosticsLogged = false
+
     fun descriptorPipeline(): VulkanRenderPipeline = descriptorPipeline
 
     fun draw(
@@ -184,6 +186,15 @@ private class GltfVulkanMeshPipeline(
                 writes
             )
             val candidateCount = instanceCount.toLong() * meshlets.meshletCount
+            if (!diagnosticsLogged) {
+                diagnosticsLogged = true
+                LOGGER.info(
+                    "libgltf Vulkan mesh draw instanceCount={} meshletCount={} candidates={}",
+                    instanceCount,
+                    meshlets.meshletCount,
+                    candidateCount
+                )
+            }
             var baseCandidate = 0L
             while (baseCandidate < candidateCount) {
                 val groups = minOf(
@@ -201,7 +212,8 @@ private class GltfVulkanMeshPipeline(
                 VK10.vkCmdPushConstants(
                     commandBuffer,
                     pipelineLayout,
-                    EXTMeshShader.VK_SHADER_STAGE_TASK_BIT_EXT,
+                    EXTMeshShader.VK_SHADER_STAGE_TASK_BIT_EXT or
+                        EXTMeshShader.VK_SHADER_STAGE_MESH_BIT_EXT,
                     0,
                     parameters
                 )
@@ -555,7 +567,7 @@ private class GltfVulkanMeshPipeline(
         private const val MESH_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh.mesh"
         private const val FRAGMENT_SHADER = "/assets/libgltf/shaders/mesh/gpu_mesh.fsh"
         private const val STORAGE_BUFFER_COUNT = 5
-        private const val TASK_WORKGROUP = 32
+        private const val TASK_WORKGROUP = 1
         private const val PUSH_CONSTANT_SIZE = 36
         private val LOGGER = LogUtils.getLogger()
     }
