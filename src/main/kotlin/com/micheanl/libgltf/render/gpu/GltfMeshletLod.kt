@@ -76,7 +76,6 @@ class GltfMeshletLod private constructor(
                     .order(ByteOrder.nativeOrder())
                 val compactVertexData = vertexData.asIntBuffer()
                 triangleData = MemoryUtil.memCalloc(align4(usedTriangleBytes)).order(ByteOrder.nativeOrder())
-                for (index in 0 until usedTriangleBytes) triangleData.put(index, meshletTriangles[index])
                 triangleData.position(triangleData.capacity())
                 val meshletBounds = MeshoptBounds.calloc()
                 try {
@@ -93,6 +92,9 @@ class GltfMeshletLod private constructor(
                             meshletTriangles.duplicate().position(triangleOffset)
                                 .limit(triangleOffset + triangleIndexCount).slice()
                         )
+                        for (triangleIndex in 0 until triangleIndexCount) {
+                            triangleData.put(triangleOffset + triangleIndex, meshletTriangles[triangleOffset + triangleIndex])
+                        }
                         for (triangleIndex in 0 until triangleIndexCount) {
                             val localIndex = meshletTriangles[triangleOffset + triangleIndex].toInt() and 0xFF
                             putIndex(packedIndices, indexType, meshletVertices[vertexOffset + localIndex])
