@@ -239,6 +239,7 @@ object GltfLoader {
             val transmissionExtension = JsonFields.value(extensions, "KHR_materials_transmission")
             val volumeExtension = JsonFields.value(extensions, "KHR_materials_volume")
             val iorExtension = JsonFields.value(extensions, "KHR_materials_ior")
+            val dispersionExtension = JsonFields.value(extensions, "KHR_materials_dispersion")
             val anisotropyExtension = JsonFields.value(extensions, "KHR_materials_anisotropy")
             val iridescenceExtension = JsonFields.value(extensions, "KHR_materials_iridescence")
             GltfMaterial(
@@ -292,6 +293,7 @@ object GltfLoader {
                 JsonFields.float(volumeExtension, "attenuationDistance", Float.POSITIVE_INFINITY),
                 JsonFields.floats(volumeExtension, "attenuationColor", floatArrayOf(1.0f, 1.0f, 1.0f)),
                 JsonFields.float(iorExtension, "ior", 1.5f),
+                JsonFields.float(dispersionExtension, "dispersion"),
                 anisotropyExtension?.let {
                     AnisotropyMaterial(
                         JsonFields.float(it, "anisotropyStrength"),
@@ -875,6 +877,7 @@ object GltfLoader {
         Float.POSITIVE_INFINITY,
         floatArrayOf(1.0f, 1.0f, 1.0f),
         1.5f,
+        0.0f,
         null,
         null
     )

@@ -28,6 +28,7 @@ data class GltfMaterial(
     val attenuationDistance: Float,
     val attenuationColor: FloatArray,
     val ior: Float,
+    val dispersion: Float,
     val anisotropy: AnisotropyMaterial?,
     val iridescence: IridescenceMaterial?
 ) {
