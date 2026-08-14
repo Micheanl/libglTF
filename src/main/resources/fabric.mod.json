@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "libgltf",
+  "version": "${version}",
+  "name": "libgltf",
+  "description": "High-performance glTF loading, materials, LOD, animation and instanced rendering for Minecraft.",
+  "authors": [
+    "Micheanl Chen"
+  ],
+  "license": "MIT",
+  "icon": "assets/libgltf/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "main": [
+      {
+        "adapter": "kotlin",
+        "value": "com.micheanl.libgltf.LibGltf"
+      }
+    ],
+    "client": [
+      {
+        "adapter": "kotlin",
+        "value": "com.micheanl.libgltf.LibGltfClient"
+      }
+    ]
+  },
+  "mixins": [
+    "libgltf.mixins.json",
+    "libgltf.iris.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "fabric-language-kotlin": ">=1.13.13+kotlin.2.4.10",
+    "minecraft": "~26.3-",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}

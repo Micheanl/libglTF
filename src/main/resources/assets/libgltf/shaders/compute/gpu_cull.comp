@@ -1,0 +1,119 @@
+#version 450
+
+layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+
+layout(set = 0, binding = 0, std430) readonly buffer Instances {
+    uint instanceWords[];
+};
+
+struct Meshlet {
+    vec4 sphere;
+    uint vertexOffset;
+    uint triangleOffset;
+    uint vertexCount;
+    uint triangleCount;
+    uint firstIndex;
+    uint indexCount;
+    uint padding0;
+    uint padding1;
+    vec4 cone;
+    vec4 coneApex;
+    vec4 positionBias;
+};
+
+layout(set = 0, binding = 1, std430) readonly buffer Meshlets {
+    Meshlet meshlets[];
+};
+
+struct DrawCommand {
+    uint indexCount;
+    uint instanceCount;
+    uint firstIndex;
+    int vertexOffset;
+    uint firstInstance;
+};
+
+layout(set = 0, binding = 2, std430) writeonly buffer Commands {
+    DrawCommand commands[];
+};
+
+layout(set = 0, binding = 3, std430) buffer Stats {
+    uint drawCount;
+    uint visibleInstances;
+    uint visibleMeshlets;
+    uint reserved;
+} stats;
+
+layout(set = 0, binding = 4, std140) uniform Projection {
+    mat4 ProjMat;
+};
+
+layout(push_constant) uniform Parameters {
+    mat4 ModelViewMat;
+    vec4 primitiveSphere;
+    uint instanceCount;
+    uint meshletCount;
+    uint instanceCulling;
+    uint meshletCulling;
+} parameters;
+
+mat4 instanceMatrix(uint instanceIndex) {
+    uint offset = instanceIndex * 41;
+    return mat4(
+        uintBitsToFloat(instanceWords[offset]),
+        uintBitsToFloat(instanceWords[offset + 1]),
+        uintBitsToFloat(instanceWords[offset + 2]),
+        uintBitsToFloat(instanceWords[offset + 3]),
+        uintBitsToFloat(instanceWords[offset + 4]),
+        uintBitsToFloat(instanceWords[offset + 5]),
+        uintBitsToFloat(instanceWords[offset + 6]),
+        uintBitsToFloat(instanceWords[offset + 7]),
+        uintBitsToFloat(instanceWords[offset + 8]),
+        uintBitsToFloat(instanceWords[offset + 9]),
+        uintBitsToFloat(instanceWords[offset + 10]),
+        uintBitsToFloat(instanceWords[offset + 11]),
+        uintBitsToFloat(instanceWords[offset + 12]),
+        uintBitsToFloat(instanceWords[offset + 13]),
+        uintBitsToFloat(instanceWords[offset + 14]),
+        uintBitsToFloat(instanceWords[offset + 15])
+    );
+}
+
+bool visibleSphere(vec4 sphere, mat4 transform) {
+    vec4 row0 = vec4(transform[0][0], transform[1][0], transform[2][0], transform[3][0]);
+    vec4 row1 = vec4(transform[0][1], transform[1][1], transform[2][1], transform[3][1]);
+    vec4 row2 = vec4(transform[0][2], transform[1][2], transform[2][2], transform[3][2]);
+    vec4 row3 = vec4(transform[0][3], transform[1][3], transform[2][3], transform[3][3]);
+    vec4 center = vec4(sphere.xyz, 1.0);
+    vec4 planes[6] = vec4[6](row3 + row0, row3 - row0, row3 + row1, row3 - row1, row3 + row2, row3 - row2);
+    for (uint index = 0; index < 6; index++) {
+        vec4 plane = planes[index];
+        if (dot(plane, center) < -sphere.w * length(plane.xyz)) return false;
+    }
+    return true;
+}
+
+void main() {
+    uint meshletIndex = gl_GlobalInvocationID.x;
+    uint instanceIndex = gl_GlobalInvocationID.y;
+    if (instanceIndex >= parameters.instanceCount || meshletIndex >= parameters.meshletCount) return;
+    mat4 transform = ProjMat * parameters.ModelViewMat * instanceMatrix(instanceIndex);
+    bool instanceVisible = parameters.instanceCulling == 0 || visibleSphere(parameters.primitiveSphere, transform);
+    if (meshletIndex == 0 && instanceVisible) atomicAdd(stats.visibleInstances, 1);
+    if (!instanceVisible) return;
+    Meshlet meshlet = meshlets[meshletIndex];
+    if (parameters.meshletCulling != 0 && !visibleSphere(meshlet.sphere, transform)) return;
+    if (parameters.meshletCulling != 0) {
+        mat4 viewTransform = parameters.ModelViewMat * instanceMatrix(instanceIndex);
+        vec3 axisView = normalize(mat3(viewTransform) * meshlet.cone.xyz);
+        vec3 apexView = (viewTransform * vec4(meshlet.coneApex.xyz, 1.0)).xyz;
+        if (dot(axisView, apexView) > meshlet.cone.w * length(apexView)) return;
+    }
+    uint commandIndex = atomicAdd(stats.drawCount, 1);
+    atomicAdd(stats.visibleMeshlets, 1);
+    commands[commandIndex].indexCount = meshlet.indexCount;
+    commands[commandIndex].instanceCount = 1;
+    commands[commandIndex].firstIndex = meshlet.firstIndex;
+    commands[commandIndex].vertexOffset = 0;
+    commands[commandIndex].firstInstance = instanceIndex;
+}

@@ -1,0 +1,47 @@
+#version 460
+#extension GL_EXT_mesh_shader : require
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout(set = 0, binding = PROJECTION_BINDING, std140) uniform Projection { mat4 ProjMat; };
+layout(set = 0, binding = DYNAMIC_TRANSFORMS_BINDING, std140) uniform DynamicTransforms { mat4 ModelViewMat; mat4 TextureMat; vec4 ColorModulator; vec3 ModelOffset; };
+layout(set = 1, binding = INSTANCES_BINDING, std430) readonly buffer Instances { uint instanceWords[]; };
+struct Meshlet { vec4 sphere; uint vertexOffset; uint triangleOffset; uint vertexCount; uint triangleCount; uint firstIndex; uint indexCount; uint padding0; uint padding1; vec4 cone; vec4 coneApex; vec4 positionBias; };
+layout(set = 1, binding = MESHLETS_BINDING, std430) readonly buffer Meshlets { Meshlet meshlets[]; };
+layout(push_constant) uniform Parameters { vec4 primitiveSphere; vec4 screenSizeAndFlags; uint instanceCount; uint meshletCount; uint instanceCulling; uint meshletCulling; uint baseCandidate; uint meshBatch; } parameters;
+taskPayloadSharedEXT uint payload[2];
+mat4 instanceMatrix(uint instanceIndex) {
+    uint o = instanceIndex * 41;
+    return mat4(uintBitsToFloat(instanceWords[o]), uintBitsToFloat(instanceWords[o + 1]), uintBitsToFloat(instanceWords[o + 2]), uintBitsToFloat(instanceWords[o + 3]), uintBitsToFloat(instanceWords[o + 4]), uintBitsToFloat(instanceWords[o + 5]), uintBitsToFloat(instanceWords[o + 6]), uintBitsToFloat(instanceWords[o + 7]), uintBitsToFloat(instanceWords[o + 8]), uintBitsToFloat(instanceWords[o + 9]), uintBitsToFloat(instanceWords[o + 10]), uintBitsToFloat(instanceWords[o + 11]), uintBitsToFloat(instanceWords[o + 12]), uintBitsToFloat(instanceWords[o + 13]), uintBitsToFloat(instanceWords[o + 14]), uintBitsToFloat(instanceWords[o + 15]));
+}
+bool visibleSphere(vec4 sphere, mat4 transform) {
+    vec4 r0 = vec4(transform[0][0], transform[1][0], transform[2][0], transform[3][0]);
+    vec4 r1 = vec4(transform[0][1], transform[1][1], transform[2][1], transform[3][1]);
+    vec4 r2 = vec4(transform[0][2], transform[1][2], transform[2][2], transform[3][2]);
+    vec4 r3 = vec4(transform[0][3], transform[1][3], transform[2][3], transform[3][3]);
+    vec4 c = vec4(sphere.xyz, 1.0);
+    vec4 planes[6] = vec4[6](r3 + r0, r3 - r0, r3 + r1, r3 - r1, r3 + r2, r3 - r2);
+    for (uint i = 0; i < 6; i++) if (dot(planes[i], c) < -sphere.w * length(planes[i].xyz)) return false;
+    return true;
+}
+void main() {
+    uint candidate = parameters.baseCandidate + gl_WorkGroupID.x;
+    uint candidateCount = parameters.instanceCount * parameters.meshletCount;
+    if (candidate >= candidateCount) return;
+    uint instanceIndex = candidate / parameters.meshletCount;
+    uint meshletIndex = candidate - instanceIndex * parameters.meshletCount;
+    mat4 transform = ProjMat * ModelViewMat * instanceMatrix(instanceIndex);
+    bool instanceVisible = parameters.instanceCulling == 0 || visibleSphere(parameters.primitiveSphere, transform);
+    bool meshletVisible = parameters.meshletCulling == 0 || visibleSphere(meshlets[meshletIndex].sphere, transform);
+#ifdef MESH_CONE_CULLING
+    mat4 viewTransform = ModelViewMat * instanceMatrix(instanceIndex);
+    Meshlet meshlet = meshlets[meshletIndex];
+    vec3 axisView = normalize(mat3(viewTransform) * meshlet.cone.xyz);
+    vec3 apexView = (viewTransform * vec4(meshlet.coneApex.xyz, 1.0)).xyz;
+    bool backfacing = dot(axisView, apexView) > meshlet.cone.w * length(apexView);
+#else
+    bool backfacing = false;
+#endif
+    if (!(instanceVisible && meshletVisible) || backfacing) return;
+    payload[0] = instanceIndex;
+    payload[1] = meshletIndex;
+    EmitMeshTasksEXT(1, 1, 1);
+}
