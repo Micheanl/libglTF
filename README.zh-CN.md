@@ -84,18 +84,18 @@ instance.automaticAnimation = false
 
 ## 通过 Maven Central 使用
 
-发布坐标：`io.github.micheanl:libgltf:0.10-fabric-26.3-snapshot-7`
+发布坐标：`io.github.micheanl:libgltf:0.10-fabric-26.3-snapshot-8`
 
 Gradle（Kotlin DSL）：
 
 ```kotlin
-modImplementation("io.github.micheanl:libgltf:0.10-fabric-26.3-snapshot-7")
+modImplementation("io.github.micheanl:libgltf:0.10-fabric-26.3-snapshot-8")
 ```
 
 Gradle（Groovy DSL）：
 
 ```groovy
-modImplementation 'io.github.micheanl:libgltf:0.10-fabric-26.3-snapshot-7'
+modImplementation 'io.github.micheanl:libgltf:0.10-fabric-26.3-snapshot-8'
 ```
 
 Maven：
@@ -104,7 +104,7 @@ Maven：
 <dependency>
     <groupId>io.github.micheanl</groupId>
     <artifactId>libgltf</artifactId>
-    <version>0.10-fabric-26.3-snapshot-7</version>
+    <version>0.10-fabric-26.3-snapshot-8</version>
 </dependency>
 ```
 
@@ -166,10 +166,10 @@ flowchart LR
 .\gradlew.bat build
 ```
 
-产物 → `build/libs/libgltf-0.10-fabric-26.3-snapshot-7.jar`
+产物 → `build/libs/libgltf-0.10-fabric-26.3-snapshot-8.jar`
 
 > [!IMPORTANT]
-> 需要 Minecraft **26.3-snapshot-7**、Fabric Loader **0.19.3+**、Fabric API、Fabric Language Kotlin 与 Java **25**。
+> 需要 Minecraft **26.3-snapshot-8**、Fabric Loader **0.19.3+**、Fabric API、Fabric Language Kotlin 与 Java **25**。
 > mesh shader 路径需要 `VK_EXT_mesh_shader` / `VK_NV_mesh_shader`（Vulkan）或 `GL_EXT_mesh_shader` / `GL_NV_mesh_shader`（OpenGL）。
 
 <div align="center">

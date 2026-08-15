@@ -117,7 +117,7 @@ afterEvaluate {
                 pom {
                     name.set("libgltf")
                     description.set("High-performance glTF 2.0 rendering library for Minecraft")
-                    url.set("https://github.com/Micheanl/libglTF")
+                    url.set("https://github.com/RenderShard/libglTF")
                     licenses {
                         license {
                             name.set("MIT")
@@ -131,9 +131,9 @@ afterEvaluate {
                         }
                     }
                     scm {
-                        connection.set("scm:git:https://github.com/Micheanl/libglTF.git")
-                        developerConnection.set("scm:git:git@github.com:Micheanl/libglTF.git")
-                        url.set("https://github.com/Micheanl/libglTF")
+                        connection.set("scm:git:https://github.com/RenderShard/libglTF.git")
+                        developerConnection.set("scm:git:git@github.com:RenderShard/libglTF.git")
+                        url.set("https://github.com/RenderShard/libglTF")
                     }
                 }
             }
@@ -141,7 +141,7 @@ afterEvaluate {
         repositories {
             maven {
                 name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/Micheanl/libgltf")
+                url = uri("https://maven.pkg.github.com/RenderShard/libgltf")
                 credentials {
                     username = (project.findProperty("gpr.user") as String?) ?: System.getenv("GITHUB_ACTOR").orEmpty()
                     password = (project.findProperty("gpr.key") as String?) ?: System.getenv("GITHUB_TOKEN").orEmpty()
