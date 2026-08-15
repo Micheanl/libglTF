@@ -86,20 +86,13 @@ instance.automaticAnimation = false
 
 Published coordinates: `io.github.micheanl:libgltf:0.11-fabric-26.3-snapshot-8`
 
-libgltf requires the `renderapi` mod, published to GitHub Packages: `io.github.micheanl:renderapi:0.11-fabric-26.3-snapshot-8`
+libgltf requires the `renderapi` mod, also published to Maven Central: `io.github.micheanl:renderapi:0.11-fabric-26.3-snapshot-8`
 
 Gradle (Kotlin DSL):
 
 ```kotlin
 repositories {
-    maven {
-        name = "RenderapiPackages"
-        url = uri("https://maven.pkg.github.com/RenderShard/renderapi")
-        credentials {
-            username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
-            password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
-        }
-    }
+    mavenCentral()
 }
 
 modImplementation("io.github.micheanl:libgltf:0.11-fabric-26.3-snapshot-8")
@@ -110,14 +103,7 @@ Gradle (Groovy DSL):
 
 ```groovy
 repositories {
-    maven {
-        name = 'RenderapiPackages'
-        url = uri('https://maven.pkg.github.com/RenderShard/renderapi')
-        credentials {
-            username = findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
-            password = findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
-        }
-    }
+    mavenCentral()
 }
 
 modImplementation 'io.github.micheanl:libgltf:0.11-fabric-26.3-snapshot-8'
@@ -140,7 +126,7 @@ Maven:
 ```
 
 > [!NOTE]
-> renderapi is a separate mod with its own meshoptimizer natives. Declare both with `modImplementation` and ship both jars. The renderapi package lives at `https://maven.pkg.github.com/RenderShard/renderapi` and requires GitHub Packages credentials.
+> renderapi is a separate mod with its own meshoptimizer natives. Declare both with `modImplementation` and ship both jars.
 
 ## Configuration
 

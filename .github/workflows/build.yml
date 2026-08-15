@@ -1,9 +1,6 @@
 name: build
 on: [pull_request, push]
 
-permissions:
-  packages: read
-
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -20,8 +17,6 @@ jobs:
       - name: make gradle wrapper executable
         run: chmod +x ./gradlew
       - name: build
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew build
       - name: capture build artifacts
         uses: actions/upload-artifact@v7

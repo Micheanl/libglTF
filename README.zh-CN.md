@@ -86,20 +86,13 @@ instance.automaticAnimation = false
 
 发布坐标：`io.github.micheanl:libgltf:0.11-fabric-26.3-snapshot-8`
 
-libgltf 依赖 `renderapi` mod，发布于 GitHub Packages：`io.github.micheanl:renderapi:0.11-fabric-26.3-snapshot-8`
+libgltf 依赖 `renderapi` mod，同样发布在 Maven Central：`io.github.micheanl:renderapi:0.11-fabric-26.3-snapshot-8`
 
 Gradle（Kotlin DSL）：
 
 ```kotlin
 repositories {
-    maven {
-        name = "RenderapiPackages"
-        url = uri("https://maven.pkg.github.com/RenderShard/renderapi")
-        credentials {
-            username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
-            password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
-        }
-    }
+    mavenCentral()
 }
 
 modImplementation("io.github.micheanl:libgltf:0.11-fabric-26.3-snapshot-8")
@@ -110,14 +103,7 @@ Gradle（Groovy DSL）：
 
 ```groovy
 repositories {
-    maven {
-        name = 'RenderapiPackages'
-        url = uri('https://maven.pkg.github.com/RenderShard/renderapi')
-        credentials {
-            username = findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
-            password = findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
-        }
-    }
+    mavenCentral()
 }
 
 modImplementation 'io.github.micheanl:libgltf:0.11-fabric-26.3-snapshot-8'
@@ -140,7 +126,7 @@ Maven：
 ```
 
 > [!NOTE]
-> renderapi 是独立 mod，自带 meshoptimizer 原生运行库，需同时声明并一起分发；renderapi 包位于 `https://maven.pkg.github.com/RenderShard/renderapi`，需要 GitHub Packages 凭据。
+> renderapi 是独立 mod，自带 meshoptimizer 原生运行库，需同时声明并一起分发。
 
 ## 配置
 
