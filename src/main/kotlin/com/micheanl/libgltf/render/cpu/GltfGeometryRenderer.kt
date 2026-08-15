@@ -7,7 +7,7 @@ import com.micheanl.libgltf.material.AlphaMode
 import com.micheanl.libgltf.material.TextureWrap
 import com.micheanl.libgltf.model.GltfPrimitive
 import com.micheanl.libgltf.model.PrimitiveMode
-import com.micheanl.libgltf.model.VertexLayout
+import com.micheanl.renderapi.gpu.VertexLayout
 import com.micheanl.libgltf.render.texture.GltfTextureSet
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.CompactVectorArray

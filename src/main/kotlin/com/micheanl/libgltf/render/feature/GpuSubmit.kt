@@ -4,9 +4,11 @@ import com.micheanl.libgltf.api.GltfInstance
 import com.micheanl.libgltf.render.GltfRenderAsset
 import com.micheanl.libgltf.render.GltfRenderTypes
 import com.micheanl.libgltf.render.texture.GltfTextureSet
+import com.micheanl.renderapi.MeshResources
+import com.micheanl.renderapi.RenderSubmit
+import com.micheanl.renderapi.feature.GpuBatchKey
+import com.micheanl.renderapi.feature.GpuFeature
 import net.minecraft.client.renderer.feature.FeatureRendererType
-import net.minecraft.client.renderer.feature.submit.BatchableSubmit
-import net.minecraft.client.renderer.feature.submit.TranslucentSubmit
 import net.minecraft.client.renderer.rendertype.RenderType
 import org.joml.Matrix3f
 import org.joml.Matrix4f
@@ -29,35 +31,38 @@ import kotlin.math.sin
  */
 
 class GpuSubmit(
-    val instance: GltfInstance,
+    override val instance: GltfInstance,
     val nodeIndex: Int,
-    val meshIndex: Int,
-    val primitiveIndex: Int
-) : BatchableSubmit, TranslucentSubmit {
-    val modelMatrix: Matrix4f = Matrix4f()
-    val normalMatrix: Matrix3f = Matrix3f()
-    val uvTransform0: FloatArray = FloatArray(4)
-    val uvTransform1: FloatArray = FloatArray(2)
-    var red: Float = 1.0f
+    override val meshIndex: Int,
+    override val primitiveIndex: Int
+) : RenderSubmit {
+    override val modelMatrix: Matrix4f = Matrix4f()
+    override val normalMatrix: Matrix3f = Matrix3f()
+    override val uvTransform0: FloatArray = FloatArray(4)
+    override val uvTransform1: FloatArray = FloatArray(2)
+    override var red: Float = 1.0f
         private set
-    var green: Float = 1.0f
+    override var green: Float = 1.0f
         private set
-    var blue: Float = 1.0f
+    override var blue: Float = 1.0f
         private set
-    var alpha: Float = 1.0f
+    override var alpha: Float = 1.0f
         private set
-    var light: Int = 0
+    override var light: Int = 0
         private set
-    var overlay: Int = 0
+    override var overlay: Int = 0
         private set
-    var lod: Int = 0
+    override var lod: Int = 0
         private set
-    var skinIndex: Int = -1
+    override var skinIndex: Int = -1
         private set
     lateinit var resource: GltfRenderAsset
         private set
-    lateinit var renderType: RenderType
+    override lateinit var renderType: RenderType
         private set
+
+    override val meshResources: MeshResources
+        get() = resource.gpu()
 
     private lateinit var batchKey: GpuBatchKey
     private var cachedResourceId = Long.MIN_VALUE
@@ -66,7 +71,7 @@ class GpuSubmit(
     private var cachedLod = -1
     private var distanceToCameraSquared = 0.0f
 
-    override fun featureType(): FeatureRendererType<GpuSubmit> = GpuFeature.TYPE
+    override fun featureType(): FeatureRendererType<RenderSubmit> = GpuFeature.TYPE
 
     override fun batchKey(): Any = batchKey
 

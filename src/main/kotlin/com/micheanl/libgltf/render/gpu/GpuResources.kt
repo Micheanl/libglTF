@@ -1,8 +1,11 @@
 package com.micheanl.libgltf.render.gpu
 
 import com.micheanl.libgltf.model.GltfAsset
-import com.micheanl.libgltf.render.GpuBackendType
-import com.micheanl.libgltf.render.vulkan.RenderConfig
+import com.micheanl.libgltf.render.GltfMeshSource
+import com.micheanl.renderapi.MeshResources
+import com.micheanl.renderapi.gpu.GpuBackend
+import com.micheanl.renderapi.gpu.GpuMesh
+import com.micheanl.renderapi.vulkan.RenderConfig
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.logging.LogUtils
 
@@ -23,7 +26,7 @@ import com.mojang.logging.LogUtils
 class GpuResources(
     private val resourceId: Long,
     private val asset: GltfAsset
-) : AutoCloseable {
+) : AutoCloseable, MeshResources {
     private val primitives: Array<Array<GpuMesh?>> = Array(asset.meshes.size) { meshIndex ->
         arrayOfNulls(asset.meshes[meshIndex].primitives.size)
     }
@@ -31,7 +34,7 @@ class GpuResources(
         BooleanArray(asset.meshes[meshIndex].primitives.size)
     }
 
-    fun primitive(meshIndex: Int, primitiveIndex: Int): GpuMesh? {
+    override fun primitive(meshIndex: Int, primitiveIndex: Int): GpuMesh? {
         if (failed[meshIndex][primitiveIndex]) return null
         var primitive = primitives[meshIndex][primitiveIndex]
         if (primitive == null) {
@@ -39,7 +42,7 @@ class GpuResources(
                 primitive = GpuMesh.create(
                     RenderSystem.getDevice(),
                     "libgltf $resourceId mesh $meshIndex primitive $primitiveIndex",
-                    asset.meshes[meshIndex].primitives[primitiveIndex],
+                    GltfMeshSource(asset.meshes[meshIndex].primitives[primitiveIndex]),
                     RenderConfig.enabled && GpuBackend.meshletBuilding()
                 )
                 primitives[meshIndex][primitiveIndex] = primitive
@@ -52,9 +55,9 @@ class GpuResources(
         return primitive
     }
 
-    fun failed(meshIndex: Int, primitiveIndex: Int): Boolean = failed[meshIndex][primitiveIndex]
+    override fun failed(meshIndex: Int, primitiveIndex: Int): Boolean = failed[meshIndex][primitiveIndex]
 
-    fun disable(meshIndex: Int, primitiveIndex: Int) {
+    override fun disable(meshIndex: Int, primitiveIndex: Int) {
         failed[meshIndex][primitiveIndex] = true
         primitives[meshIndex][primitiveIndex]?.close()
         primitives[meshIndex][primitiveIndex] = null

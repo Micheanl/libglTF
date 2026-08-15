@@ -35,12 +35,25 @@ base {
     archivesName.set(archivesBaseName)
 }
 
+repositories {
+    mavenCentral()
+    maven {
+        name = "RenderapiPackages"
+        url = uri("https://maven.pkg.github.com/RenderShard/renderapi")
+        credentials {
+            username = (project.findProperty("gpr.user") as String?) ?: System.getenv("GITHUB_ACTOR").orEmpty()
+            password = (project.findProperty("gpr.key") as String?) ?: System.getenv("GITHUB_TOKEN").orEmpty()
+        }
+    }
+}
+
 dependencies {
     minecraft("com.mojang:minecraft:$minecraftVersion")
     implementation("net.fabricmc:fabric-loader:$loaderVersion")
     implementation("net.fabricmc.fabric-api:fabric-api:$fabricApiVersion")
     implementation("net.fabricmc:fabric-language-kotlin:$fabricKotlinVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
+    implementation("io.github.micheanl:renderapi:$modVersion")
     compileOnly(files("libs/iris.jar"))
 
     val meshoptimizer = "org.lwjgl:lwjgl-meshoptimizer:$lwjglVersion"

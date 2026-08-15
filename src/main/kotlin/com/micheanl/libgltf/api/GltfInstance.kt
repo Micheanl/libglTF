@@ -9,6 +9,7 @@ import com.micheanl.libgltf.material.MaterialOverride
 import com.micheanl.libgltf.render.cpu.GltfGeometryRenderer
 import com.micheanl.libgltf.render.feature.GpuSubmit
 import com.micheanl.libgltf.render.gpu.GpuAnimationState
+import com.micheanl.renderapi.RenderInstance
 import org.joml.Matrix4f
 import org.joml.Matrix4fc
 
@@ -26,7 +27,7 @@ import org.joml.Matrix4fc
  * @see [Micheanl/libglTF](https://github.com/Micheanl/libglTF)
  */
 
-class GltfInstance internal constructor(val handle: GltfHandle) {
+class GltfInstance internal constructor(val handle: GltfHandle) : RenderInstance {
     val transform: Matrix4f = Matrix4f()
     val animation: AnimationPlayer = AnimationPlayer(handle.asset)
     val animator: AnimationController = AnimationController(handle.asset, animation)
@@ -63,6 +64,8 @@ class GltfInstance internal constructor(val handle: GltfHandle) {
         animationState.update(animation.pose)
         animationRevision = animation.revision
     }
+
+    override fun jointPalettes(skinIndex: Int): FloatArray = animationState.jointPalettes[skinIndex]
 
     fun updateAnimation(deltaSeconds: Float): GltfInstance {
         animator.evaluate(deltaSeconds)

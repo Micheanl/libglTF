@@ -1,13 +1,13 @@
 package com.micheanl.libgltf.render
 
-import com.micheanl.libgltf.LibGltf
 import com.micheanl.libgltf.material.AlphaMode
 import com.micheanl.libgltf.material.GltfMaterial
 import com.micheanl.libgltf.model.PrimitiveMode
-import com.micheanl.libgltf.render.gpu.GpuFormats
-import com.micheanl.libgltf.render.gpu.GpuBackend
-import com.micheanl.libgltf.render.GpuBackendType
 import com.micheanl.libgltf.render.iris.IrisCompat
+import com.micheanl.renderapi.GpuBackendType
+import com.micheanl.renderapi.RenderApi
+import com.micheanl.renderapi.gpu.GpuBackend
+import com.micheanl.renderapi.gpu.GpuFormats
 import com.mojang.renderpearl.api.GpuFormat
 import com.mojang.renderpearl.api.pipeline.PrimitiveTopology
 import com.mojang.renderpearl.api.pipeline.BindGroupLayout
@@ -101,9 +101,9 @@ object GltfRenderTypes {
 
     private fun createGlint(texture: Identifier): RenderType {
         val pipeline = RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET, RenderPipelines.GLINT_SNIPPET)
-            .withLocation(LibGltf.id("pipeline/glint_${texture.namespace}_${texture.path.replace('/', '_')}"))
-            .withVertexShader(LibGltf.id("core/entity"))
-            .withFragmentShader(LibGltf.id("core/entity"))
+            .withLocation(RenderApi.id("pipeline/glint_${texture.namespace}_${texture.path.replace('/', '_')}"))
+            .withVertexShader(RenderApi.id("core/entity"))
+            .withFragmentShader(RenderApi.id("core/entity"))
             .withBindGroupLayout(BindGroupLayouts.SAMPLER1)
             .withVertexBinding(0, DefaultVertexFormat.ENTITY)
             .withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
@@ -130,9 +130,9 @@ object GltfRenderTypes {
     ): RenderType {
         val suffix = "${resourceId}_${materialIndex}_${textureIndex}_${mode.ordinal}_${alphaCutoff.toBits()}"
         val builder = RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
-            .withLocation(LibGltf.id("pipeline/runtime_$suffix"))
-            .withVertexShader(LibGltf.id("core/entity"))
-            .withFragmentShader(LibGltf.id("core/entity"))
+            .withLocation(RenderApi.id("pipeline/runtime_$suffix"))
+            .withVertexShader(RenderApi.id("core/entity"))
+            .withFragmentShader(RenderApi.id("core/entity"))
             .withBindGroupLayout(BindGroupLayouts.SAMPLER1)
             .withVertexBinding(0, DefaultVertexFormat.ENTITY)
             .withPrimitiveTopology(topology(mode))
@@ -157,9 +157,9 @@ object GltfRenderTypes {
         val suffix = "gpu_${resourceId}_${materialIndex}_${textureIndex}_${mode.ordinal}_${alphaCutoff.toBits()}_${if (skinned) 1 else 0}"
         val gl = GpuBackend.capabilities().backend == GpuBackendType.OPENGL
         val builder = RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
-            .withLocation(LibGltf.id("pipeline/runtime_$suffix"))
-            .withVertexShader(if (gl) LibGltf.id("core/entity_gpu_gl") else LibGltf.id("core/entity_gpu"))
-            .withFragmentShader(LibGltf.id("core/entity"))
+            .withLocation(RenderApi.id("pipeline/runtime_$suffix"))
+            .withVertexShader(if (gl) RenderApi.id("core/entity_gpu_gl") else RenderApi.id("core/entity_gpu"))
+            .withFragmentShader(RenderApi.id("core/entity"))
             .withBindGroupLayout(BindGroupLayouts.SAMPLER1)
             .withVertexBinding(0, if (gl) GpuFormats.GEOMETRY_GL else GpuFormats.GEOMETRY)
             .withVertexBinding(1, if (gl) GpuFormats.INSTANCE_GL else GpuFormats.INSTANCE)
@@ -196,13 +196,13 @@ object GltfRenderTypes {
     private fun buildOitPipelineSet(suffix: String, builder: RenderPipeline.Builder): OitPipelineSet {
         val base = builder.buildSnippet()
         val depthBounds = RenderPipeline.builder(base, RenderPipelines.OIT_DEPTH_BOUNDS_SNIPPET)
-            .withLocation(LibGltf.id("pipeline/oit_depth_bounds_$suffix"))
+            .withLocation(RenderApi.id("pipeline/oit_depth_bounds_$suffix"))
             .build()
         val transmittance = RenderPipeline.builder(base, RenderPipelines.OIT_TRANSMITTANCE_SNIPPET)
-            .withLocation(LibGltf.id("pipeline/oit_transmittance_$suffix"))
+            .withLocation(RenderApi.id("pipeline/oit_transmittance_$suffix"))
             .build()
         val accumulate = RenderPipeline.builder(base, RenderPipelines.OIT_ACCUMULATE_SNIPPET)
-            .withLocation(LibGltf.id("pipeline/oit_accumulate_$suffix"))
+            .withLocation(RenderApi.id("pipeline/oit_accumulate_$suffix"))
             .build()
         return OitPipelineSet(depthBounds, transmittance, accumulate)
     }

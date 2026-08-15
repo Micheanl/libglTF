@@ -84,18 +84,44 @@ instance.automaticAnimation = false
 
 ## Using from Maven Central
 
-Published coordinates: `io.github.micheanl:libgltf:0.10-fabric-26.3-snapshot-8`
+Published coordinates: `io.github.micheanl:libgltf:0.11-fabric-26.3-snapshot-8`
+
+libgltf requires the `renderapi` mod, published to GitHub Packages: `io.github.micheanl:renderapi:0.11-fabric-26.3-snapshot-8`
 
 Gradle (Kotlin DSL):
 
 ```kotlin
-modImplementation("io.github.micheanl:libgltf:0.10-fabric-26.3-snapshot-8")
+repositories {
+    maven {
+        name = "RenderapiPackages"
+        url = uri("https://maven.pkg.github.com/RenderShard/renderapi")
+        credentials {
+            username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
+            password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
+}
+
+modImplementation("io.github.micheanl:libgltf:0.11-fabric-26.3-snapshot-8")
+modImplementation("io.github.micheanl:renderapi:0.11-fabric-26.3-snapshot-8")
 ```
 
 Gradle (Groovy DSL):
 
 ```groovy
-modImplementation 'io.github.micheanl:libgltf:0.10-fabric-26.3-snapshot-8'
+repositories {
+    maven {
+        name = 'RenderapiPackages'
+        url = uri('https://maven.pkg.github.com/RenderShard/renderapi')
+        credentials {
+            username = findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
+            password = findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
+        }
+    }
+}
+
+modImplementation 'io.github.micheanl:libgltf:0.11-fabric-26.3-snapshot-8'
+modImplementation 'io.github.micheanl:renderapi:0.11-fabric-26.3-snapshot-8'
 ```
 
 Maven:
@@ -104,12 +130,17 @@ Maven:
 <dependency>
     <groupId>io.github.micheanl</groupId>
     <artifactId>libgltf</artifactId>
-    <version>0.10-fabric-26.3-snapshot-8</version>
+    <version>0.11-fabric-26.3-snapshot-8</version>
+</dependency>
+<dependency>
+    <groupId>io.github.micheanl</groupId>
+    <artifactId>renderapi</artifactId>
+    <version>0.11-fabric-26.3-snapshot-8</version>
 </dependency>
 ```
 
 > [!NOTE]
-> The jar bundles its meshoptimizer native runtime, so declare it with `modImplementation` in a Fabric Loom project. A GitHub Packages mirror is also published on every release.
+> renderapi is a separate mod with its own meshoptimizer natives. Declare both with `modImplementation` and ship both jars. The renderapi package lives at `https://maven.pkg.github.com/RenderShard/renderapi` and requires GitHub Packages credentials.
 
 ## Configuration
 
@@ -135,12 +166,9 @@ flowchart LR
     API --> AN["animation"]
     API --> MAT["material"]
     API --> LOD["lod"]
-    API --> R{"render"}
-    R --> GPU["render.gpu<br/>GpuMesh · MeshletStorage"]
-    R --> VK["render.vulkan<br/>VulkanGpuDriver · MeshletDispatcher"]
-    R --> GL["render.gl<br/>GlGpuDriver"]
-    R --> F["render.feature<br/>GpuSubmitRenderer · GpuBatch"]
+    API --> R{"glTF render adapters"}
     R --> CPU["render.cpu<br/>fallback"]
+    R --> RA["renderapi<br/>gpu · gl · vulkan · feature"]
     API --> INT["integration<br/>item · entity · block"]
 ```
 
@@ -153,10 +181,11 @@ flowchart LR
 | `asset` / `model` | glTF / GLB parsing and immutable asset model |
 | `material` / `texture` | PBR materials, overrides, texture generation |
 | `animation` / `lod` | Animation state machines, LOD generation and selection |
-| `render.gpu` | GPU resources, meshlet storage, capability probing |
-| `render.vulkan` / `render.gl` | Mesh and indirect drawing for both backends |
-| `render.feature` | Frame submission, batching, FeatureRenderer integration |
+| `render` | glTF render adapters, GPU resource pool, CPU fallback |
 | `integration` | Item / entity / block-entity renderers |
+| `renderapi.gpu` | Mesh upload, meshlet storage, capability probing |
+| `renderapi.gl` / `renderapi.vulkan` | Mesh and indirect drawing for both backends |
+| `renderapi.feature` | Frame submission, batching, FeatureRenderer integration |
 
 </details>
 
@@ -166,7 +195,7 @@ flowchart LR
 .\gradlew.bat build
 ```
 
-Output → `build/libs/libgltf-0.10-fabric-26.3-snapshot-8.jar`
+Output → `build/libs/libgltf-0.11-fabric-26.3-snapshot-8-fabric.jar`
 
 > [!IMPORTANT]
 > Requires Minecraft **26.3-snapshot-8**, Fabric Loader **0.19.3+**, Fabric API, Fabric Language Kotlin and Java **25**.

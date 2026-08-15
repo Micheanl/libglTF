@@ -1,6 +1,6 @@
 package com.micheanl.libgltf.render
 
-import com.micheanl.libgltf.render.vulkan.RenderConfig
+import com.micheanl.renderapi.vulkan.RenderConfig
 import net.fabricmc.loader.api.FabricLoader
 import java.nio.file.Files
 import java.nio.file.Path

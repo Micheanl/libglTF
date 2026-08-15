@@ -33,6 +33,10 @@ bin/
 
 run/
 
+# playwright
+
+.playwright-mcp/
+
 # java
 
 hs_err_*.log

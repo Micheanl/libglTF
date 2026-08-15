@@ -3,13 +3,14 @@ package com.micheanl.libgltf.render
 import com.micheanl.libgltf.api.GltfInstance
 import com.micheanl.libgltf.api.GltfRenderMode
 import com.micheanl.libgltf.material.TextureWrap
-import com.micheanl.libgltf.mixin.FrustumAccessor
 import com.micheanl.libgltf.model.GltfPrimitive
 import com.micheanl.libgltf.model.PrimitiveMode
 import com.micheanl.libgltf.render.cpu.GltfGeometryRenderer
 import com.micheanl.libgltf.render.feature.GpuSubmit
-import com.micheanl.libgltf.render.gpu.GpuBackend
 import com.micheanl.libgltf.render.iris.IrisCompat
+import com.micheanl.renderapi.GpuBackendType
+import com.micheanl.renderapi.gpu.GpuBackend
+import com.micheanl.renderapi.mixin.FrustumAccessor
 import com.mojang.blaze3d.vertex.PoseStack
 import java.util.function.Consumer
 import net.fabricmc.fabric.api.client.rendering.v1.SubmitRenderPhases
@@ -168,7 +169,7 @@ object GltfSceneRenderer {
                 }
             }
         }
-        return (camera.cullFrustum as FrustumAccessor).`libgltf$intersection`()
+        return (camera.cullFrustum as FrustumAccessor).`renderapi$intersection`()
             .testAab(minX, minY, minZ, maxX, maxY, maxZ)
     }
 

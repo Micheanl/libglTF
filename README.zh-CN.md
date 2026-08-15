@@ -84,18 +84,44 @@ instance.automaticAnimation = false
 
 ## 通过 Maven Central 使用
 
-发布坐标：`io.github.micheanl:libgltf:0.10-fabric-26.3-snapshot-8`
+发布坐标：`io.github.micheanl:libgltf:0.11-fabric-26.3-snapshot-8`
+
+libgltf 依赖 `renderapi` mod，发布于 GitHub Packages：`io.github.micheanl:renderapi:0.11-fabric-26.3-snapshot-8`
 
 Gradle（Kotlin DSL）：
 
 ```kotlin
-modImplementation("io.github.micheanl:libgltf:0.10-fabric-26.3-snapshot-8")
+repositories {
+    maven {
+        name = "RenderapiPackages"
+        url = uri("https://maven.pkg.github.com/RenderShard/renderapi")
+        credentials {
+            username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
+            password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
+}
+
+modImplementation("io.github.micheanl:libgltf:0.11-fabric-26.3-snapshot-8")
+modImplementation("io.github.micheanl:renderapi:0.11-fabric-26.3-snapshot-8")
 ```
 
 Gradle（Groovy DSL）：
 
 ```groovy
-modImplementation 'io.github.micheanl:libgltf:0.10-fabric-26.3-snapshot-8'
+repositories {
+    maven {
+        name = 'RenderapiPackages'
+        url = uri('https://maven.pkg.github.com/RenderShard/renderapi')
+        credentials {
+            username = findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
+            password = findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
+        }
+    }
+}
+
+modImplementation 'io.github.micheanl:libgltf:0.11-fabric-26.3-snapshot-8'
+modImplementation 'io.github.micheanl:renderapi:0.11-fabric-26.3-snapshot-8'
 ```
 
 Maven：
@@ -104,12 +130,17 @@ Maven：
 <dependency>
     <groupId>io.github.micheanl</groupId>
     <artifactId>libgltf</artifactId>
-    <version>0.10-fabric-26.3-snapshot-8</version>
+    <version>0.11-fabric-26.3-snapshot-8</version>
+</dependency>
+<dependency>
+    <groupId>io.github.micheanl</groupId>
+    <artifactId>renderapi</artifactId>
+    <version>0.11-fabric-26.3-snapshot-8</version>
 </dependency>
 ```
 
 > [!NOTE]
-> jar 已内置 meshoptimizer 原生运行库，在 Fabric Loom 项目里用 `modImplementation` 声明即可；每次发布也会同步推送 GitHub Packages 镜像。
+> renderapi 是独立 mod，自带 meshoptimizer 原生运行库，需同时声明并一起分发；renderapi 包位于 `https://maven.pkg.github.com/RenderShard/renderapi`，需要 GitHub Packages 凭据。
 
 ## 配置
 
@@ -135,12 +166,9 @@ flowchart LR
     API --> AN["animation"]
     API --> MAT["material"]
     API --> LOD["lod"]
-    API --> R{"render"}
-    R --> GPU["render.gpu<br/>GpuMesh · MeshletStorage"]
-    R --> VK["render.vulkan<br/>VulkanGpuDriver · MeshletDispatcher"]
-    R --> GL["render.gl<br/>GlGpuDriver"]
-    R --> F["render.feature<br/>GpuSubmitRenderer · GpuBatch"]
+    API --> R{"glTF 渲染适配层"}
     R --> CPU["render.cpu<br/>兜底"]
+    R --> RA["renderapi<br/>gpu · gl · vulkan · feature"]
     API --> INT["integration<br/>item · entity · block"]
 ```
 
@@ -153,10 +181,11 @@ flowchart LR
 | `asset` / `model` | glTF / GLB 解析与不可变资源模型 |
 | `material` / `texture` | PBR 材质、覆盖、贴图生成 |
 | `animation` / `lod` | 动画状态机、LOD 生成与选择 |
-| `render.gpu` | GPU 资源、meshlet 存储、能力探测 |
-| `render.vulkan` / `render.gl` | 双后端的 mesh 与间接绘制 |
-| `render.feature` | 帧提交、批处理、FeatureRenderer 接入 |
+| `render` | glTF 渲染适配、GPU 资源池、CPU 兜底 |
 | `integration` | 物品 / 实体 / 方块实体渲染器 |
+| `renderapi.gpu` | 网格上传、meshlet 存储、能力探测 |
+| `renderapi.gl` / `renderapi.vulkan` | 双后端的 mesh 与间接绘制 |
+| `renderapi.feature` | 帧提交、批处理、FeatureRenderer 接入 |
 
 </details>
 
@@ -166,7 +195,7 @@ flowchart LR
 .\gradlew.bat build
 ```
 
-产物 → `build/libs/libgltf-0.10-fabric-26.3-snapshot-8.jar`
+产物 → `build/libs/libgltf-0.11-fabric-26.3-snapshot-8-fabric.jar`
 
 > [!IMPORTANT]
 > 需要 Minecraft **26.3-snapshot-8**、Fabric Loader **0.19.3+**、Fabric API、Fabric Language Kotlin 与 Java **25**。

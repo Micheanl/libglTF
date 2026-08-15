@@ -36,7 +36,7 @@ import com.micheanl.libgltf.model.GltfSkin
 import com.micheanl.libgltf.model.GltfStats
 import com.micheanl.libgltf.model.GltfTexture
 import com.micheanl.libgltf.model.PrimitiveMode
-import com.micheanl.libgltf.model.VertexLayout
+import com.micheanl.renderapi.gpu.VertexLayout
 import com.micheanl.libgltf.util.JsonFields
 import java.io.ByteArrayInputStream
 import java.nio.ByteBuffer

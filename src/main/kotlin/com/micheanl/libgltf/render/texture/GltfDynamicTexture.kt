@@ -3,6 +3,7 @@ package com.micheanl.libgltf.render.texture
 import com.micheanl.libgltf.material.TextureFilter
 import com.micheanl.libgltf.material.TextureSampler
 import com.micheanl.libgltf.material.TextureWrap
+import com.micheanl.renderapi.texture.MipmapFilterState
 import com.mojang.renderpearl.api.GpuFormat
 import com.mojang.blaze3d.platform.NativeImage
 import com.mojang.blaze3d.systems.RenderSystem
@@ -50,7 +51,7 @@ class GltfDynamicTexture(
         texture = gpuTexture
         textureView = device.createTextureView(gpuTexture)
         sampler = if (ownsSampler) {
-            MipmapFilterState.create(TextureFilter.NEAREST) {
+            MipmapFilterState.create(nearest = true) {
                 device.createSampler(
                     address(samplerDefinition.wrapS),
                     address(samplerDefinition.wrapT),
